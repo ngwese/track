@@ -28,5 +28,6 @@ Track provides:
 |----------|-------------|
 | [docs/PRD.md](docs/PRD.md) | Vision, goals, personas, product principles |
 | [docs/SRD.md](docs/SRD.md) | Domain model, file formats, CLI, hub API, MVP |
+| [docs/adr/](docs/adr/) | Architecture decision records |
 | [infra/README.md](infra/README.md) | Deploy a sync hub workspace |
 | [AGENTS.md](AGENTS.md) | Agent workflow; [Conventional Commits](https://www.conventionalcommits.org/) |
