@@ -1,0 +1,59 @@
+# Track sync hub — personal workspace
+# Usage: cp .env.example .env && docker compose up -d
+
+services:
+  hub:
+    image: ghcr.io/track-io/hub:latest   # placeholder until hub image published
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      TRACK_CONFIG: /config/hub.yaml
+      TRACK_DATABASE_URL: postgres://track:${POSTGRES_PASSWORD}@postgres:5432/track?sslmode=disable
+      TRACK_HUB_TOKEN_SECRET: ${TRACK_HUB_TOKEN_SECRET}
+      TRACK_LOG_LEVEL: ${TRACK_LOG_LEVEL:-info}
+    volumes:
+      - ../hub.yaml:/config/hub.yaml:ro
+    ports:
+      - "${HUB_BIND:-127.0.0.1:8080}:8080"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: track
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: track
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U track -d track"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Optional: TLS termination when not using an external load balancer
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    profiles: ["tls"]
+    depends_on:
+      - hub
+    ports:
+      - "443:443"
+      - "80:80"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  postgres_data:
+  caddy_data:
+  caddy_config:

@@ -1,0 +1,61 @@
+# Track workspace manifest — lab
+# Shared environment for software projects and agent orchestration.
+
+apiVersion: track.afofo.io/v1
+kind: Workspace
+
+workspace:
+  slug: lab
+  eid: W-01JHM8X9K2Q4Z8          # operator-generated at hub deploy
+  display_name: Lab
+  description: Multi-project lab with CI and agent dispatch
+
+server:
+  public_url: https://track-lab.example.com
+  listen: ":8080"
+
+storage:
+  driver: postgres
+
+events:
+  retention_days: 30
+  subscribe:
+    enabled: true
+    protocol: both
+  poll:
+    enabled: true
+    default_limit: 200
+
+auth:
+  token_ttl_hours: 168
+  allowed_actor_prefixes:
+    - user:
+    - agent:
+  claim:
+    allowed_agents: []          # empty = any agent: name allowed
+    default_lease_seconds: 7200
+    max_lease_seconds: 86400
+
+sync:
+  push:
+    require_schema_first: true
+    idempotency_required: true
+  pull:
+    default_scope: index
+
+features:
+  claims: true
+  progress_signals: true
+  effort_relations: true
+
+limits:
+  max_projects: 200
+  max_issues_per_project: 500000
+  rate_limit_per_minute: 1000
+
+observability:
+  log_level: info
+  metrics: true
+  health_path: /healthz
+
+projects: []

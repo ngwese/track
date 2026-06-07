@@ -1,0 +1,8 @@
+# TLS reverse proxy for personal workspace hub
+# Enable with: docker compose --profile tls up -d
+#
+# Set TRACK_DOMAIN in .env or replace example.com below.
+
+track-personal.example.com {
+    reverse_proxy hub:8080
+}

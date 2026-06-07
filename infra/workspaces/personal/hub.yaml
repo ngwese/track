@@ -1,0 +1,78 @@
+# Track workspace manifest — personal
+# Declarative hub configuration. Not co-mingled with project issue-tracking-as-code.
+#
+# Consumed by: track-hub server on startup, `track workspace validate`
+
+apiVersion: track.afofo.io/v1
+kind: Workspace
+
+workspace:
+  slug: personal
+  eid: W-01JHM8X9K2Q4Z9          # operator-generated at hub deploy
+  display_name: Personal
+  description: Single-operator workspace with agent orchestration
+
+server:
+  # Public URL clients use (track auth login --hub-url)
+  public_url: https://track-personal.example.com
+  # Bind address inside container
+  listen: ":8080"
+
+storage:
+  # Hub canonical store (full issue/effort index + bodies)
+  driver: postgres
+  # Connection string from env: TRACK_DATABASE_URL
+
+events:
+  retention_days: 90
+  # Transport exposed to clients
+  subscribe:
+    enabled: true
+    protocol: sse          # sse | websocket | both
+  poll:
+    enabled: true
+    default_limit: 100
+
+auth:
+  # HMAC secret for token signing — set via env TRACK_HUB_TOKEN_SECRET
+  token_ttl_hours: 720
+  # Actor prefixes allowed to authenticate
+  allowed_actor_prefixes:
+    - user:
+    - agent:
+  # Optional: restrict which agent names may claim issues
+  claim:
+    allowed_agents:
+      - agent:cursor
+      - agent:orchestrator
+      - agent:ci
+    default_lease_seconds: 3600
+    max_lease_seconds: 86400
+
+sync:
+  # Clients push materialized work + schema; hub holds authoritative index
+  push:
+    require_schema_first: true
+    idempotency_required: true
+  pull:
+    # Default pull returns index metadata only (lazy materialization)
+    default_scope: index    # index | materialized
+
+features:
+  claims: true
+  progress_signals: true
+  effort_relations: true
+
+limits:
+  max_projects: 50
+  max_issues_per_project: 100000
+  rate_limit_per_minute: 300
+
+observability:
+  log_level: info
+  metrics: true
+  health_path: /healthz
+
+# Projects register themselves on first push (track.yaml workspace: personal).
+# Optional explicit allowlist (empty = allow any project key on first push):
+projects: []
