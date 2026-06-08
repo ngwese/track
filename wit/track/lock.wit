@@ -1,0 +1,23 @@
+package track:lock@0.1.0;
+
+/// Advisory lock for project state files (`.track/state.lock`).
+interface project-lock {
+    resource lock {
+        /// Release the lock. Dropped on component exit if not explicitly released.
+        release: func() -> result<(), error>;
+    }
+
+    record error {
+        code: error-code,
+        message: string,
+    }
+
+    enum error-code {
+        already-held,
+        unavailable,
+        io-error,
+    }
+
+    /// Acquire the project state lock. When `blocking` is false, returns `unavailable` if held.
+    acquire: func(blocking: bool) -> result<lock, error>;
+}

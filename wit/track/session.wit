@@ -1,0 +1,38 @@
+package track:session@0.1.0;
+
+/// Invocation context and CLI flags parsed by the host and passed to the guest at startup.
+interface session {
+    record cli-flags {
+        json-output: bool,
+        dry-run: bool,
+        force: bool,
+        verbose: bool,
+        debug: bool,
+    }
+
+    record invocation {
+        /// Original process argv (`track` subcommand and arguments).
+        argv: list<string>,
+        /// Host process working directory at launch.
+        cwd: string,
+        /// Absolute path to the project root: the directory containing `track.yaml` (SRD §3.2.1).
+        project-root: option<string>,
+        /// Absolute path to `track.yaml` when a project is in scope.
+        manifest-path: option<string>,
+        /// Resolved `track-cli` component version for this run.
+        tool-version: string,
+        /// Optional content digest of the loaded component artifact.
+        tool-digest: option<string>,
+        /// `track-host` semver.
+        host-version: string,
+        /// Parsed global flags.
+        flags: cli-flags,
+        /// `--project PATH` override, if set.
+        project-override: option<string>,
+        /// `TRACK_TOOL_VERSION` or `--tool-version` override, if set.
+        tool-version-override: option<string>,
+    }
+
+    /// Immutable invocation context for the component lifetime.
+    get: func() -> invocation;
+}

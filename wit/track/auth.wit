@@ -1,0 +1,36 @@
+package track:auth@0.1.0;
+
+/// Workspace credential resolution. Secrets live in user config; the host mediates access.
+interface auth {
+    record workspace-auth {
+        slug: string,
+        hub-url: string,
+        /// Bearer token or PAT for hub API calls. Ephemeral for the invocation.
+        token: string,
+        /// Default actor identity for mutations (`user:<id>` or `agent:<name>`).
+        default-actor: option<string>,
+    }
+
+    record workspace-summary {
+        slug: string,
+        hub-url: string,
+        default-actor: option<string>,
+    }
+
+    record error {
+        code: error-code,
+        message: string,
+    }
+
+    enum error-code {
+        unknown-workspace,
+        not-configured,
+        expired,
+    }
+
+    /// Resolve credentials for a workspace slug (from `track.yaml` or explicit flag).
+    resolve: func(slug: string) -> result<workspace-auth, error>;
+
+    /// List workspaces registered in user config (no tokens returned).
+    list: func() -> list<workspace-summary>;
+}

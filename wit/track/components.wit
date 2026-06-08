@@ -1,0 +1,25 @@
+package track:components@0.1.0;
+
+/// Resolve `track-cli` WebAssembly components from the user cache (ADR 0001).
+interface registry {
+    record artifact {
+        version: string,
+        digest: string,
+        /// Path within the user-cache bucket where the `.wasm` component is stored.
+        cache-path: string,
+    }
+
+    record error {
+        code: error-code,
+        message: string,
+    }
+
+    enum error-code {
+        not-found,
+        fetch-failed,
+        digest-mismatch,
+    }
+
+    /// Ensure a component version is present in user cache; fetch if missing and network allowed.
+    resolve: func(version: string, digest: option<string>) -> result<artifact, error>;
+}

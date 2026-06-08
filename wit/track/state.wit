@@ -1,0 +1,23 @@
+package track:state@0.1.0;
+
+/// Structured access to `.track/state.json`.
+/// Aligns with SRD §3.7 (content hashes, materialization registry, event cursor).
+/// Callers should hold `track:lock/project-lock` across read/write sequences.
+interface project-state {
+    record error {
+        code: error-code,
+        message: string,
+    }
+
+    enum error-code {
+        not-in-project,
+        parse-error,
+        io-error,
+    }
+
+    /// Read `state.json` as JSON text.
+    read: func() -> result<string, error>;
+
+    /// Replace `state.json` entirely.
+    write: func(json: string) -> result<(), error>;
+}

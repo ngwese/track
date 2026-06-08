@@ -1,0 +1,49 @@
+package track:locations@0.1.0;
+
+/// Resolved on-disk locations for user- and project-scoped storage buckets.
+/// The host maps these to OS-specific paths (XDG on Linux, Application Support on macOS, etc.).
+interface locations {
+    use wasi:filesystem/types.{descriptor};
+
+    /// Storage bucket the guest may request as a preopened directory descriptor.
+    enum bucket {
+        /// User config: credentials, workspace registry (`config.json`).
+        user-config,
+        /// User state: offline queues, global cursors, host diagnostics.
+        user-state,
+        /// User cache: `track-cli` components, fetched templates.
+        user-cache,
+        /// Project config: directory containing `track.yaml` (SRD §3.2.1) — `schema/`, `work/`, etc.
+        project-config,
+        /// Project state: `<project-root>/.track/` sync metadata (`state.json`, lock file).
+        project-state,
+        /// Project cache: `<project-root>/.track/cache/` (index DB, validation cache).
+        project-cache,
+    }
+
+    record path-info {
+        bucket: bucket,
+        /// Host-native path for error messages and logging only.
+        native-path: string,
+        /// Preopened directory descriptor rooted at this bucket.
+        root: descriptor,
+    }
+
+    record error {
+        code: error-code,
+        message: string,
+    }
+
+    enum error-code {
+        not-in-project,
+        bucket-unavailable,
+        permission-denied,
+    }
+
+    /// Return path metadata and a preopened descriptor for `bucket`.
+    /// Project buckets require a discovered project root; returns `not-in-project` otherwise.
+    get: func(bucket: bucket) -> result<path-info, error>;
+
+    /// Return all buckets available for the current invocation.
+    list-available: func() -> list<bucket>;
+}

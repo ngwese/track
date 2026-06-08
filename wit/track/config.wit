@@ -1,0 +1,35 @@
+package track:config@0.1.0;
+
+/// Read/write user-level configuration (`config.json`). The host validates structure on write.
+interface user-config {
+    record workspace-entry {
+        slug: string,
+        hub-url: string,
+        token: string,
+        default-actor: option<string>,
+    }
+
+    record error {
+        code: error-code,
+        message: string,
+    }
+
+    enum error-code {
+        parse-error,
+        validation-error,
+        io-error,
+        permission-denied,
+    }
+
+    /// Read the full config file as JSON text.
+    read: func() -> result<string, error>;
+
+    /// Replace the full config file. Host validates before persisting.
+    write: func(json: string) -> result<(), error>;
+
+    /// Upsert a single workspace entry (`track auth login` path).
+    upsert-workspace: func(entry: workspace-entry) -> result<(), error>;
+
+    /// Remove a workspace entry by slug.
+    remove-workspace: func(slug: string) -> result<(), error>;
+}

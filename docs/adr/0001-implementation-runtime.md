@@ -77,7 +77,7 @@ Adopt **Option D**: implement the Track CLI as a **WASIp2 WebAssembly component*
 ┌──────────────────────────────────────────────────────────────────┐
 │  track-host  (native; built per os+arch, distributed rarely)     │
 │                                                                  │
-│  • Parse argv; locate project root / track.yaml                  │
+│  • Parse argv; discover project root via track.yaml (SRD §3.2.1) │
 │  • Resolve track-cli version (project pin → cache → fetch)       │
 │  • Wasmtime (or equivalent) + WASI Preview 2 linker              │
 │  • Configure WASI imports (narrow FS, net, stdio, env)           │
@@ -94,13 +94,37 @@ Adopt **Option D**: implement the Track CLI as a **WASIp2 WebAssembly component*
 └──────────────────────────────────────────────────────────────────┘
 ```
 
-Invocation flow:
+### Host bootstrap
+
+`track-host` performs all pre-guest work. The guest component is not loaded until bootstrap completes (or fails with a host-level error).
+
+**Phase 1 — Parse invocation**
 
 1. User or agent runs `track …` (the host binary on `PATH`).
-2. Host walks upward to find `track.yaml` (or accepts `--project`).
-3. Host reads **tool version** from project metadata (see below).
-4. Host ensures the matching `track-cli` component is present in a local cache (content-addressed or semver-keyed); fetches from a release registry or mirror if missing.
-5. Host instantiates the component with configured WASI + Track WIT imports and delegates execution (e.g. `wasi:cli/run`).
+2. Host parses `argv`, global flags (`--json`, `--dry-run`, `--project`, …), and determines whether the subcommand requires a project.
+
+**Phase 2 — Discover project root** (when required)
+
+Per [SRD §3.2.1](../SRD.md):
+
+1. If `--project PATH` is set, `PATH` is the project root.
+2. Otherwise, walk from the process working directory toward the filesystem root until a `track.yaml` file is found; the **directory containing that file** is the project root (e.g. `kitchen/track.yaml` → root is `kitchen/`; `api-server/track/track.yaml` → root is `api-server/track/`, not `api-server/`).
+3. If discovery fails and the command requires a project, the host exits before loading a guest.
+
+The host records `project-root` and `manifest-path` (`<project-root>/track.yaml`) in `track:session` when a project is in scope.
+
+**Phase 3 — Resolve guest component**
+
+1. If a project is in scope, read `tool.version` from `track.yaml` (see below). Commands without a project (e.g. `track auth login`) use the host's default or latest compatible `track-cli` version.
+2. Ensure the matching `track-cli` component is present in user-cache (content-addressed or semver-keyed); fetch from a release registry or mirror if missing and network policy allows.
+3. Map [storage buckets](0002-host-guest-wit-interfaces.md) to absolute paths: user buckets from OS conventions; project buckets from the discovered project root.
+
+**Phase 4 — Instantiate guest**
+
+1. Configure WASI Preview 2 imports (scoped preopens, optional sockets per command policy).
+2. Link `track:*` WIT exports (session, locations, auth, …).
+3. Instantiate the resolved component and delegate execution (e.g. `wasi:cli/run`).
+4. Propagate guest exit code to the host process.
 
 ### Per-project version pinning
 
@@ -132,7 +156,7 @@ The host is the **only** code with direct OS access. Responsibilities:
 | Responsibility | Mechanism |
 |----------------|-----------|
 | Map config dir across OSes | `track:config` WIT (returns base path; guest opens files via WASI FS preopens) |
-| Scope filesystem access | WASI preopens: project root, `.track/`, optional temp dir — not arbitrary `~/` |
+| Scope filesystem access | WASI preopens: discovered project root (SRD §3.2.1), `.track/` under that root, user buckets — not arbitrary `~/` |
 | Network to sync hub | `wasi:sockets` or host-mediated HTTP WIT; optional per-workspace allowlist |
 | Credentials | Host reads `~/.config/track/config.json`; exposes token to guest via WIT handle, not env vars in project repos |
 | Stdio / exit code | `wasi:cli` for agent-friendly stdout/stderr; guest exit propagates to host process |
@@ -207,4 +231,4 @@ How we will verify this decision is working:
 
 ## Related decisions
 
-_None yet. Future ADRs may cover: hub server stack, component release registry, WIT interface versioning policy._
+- [ADR 0002](0002-host-guest-wit-interfaces.md) — host–guest WIT interfaces, project root discovery, and on-disk storage scopes

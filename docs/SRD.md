@@ -99,7 +99,7 @@ Workspace (sync hub)
     └── Comment[]         (hub; materialized with parent issue)
 ```
 
-Each **project** is an independent directory. Its manifest associates the project with exactly one **workspace** (hub). Multiple project directories may share a workspace; each maintains its own schema and work files.
+Each **project** is an independent directory tree whose root is defined by `track.yaml` (§3.2.1). Its manifest associates the project with exactly one **workspace** (hub). Multiple project trees may share a workspace; each maintains its own schema and work files.
 
 
 ### 2.2 Prefixed entity IDs (typed ULIDs)
@@ -780,8 +780,58 @@ work/issues/<eid>/
 
 ### 3.2 Project directory layout
 
+#### 3.2.1 Project root
+
+The **project root** is the directory that **directly contains** `track.yaml`. All paths in this section (`schema/`, `work/`, `.track/`) are relative to the project root — not the repository root, working tree root, or workspace slug.
+
+**Discovery.** When a command requires a project, the client resolves the project root as follows:
+
+1. If `--project PATH` is set, `PATH` is the project root (it must contain `track.yaml`, except for `track init` which may create it).
+2. Otherwise, starting at the process working directory, walk parent directories until a `track.yaml` file is found. The directory containing that file is the project root.
+3. If no `track.yaml` is found and the command requires a project, the client exits with an error.
+
+The repository root and the Track project root are **not** assumed to be the same directory.
+
+#### 3.2.2 Layout patterns
+
+Two layouts are supported. In both cases, **`track.yaml` alone defines the project root**.
+
+**Standalone project** — the project root is the top-level project directory (dedicated repo or folder):
+
 ```
-<project-key>/
+kitchen/                         # project root
+├── track.yaml
+├── schema/
+├── work/
+└── .track/
+```
+
+**Embedded in a version-controlled repository** — when issue tracking lives inside another project (e.g. a software repo), the customary layout is a `track/` directory at the **repository root** with `track.yaml` inside it:
+
+```
+api-server/                      # repository root (not the Track project root)
+├── src/
+├── Cargo.toml
+└── track/                       # project root
+    ├── track.yaml
+    ├── schema/
+    ├── work/
+    └── .track/
+```
+
+This embedded layout is preferred for source-controlled application repos because it:
+
+- Reduces naming conflicts with repository-root files (`README.md`, `package.json`, `Cargo.toml`, CI configs, etc.)
+- Allows `<repo-root>/track` to be a **git submodule** (when using Git) pointing at a separate issue-tracking-as-code repository, keeping Track revision history independent from application source history
+
+`track init` accepts a target directory; when run from a repository root without an existing project, it should default to creating `./track/` for embedded repos unless `--project` or an explicit path argument specifies otherwise.
+
+#### 3.2.3 Directory tree
+
+Regardless of layout pattern, the tree below is rooted at **`<project-root>/`** (the directory containing `track.yaml`):
+
+```
+<project-root>/
 ├── track.yaml
 ├── schema/
 │   ├── types.yaml
@@ -805,7 +855,8 @@ work/issues/<eid>/
 │           └── component.yaml
 ├── .track/
 │   ├── state.json               # sync state, materialization tracking, hashes
-│   └── state.lock
+│   ├── state.lock
+│   └── cache/                   # local index DB, validation cache (see ADR 0002)
 └── .gitignore                   # see suggested rules below
 ```
 
@@ -1150,11 +1201,12 @@ A **workspace** is the unit of synchronization—not a directory co-mingled with
 Example layout on disk:
 
 ```
-~/track-projects/           # issue tracking as code (may be multiple git repos)
-├── api-server/
-│   └── track.yaml          # workspace: lab
-└── kitchen/
-    └── track.yaml          # workspace: personal
+~/repos/
+├── api-server/             # software repository
+│   └── track/              # project root (may be a git submodule); workspace: lab
+│       └── track.yaml
+└── kitchen/                # standalone project root; workspace: personal
+    └── track.yaml
 
 ~/infra/track/              # workspace infra (separate git repo; see infra/ in track repo)
 ├── README.md
@@ -1755,11 +1807,11 @@ Runtime manifests. Secrets (`POSTGRES_PASSWORD`, `TRACK_HUB_TOKEN_SECRET`) live 
 ### Association flow
 
 ```
-infra/workspaces/personal/hub.yaml     workspace slug: personal, eid: W-…
+infra/workspaces/personal/hub.yaml        workspace slug: personal, eid: W-…
         ↕ (deploy hub at public_url)
-~/projects/api/track.yaml              workspace: personal, project.eid: P-…
+~/projects/api/track/track.yaml           project root: ~/projects/api/track/; workspace: personal
         ↕ (track push / materialize / claim)
-work/issues/<eid>/issue.yaml            lazy; cascade includes relations, comments, component
+<project-root>/work/issues/<eid>/issue.yaml   lazy cascade; e.g. …/track/work/issues/…
 ```
 
 See [`infra/README.md`](../infra/README.md) for deploy steps.
