@@ -82,7 +82,7 @@ ensure_toolchain() {
 cargo_install_if_missing() {
   local crate="$1"
   local version="$2"
-  local bin_name="${crate#*/}"
+  local bin_name="${3:-${crate##*/}}"
 
   if command -v "${bin_name}" >/dev/null 2>&1; then
     info "${bin_name} already installed ($(command -v "${bin_name}"))"
@@ -94,9 +94,9 @@ cargo_install_if_missing() {
 }
 
 ensure_cargo_tools() {
-  # Build-time WIT vendoring uses the wit-deps library crate; the CLI is only
-  # needed when updating pins in wit/deps.toml / wit/deps.lock.
-  cargo_install_if_missing "wit-deps" "0.6.0"
+  # Build-time WIT vendoring uses the wit-deps library crate. The wit-deps-cli
+  # package provides the `wit-deps` binary for updating wit/deps.toml pins.
+  cargo_install_if_missing "wit-deps-cli" "0.6.0" "wit-deps"
 }
 
 main() {
