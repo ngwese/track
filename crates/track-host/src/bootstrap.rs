@@ -1,4 +1,5 @@
 use crate::flags::{self, ParsedArgv};
+use crate::log;
 use crate::manifest;
 use crate::registry_store;
 use anyhow::{bail, Context, Result};
@@ -51,6 +52,10 @@ pub fn from_argv(argv: Vec<String>) -> Result<Bootstrap> {
         registry_store::runtime_component_path(&tool_version, tool_digest.as_deref()).map_err(
             |err| anyhow::anyhow!("resolve track-cli component {}: {}", tool_version, err.message),
         )?;
+    log::trace(format!(
+        "project_root={:?} manifest={:?}",
+        project_root, manifest_path
+    ));
 
     Ok(Bootstrap {
         argv,

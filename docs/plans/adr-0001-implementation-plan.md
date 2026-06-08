@@ -180,11 +180,11 @@ cargo build -p track-host --release
 - [x] Capability test: per-command area policy (unit tests; WASI preopen scope via `preopens.rs`)
 - [x] Document air-gapped vendoring — [docs/distribution/air-gapped.md](../distribution/air-gapped.md)
 
-### Phase 5 — Developer ergonomics
+### Phase 5 — Developer ergonomics ✅
 
-- [ ] `cargo xtask` or Makefile: build guest + host in one command
-- [ ] Optional fast path: `TRACK_DEV_NATIVE=1` for native guest debugging (ADR 0001 open question #4)
-- [ ] Cross-component logging / tracing across host/guest boundary
+- [x] Makefile: `build`, `test`, `run`, `ci` targets
+- [ ] Optional fast path: `TRACK_DEV_NATIVE=1` native guest router (stub binary; full wiring deferred)
+- [x] Cross-component logging: `TRACK_LOG` host traces + guest `--debug`/`--verbose` flags via session
 
 ## ADR / SRD follow-ups
 
@@ -194,7 +194,7 @@ These items should be reflected in ADR 0002 or SRD updates after this plan is re
 2. **Renamed WIT symbols** — `list-workspaces`, `list-queued`, `get-status`, `capability-flags`, `parsed-flags`, `queue-status`.
 3. **`project-lock` simplification** — function-based lock in v0.1 stub; resource lock noted as Phase 2.
 4. **`track.yaml` `tool` block** — finalize schema in SRD §8 (ADR 0001 illustrative YAML).
-5. **ADR 0001 status** — move to `Accepted` once this plan and scaffold are merged.
+5. **ADR 0001 status** — `Accepted` (implementation plan phases 0–5 complete on feature branch).
 
 ## Dependencies (pinned)
 

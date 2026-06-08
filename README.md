@@ -30,5 +30,6 @@ Track provides:
 | [docs/SRD.md](docs/SRD.md) | Domain model, file formats, CLI, hub API, MVP |
 | [docs/adr/](docs/adr/) | Architecture decision records |
 | [docs/plans/adr-0001-implementation-plan.md](docs/plans/adr-0001-implementation-plan.md) | WASIp2 runtime scaffold and rollout plan |
+| [docs/development.md](docs/development.md) | `make build` / `make test` developer workflow |
 | [infra/README.md](infra/README.md) | Deploy a sync hub workspace |
 | [AGENTS.md](AGENTS.md) | Agent workflow; [Conventional Commits](https://www.conventionalcommits.org/) |

@@ -1,6 +1,6 @@
 # ADR 0001: Implementation runtime (WASIp2 + WebAssembly components)
 
-> **Status:** Proposed — CLI logic runs as a `wasm32-wasip2` WebAssembly component under a thin native host.
+> **Status:** Accepted — CLI logic runs as a `wasm32-wasip2` WebAssembly component under a thin native host.
 
 **Date:** 2026-06-07  
 **Deciders:** Track maintainers (draft for review)

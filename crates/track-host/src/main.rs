@@ -2,6 +2,7 @@ mod bootstrap;
 mod flags;
 mod host_impl;
 mod lock_store;
+mod log;
 mod manifest;
 mod paths;
 mod policy;
@@ -22,7 +23,13 @@ use wasmtime_wasi::WasiCtxBuilder;
 
 fn main() -> Result<()> {
     let argv: Vec<String> = env::args().collect();
+    log::trace(format!("argv: {argv:?}"));
     let bootstrap = from_argv(argv)?;
+    log::trace(format!(
+        "tool_version={} component={}",
+        bootstrap.tool_version,
+        bootstrap.component_path.display()
+    ));
     ensure_project(&bootstrap)?;
     run_component(bootstrap)
 }

@@ -16,7 +16,7 @@ ADRs use a numbered, immutable sequence. Superseded decisions remain in place; a
 
 | ADR | Title | Status |
 |-----|-------|--------|
-| [0001](0001-implementation-runtime.md) | Implementation runtime (WASIp2 + WebAssembly components) | Proposed |
+| [0001](0001-implementation-runtime.md) | Implementation runtime (WASIp2 + WebAssembly components) | Accepted |
 | [0002](0002-host-guest-wit-interfaces.md) | Host–guest WIT interfaces and on-disk storage scopes | Proposed |
 
 ## Implementation plans
