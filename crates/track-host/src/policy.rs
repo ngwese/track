@@ -8,6 +8,15 @@ pub struct CommandPolicy {
     pub areas: Vec<Area>,
 }
 
+pub fn requires_project(argv: &[String]) -> bool {
+    let tokens = command_tokens(argv);
+    match tokens.first().map(String::as_str) {
+        None | Some("help") | Some("--help") | Some("interfaces") | Some("version") => false,
+        Some("auth") | Some("init") => false,
+        _ => true,
+    }
+}
+
 pub fn from_argv(argv: &[String], project_root: Option<&Path>) -> CommandPolicy {
     let tokens = command_tokens(argv);
     let hub_allowlist = hub_allowlist(project_root);

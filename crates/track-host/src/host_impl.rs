@@ -66,17 +66,17 @@ impl session::Host for HostState {
                 .as_ref()
                 .map(|p| p.display().to_string()),
             tool_version: self.bootstrap.tool_version.clone(),
-            tool_digest: None,
+            tool_digest: self.bootstrap.tool_digest.clone(),
             host_version: env!("CARGO_PKG_VERSION").to_string(),
             parsed_flags: session::CliFlags {
-                json_output: false,
-                dry_run: false,
-                force: false,
-                verbose: false,
-                debug: false,
+                json_output: self.bootstrap.parsed.flags.json_output,
+                dry_run: self.bootstrap.parsed.flags.dry_run,
+                force: self.bootstrap.parsed.flags.force,
+                verbose: self.bootstrap.parsed.flags.verbose,
+                debug: self.bootstrap.parsed.flags.debug,
             },
-            project_override: None,
-            tool_version_override: None,
+            project_override: self.bootstrap.parsed.overrides.project.clone(),
+            tool_version_override: self.bootstrap.parsed.overrides.tool_version.clone(),
         }
     }
 }
@@ -103,7 +103,7 @@ impl locations::Host for HostState {
         Ok(locations::PathInfo {
             area,
             native_path: native_path.display().to_string(),
-            guest_path: format!("{area:?}"),
+            guest_path: paths::guest_mount_name(area).into(),
         })
     }
 
@@ -245,14 +245,7 @@ impl registry::Host for HostState {
         version: String,
         digest: Option<String>,
     ) -> Result<registry::Artifact, registry::Error> {
-        Ok(registry::Artifact {
-            version,
-            digest: digest.unwrap_or_else(|| "stub".into()),
-            cache_path: format!(
-                "components/{}/track_cli.wasm",
-                self.bootstrap.tool_version
-            ),
-        })
+        crate::registry_store::resolve(&version, digest.as_deref())
     }
 }
 

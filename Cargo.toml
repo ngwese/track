@@ -17,6 +17,7 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 serde_yaml = "0.9"
 fs2 = "0.4"
+sha2 = "0.10"
 wasmtime = "45"
 wasmtime-wasi = "45"
 wit-bindgen = "0.57"

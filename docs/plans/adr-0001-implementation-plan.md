@@ -148,13 +148,13 @@ cargo build -p track-host --release
 - [x] Guest stub calling imports and exporting `wasi:cli/run`
 - [x] End-to-end host → guest invocation
 
-### Phase 1 — Bootstrap parity
+### Phase 1 — Bootstrap parity ✅
 
-- [ ] Parse global flags into `track:session` (`--json`, `--dry-run`, `--project`, `--tool-version`, …)
-- [ ] Read `tool.version` from `track.yaml` when project in scope
-- [ ] Implement `track:registry` — local cache under user-cache `components/`, semver + digest lookup
-- [ ] Host errors before guest load when project required but not found
-- [ ] Map all six storage areas to real paths and WASI preopens (narrow, per ADR 0002)
+- [x] Parse global flags into `track:session` (`--json`, `--dry-run`, `--project`, `--tool-version`, …)
+- [x] Read `tool.version` from `track.yaml` when project in scope
+- [x] Implement `track:registry` — local cache under user-cache `components/`, semver + digest lookup
+- [x] Host errors before guest load when project required but not found
+- [x] Map all six storage areas to real paths and WASI preopens (narrow, per ADR 0002)
 
 ### Phase 2 — Real host implementations ✅
 

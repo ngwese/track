@@ -1,14 +1,18 @@
 mod bootstrap;
+mod flags;
 mod host_impl;
 mod lock_store;
+mod manifest;
 mod paths;
 mod policy;
+mod preopens;
 mod queue_store;
+mod registry_store;
 mod state_store;
 mod user_config;
 
 use anyhow::Result;
-use bootstrap::from_argv;
+use bootstrap::{ensure_project, from_argv};
 use host_impl::HostState;
 use std::env;
 use track_host_wit::CliGuest;
@@ -19,6 +23,7 @@ use wasmtime_wasi::WasiCtxBuilder;
 fn main() -> Result<()> {
     let argv: Vec<String> = env::args().collect();
     let bootstrap = from_argv(argv)?;
+    ensure_project(&bootstrap)?;
     run_component(bootstrap)
 }
 
@@ -40,14 +45,7 @@ fn run_component(bootstrap: bootstrap::Bootstrap) -> Result<()> {
 
     let mut wasi_builder = WasiCtxBuilder::new();
     wasi_builder.inherit_stdio().inherit_args().inherit_env();
-    if let Some(root) = &bootstrap.project_root {
-        wasi_builder.preopened_dir(
-            root.clone(),
-            ".",
-            wasmtime_wasi::DirPerms::all(),
-            wasmtime_wasi::FilePerms::all(),
-        )?;
-    }
+    preopens::configure(&mut wasi_builder, &bootstrap)?;
 
     let mut store = Store::new(
         &engine,

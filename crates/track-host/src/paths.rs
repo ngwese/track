@@ -63,3 +63,15 @@ pub fn offline_queue_dir() -> PathBuf {
 pub fn offline_queue_file(workspace_slug: &str) -> PathBuf {
     offline_queue_dir().join(format!("{workspace_slug}.json"))
 }
+
+/// Guest-facing mount label used for WASI preopens.
+pub fn guest_mount_name(area: Area) -> &'static str {
+    match area {
+        Area::UserConfig => "user-config",
+        Area::UserState => "user-state",
+        Area::UserCache => "user-cache",
+        Area::ProjectConfig => "project-config",
+        Area::ProjectState => "project-state",
+        Area::ProjectCache => "project-cache",
+    }
+}
