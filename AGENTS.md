@@ -20,7 +20,7 @@ Use **[Conventional Commits](https://www.conventionalcommits.org/)** for every c
 
 ### Format
 
-```
+```txt
 <type>[optional scope]: <description>
 
 [optional body]
