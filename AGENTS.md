@@ -2,6 +2,18 @@
 
 This repository is **Track** — a CLI-first, local-first issue tracker with a sync hub. Read [docs/PRD.md](docs/PRD.md) for product intent and [docs/SRD.md](docs/SRD.md) for technical design before making structural changes.
 
+## Rust changes
+
+Before committing any changes under `crates/`, root-level `Cargo.*` files, or `wit/`, run these checks from the repository root and fix any failures:
+
+1. **Format:** `cargo fmt`
+2. **Lint:** `cargo clippy --workspace --all-targets` (must complete with no errors or warnings)
+3. **Tests:** `cargo test --workspace`
+
+If the diff touches the WASM guest component, also verify `cargo build -p track-cli --target wasm32-wasip2` succeeds.
+
+Do not commit Rust or WIT changes until all applicable checks pass.
+
 ## Commits
 
 Use **[Conventional Commits](https://www.conventionalcommits.org/)** for every commit.
