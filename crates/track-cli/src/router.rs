@@ -67,19 +67,19 @@ pub fn run() -> Result<(), ()> {
     }
 
     {
-            let command = tokens.join(" ");
-            if json {
-                output::print_json(&CommandResult {
-                    ok: false,
-                    command,
-                    message: Some("unknown command (phase 3 router stub)".into()),
-                });
-            } else {
-                output::print_text(&format!(
-                    "track-cli {}: unknown command `{command}`; try `track help`",
-                    invocation.tool_version
-                ));
-            }
+        let command = tokens.join(" ");
+        if json {
+            output::print_json(&CommandResult {
+                ok: false,
+                command,
+                message: Some("unknown command (phase 3 router stub)".into()),
+            });
+        } else {
+            output::print_text(&format!(
+                "track-cli {}: unknown command `{command}`; try `track help`",
+                invocation.tool_version
+            ));
+        }
         Err(())
     }
 }

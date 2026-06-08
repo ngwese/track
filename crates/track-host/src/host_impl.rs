@@ -1,10 +1,10 @@
 use crate::bootstrap::Bootstrap;
 use crate::{lock_store, paths, policy, queue_store, state_store, user_config};
-use policy::CommandPolicy;
 use lock_store::HeldLock;
+use policy::CommandPolicy;
 use track_host_wit::track::host::{
-    auth, capabilities, locations, offline_queue, project_lock, project_state, registry,
-    session, user_config as user_config_wit,
+    auth, capabilities, locations, offline_queue, project_lock, project_state, registry, session,
+    user_config as user_config_wit,
 };
 use wasmtime::component::ResourceTable;
 use wasmtime_wasi::{WasiCtx, WasiCtxView, WasiView};
@@ -19,10 +19,7 @@ pub struct HostState {
 
 impl HostState {
     pub fn new(bootstrap: Bootstrap, wasi_ctx: WasiCtx) -> Self {
-        let policy = policy::from_argv(
-            &bootstrap.argv,
-            bootstrap.project_root.as_deref(),
-        );
+        let policy = policy::from_argv(&bootstrap.argv, bootstrap.project_root.as_deref());
         Self {
             bootstrap,
             wasi_ctx,

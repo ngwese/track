@@ -87,10 +87,7 @@ pub fn drain(workspace_slug: &str, limit: u32) -> Result<Vec<Mutation>, Error> {
     let path = queue_path(workspace_slug)?;
     let mut items = load_file(&path)?;
     let take = limit.min(items.len() as u32) as usize;
-    let drained: Vec<Mutation> = items
-        .drain(..take)
-        .map(Mutation::from)
-        .collect();
+    let drained: Vec<Mutation> = items.drain(..take).map(Mutation::from).collect();
     save_file(&path, &items)?;
     Ok(drained)
 }

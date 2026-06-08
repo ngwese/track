@@ -15,6 +15,7 @@ pub fn acquire(project_root: &Path, blocking: bool) -> Result<HeldLock, Error> {
     let lock_path = paths::state_lock_path(project_root);
     let mut file = OpenOptions::new()
         .create(true)
+        .truncate(false)
         .read(true)
         .write(true)
         .open(&lock_path)
@@ -23,8 +24,7 @@ pub fn acquire(project_root: &Path, blocking: bool) -> Result<HeldLock, Error> {
     if blocking {
         file.lock_exclusive().map_err(map_lock_error)?;
     } else {
-        file.try_lock_exclusive()
-            .map_err(|err| map_try_lock_error(err))?;
+        file.try_lock_exclusive().map_err(map_try_lock_error)?;
     }
 
     file.set_len(0).map_err(io_error)?;

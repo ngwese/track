@@ -31,7 +31,10 @@ pub fn resolve(version: &str, expected_digest: Option<&str>) -> Result<registry:
     })
 }
 
-pub fn runtime_component_path(version: &str, expected_digest: Option<&str>) -> Result<PathBuf, Error> {
+pub fn runtime_component_path(
+    version: &str,
+    expected_digest: Option<&str>,
+) -> Result<PathBuf, Error> {
     resolve(version, expected_digest)?;
     Ok(component_cache_path(version))
 }

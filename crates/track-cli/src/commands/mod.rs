@@ -4,8 +4,8 @@ pub mod schema;
 use crate::output;
 use crate::router;
 use crate::track::host::{
-    auth as host_auth, capabilities, locations, offline_queue, project_state, registry,
-    session, user_config,
+    auth as host_auth, capabilities, locations, offline_queue, project_state, registry, session,
+    user_config,
 };
 use track_types::CommandResult;
 
@@ -23,10 +23,7 @@ pub fn help(json: bool) -> Result<(), ()> {
     Ok(())
 }
 
-pub fn version(
-    invocation: &session::Invocation,
-    json: bool,
-) -> Result<(), ()> {
+pub fn version(invocation: &session::Invocation, json: bool) -> Result<(), ()> {
     let response = router::version_line(invocation);
     if json {
         output::print_json(&response);

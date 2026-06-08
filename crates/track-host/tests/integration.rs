@@ -24,7 +24,11 @@ fn run_track(args: &[&str]) -> std::process::Output {
 #[test]
 fn version_command_succeeds() {
     let output = run_track(&["version"]);
-    assert!(output.status.success(), "stderr: {}", String::from_utf8_lossy(&output.stderr));
+    assert!(
+        output.status.success(),
+        "stderr: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("track-cli"));
 }
@@ -46,7 +50,11 @@ fn schema_validate_in_fixture_project() {
         "schema",
         "validate",
     ]);
-    assert!(output.status.success(), "stderr: {}", String::from_utf8_lossy(&output.stderr));
+    assert!(
+        output.status.success(),
+        "stderr: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
 }
 
 #[test]

@@ -25,15 +25,9 @@ pub struct Bootstrap {
 pub fn from_argv(argv: Vec<String>) -> Result<Bootstrap> {
     let cwd = env::current_dir().context("resolve working directory")?;
     let parsed = flags::parse(&argv);
-    let project_override = parsed
-        .overrides
-        .project
-        .as_ref()
-        .map(PathBuf::from);
+    let project_override = parsed.overrides.project.as_ref().map(PathBuf::from);
     let project_root = discover_project_root(&cwd, project_override.as_deref())?;
-    let manifest_path = project_root
-        .as_ref()
-        .map(|root| root.join(MANIFEST_NAME));
+    let manifest_path = project_root.as_ref().map(|root| root.join(MANIFEST_NAME));
 
     let manifest_info = manifest_path
         .as_ref()
@@ -50,7 +44,13 @@ pub fn from_argv(argv: Vec<String>) -> Result<Bootstrap> {
     let tool_digest = manifest_info.tool_digest;
     let component_path =
         registry_store::runtime_component_path(&tool_version, tool_digest.as_deref()).map_err(
-            |err| anyhow::anyhow!("resolve track-cli component {}: {}", tool_version, err.message),
+            |err| {
+                anyhow::anyhow!(
+                    "resolve track-cli component {}: {}",
+                    tool_version,
+                    err.message
+                )
+            },
         )?;
     log::trace(format!(
         "project_root={:?} manifest={:?}",

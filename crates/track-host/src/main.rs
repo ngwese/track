@@ -54,10 +54,7 @@ fn run_component(bootstrap: bootstrap::Bootstrap) -> Result<()> {
     wasi_builder.inherit_stdio().inherit_args().inherit_env();
     preopens::configure(&mut wasi_builder, &bootstrap)?;
 
-    let mut store = Store::new(
-        &engine,
-        HostState::new(bootstrap, wasi_builder.build()),
-    );
+    let mut store = Store::new(&engine, HostState::new(bootstrap, wasi_builder.build()));
 
     let guest = CliGuest::instantiate(&mut store, &component, &linker)
         .map_err(|err| anyhow::anyhow!("instantiate track-cli component: {err}"))?;

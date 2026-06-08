@@ -2,10 +2,7 @@ use crate::output;
 use crate::track::host::session;
 use track_types::SchemaValidateResponse;
 
-pub fn validate(
-    invocation: &session::Invocation,
-    json: bool,
-) -> Result<(), ()> {
+pub fn validate(invocation: &session::Invocation, json: bool) -> Result<(), ()> {
     let manifest = invocation.manifest_path.clone();
     let valid = manifest.is_some();
     let message = if valid {
@@ -15,10 +12,7 @@ pub fn validate(
     };
 
     if json {
-        output::print_json(&SchemaValidateResponse {
-            valid,
-            manifest,
-        });
+        output::print_json(&SchemaValidateResponse { valid, manifest });
     } else {
         output::print_text(message);
     }

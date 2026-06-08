@@ -135,13 +135,13 @@ fn persist(config: &UserConfig) -> Result<(), Error> {
 }
 
 fn atomic_write(path: &Path, contents: &str) -> Result<(), Error> {
-    let parent = path.parent().ok_or_else(|| io_error_msg("missing parent directory"))?;
+    let parent = path
+        .parent()
+        .ok_or_else(|| io_error_msg("missing parent directory"))?;
     fs::create_dir_all(parent).map_err(io_error)?;
     let temp = parent.join(format!(
         ".{}.tmp",
-        path.file_name()
-            .and_then(|n| n.to_str())
-            .unwrap_or("file")
+        path.file_name().and_then(|n| n.to_str()).unwrap_or("file")
     ));
     fs::write(&temp, contents).map_err(io_error)?;
     fs::rename(&temp, path).map_err(|err| {

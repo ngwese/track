@@ -10,11 +10,15 @@ pub struct CommandPolicy {
 
 pub fn requires_project(argv: &[String]) -> bool {
     let tokens = command_tokens(argv);
-    match tokens.first().map(String::as_str) {
-        None | Some("help") | Some("--help") | Some("interfaces") | Some("version") => false,
-        Some("auth") | Some("init") => false,
-        _ => true,
-    }
+    !matches!(
+        tokens.first().map(String::as_str),
+        None | Some("help")
+            | Some("--help")
+            | Some("interfaces")
+            | Some("version")
+            | Some("auth")
+            | Some("init")
+    )
 }
 
 pub fn from_argv(argv: &[String], project_root: Option<&Path>) -> CommandPolicy {
@@ -26,11 +30,17 @@ pub fn from_argv(argv: &[String], project_root: Option<&Path>) -> CommandPolicy 
     } else if matches_command(&tokens, &["schema", "validate"]) {
         (false, project_only(&[Area::ProjectConfig]))
     } else if matches_command(&tokens, &["validate"]) {
-        (false, project_only(&[Area::ProjectConfig, Area::ProjectCache]))
+        (
+            false,
+            project_only(&[Area::ProjectConfig, Area::ProjectCache]),
+        )
     } else if matches_any_command(&tokens, &[&["push"], &["pull"], &["diff"]]) {
         (true, all_areas(project_root.is_some()))
     } else if matches_command(&tokens, &["hub"]) {
-        (true, project_with(&[Area::ProjectState, Area::ProjectCache]))
+        (
+            true,
+            project_with(&[Area::ProjectState, Area::ProjectCache]),
+        )
     } else if matches_command(&tokens, &["issue", "list"]) {
         (false, project_with(&[Area::ProjectCache]))
     } else if matches_command(&tokens, &["issue", "materialize"]) {
@@ -96,7 +106,9 @@ fn matches_command(tokens: &[String], prefix: &[&str]) -> bool {
 }
 
 fn matches_any_command(tokens: &[String], prefixes: &[&[&str]]) -> bool {
-    prefixes.iter().any(|prefix| matches_command(tokens, prefix))
+    prefixes
+        .iter()
+        .any(|prefix| matches_command(tokens, prefix))
 }
 
 fn is_global_flag(arg: &str) -> bool {
@@ -123,11 +135,7 @@ fn project_with(extra: &[Area]) -> Vec<Area> {
 fn all_areas(has_project: bool) -> Vec<Area> {
     let mut areas = user_areas();
     if has_project {
-        areas.extend([
-            Area::ProjectConfig,
-            Area::ProjectState,
-            Area::ProjectCache,
-        ]);
+        areas.extend([Area::ProjectConfig, Area::ProjectState, Area::ProjectCache]);
     }
     areas
 }
@@ -154,7 +162,10 @@ fn hub_allowlist(project_root: Option<&Path>) -> Vec<String> {
 fn read_manifest_workspace(path: &Path) -> Option<String> {
     let text = std::fs::read_to_string(path).ok()?;
     let value: serde_yaml::Value = serde_yaml::from_str(&text).ok()?;
-    value.get("workspace").and_then(|v| v.as_str()).map(str::to_string)
+    value
+        .get("workspace")
+        .and_then(|v| v.as_str())
+        .map(str::to_string)
 }
 
 #[cfg(test)]
@@ -188,6 +199,10 @@ mod tests {
     #[test]
     fn push_requires_project_root_at_host() {
         assert!(requires_project(&["track".into(), "push".into()]));
-        assert!(!requires_project(&["track".into(), "auth".into(), "login".into()]));
+        assert!(!requires_project(&[
+            "track".into(),
+            "auth".into(),
+            "login".into()
+        ]));
     }
 }

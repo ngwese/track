@@ -12,7 +12,10 @@ pub fn print_text(message: &str) {
 pub fn print_error(json: bool, message: impl Into<String>, code: u8) -> Result<(), ()> {
     let message = message.into();
     if json {
-        print_json(&ErrorResponse { error: message, code });
+        print_json(&ErrorResponse {
+            error: message,
+            code,
+        });
     } else {
         eprintln!("error: {message}");
     }
