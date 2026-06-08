@@ -1,7 +1,6 @@
 use crate::bootstrap::Bootstrap;
 use crate::{paths, policy};
 use anyhow::Result;
-use track_host_wit::track::host::locations::Area;
 use wasmtime_wasi::WasiCtxBuilder;
 
 pub fn configure(wasi_builder: &mut WasiCtxBuilder, bootstrap: &Bootstrap) -> Result<()> {

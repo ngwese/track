@@ -1,6 +1,11 @@
 [workspace]
 resolver = "2"
-members = ["crates/track-host", "crates/track-host-wit", "crates/track-cli"]
+members = [
+    "crates/track-host",
+    "crates/track-host-wit",
+    "crates/track-cli",
+    "crates/track-types",
+]
 default-members = ["crates/track-host", "crates/track-host-wit"]
 
 [workspace.package]

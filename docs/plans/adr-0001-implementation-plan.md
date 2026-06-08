@@ -165,12 +165,12 @@ cargo build -p track-host --release
 - [x] `capabilities` — per-command policy (network allowlist from `track.yaml` workspace, area visibility)
 - [ ] Resource-based `project-lock` via Wasmtime resources (file advisory lock implemented on function API)
 
-### Phase 3 — CLI logic in guest
+### Phase 3 — CLI logic in guest ✅
 
-- [ ] Command router (`init`, `validate`, `push`, `pull`, `auth`, … per SRD)
-- [ ] Schema validation, materialization, hub HTTP client (via `wasi:sockets` or host-mediated HTTP — see ADR 0001 open question #5)
-- [ ] JSON output mode, stable exit codes
-- [ ] Shared pure-Rust types crate if host tests need parity
+- [x] Command router (`version`, `help`, `auth`, `schema validate`, `interfaces`; stubs for remaining SRD commands)
+- [ ] Schema validation, materialization, hub HTTP client (via `wasi:sockets` or host-mediated HTTP — deferred post-phase-3)
+- [x] JSON output mode (`--json`), stable exit codes (non-zero on error/unknown command)
+- [x] Shared `track-types` crate for JSON response shapes
 
 ### Phase 4 — Distribution and CI
 

@@ -12,4 +12,15 @@ crate-type = ["cdylib"]
 track-wit-deps = { path = "../track-wit-deps" }
 
 [dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+track-types = { path = "../track-types" }
 wit-bindgen = { workspace = true }
+
+[[bin]]
+name = "track-cli-dev"
+path = "src/bin/track-cli-dev.rs"
+required-features = ["dev-native"]
+
+[features]
+dev-native = []

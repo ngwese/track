@@ -2562,6 +2562,9 @@ dependencies = [
 name = "track-cli"
 version = "0.1.0"
 dependencies = [
+ "serde",
+ "serde_json",
+ "track-types",
  "track-wit-deps",
  "wit-bindgen 0.57.1",
 ]
@@ -2591,6 +2594,14 @@ dependencies = [
  "track-wit-deps",
  "wasmtime",
  "wasmtime-wasi",
+]
+
+[[package]]
+name = "track-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
