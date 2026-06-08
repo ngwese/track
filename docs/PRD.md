@@ -1,8 +1,8 @@
 # Track — Product Requirements Document
 
-**Version:** 0.4 (draft)  
-**Status:** Draft for review  
-**Last updated:** 2026-06-06
+**Version:** 0.4  
+**Status:** Approved  
+**Last updated:** 2026-06-07
 
 > **Companion document:** Technical design and implementation detail live in the [Software Requirements Document](./SRD.md).
 

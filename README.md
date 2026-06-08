@@ -2,7 +2,7 @@
 
 Personal issue tracking for heterogeneous projects—software, hardware, home improvement, travel, and more—from one system. **Issue tracking as code**, **CLI-first**, **local-first**, with a **sync hub** that keeps humans, agents, and CI convergent.
 
-> **Status:** Design and infrastructure drafts. Application code (CLI, hub) is not implemented yet.
+> **Status:** PRD and SRD approved (v0.4). Sync hub MVP and CLI implementation in progress; see [docs/adr/](docs/adr/) for runtime decisions.
 
 ## Why Track
 

@@ -1,8 +1,8 @@
 # Track — Software Requirements Document
 
-**Version:** 0.4 (draft)  
-**Status:** Draft for review  
-**Last updated:** 2026-06-06
+**Version:** 0.4  
+**Status:** Approved  
+**Last updated:** 2026-06-07
 
 > **Companion document:** Product intent, goals, principles, and personas are in the [Product Requirements Document](./PRD.md).
 
