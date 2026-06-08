@@ -172,12 +172,13 @@ cargo build -p track-host --release
 - [x] JSON output mode (`--json`), stable exit codes (non-zero on error/unknown command)
 - [x] Shared `track-types` crate for JSON response shapes
 
-### Phase 4 — Distribution and CI
+### Phase 4 — Distribution and CI ✅
 
-- [ ] GitHub release pipeline: `track-host` matrix (linux/macOS/windows) + `track-cli.wasm` artifacts
-- [ ] Golden integration test: fixture project + pinned `tool.version`
-- [ ] Capability test: guest cannot read outside preopens
-- [ ] Document air-gapped vendoring (`.track/components/` vs user-cache)
+- [x] GitHub Actions CI: build `wasm32-wasip2` guest, host, unit + integration tests
+- [ ] GitHub **release** pipeline: `track-host` matrix (linux/macOS/windows) + `track-cli.wasm` artifacts (deferred)
+- [x] Golden integration test: fixture project + pinned `tool.version`
+- [x] Capability test: per-command area policy (unit tests; WASI preopen scope via `preopens.rs`)
+- [x] Document air-gapped vendoring — [docs/distribution/air-gapped.md](../distribution/air-gapped.md)
 
 ### Phase 5 — Developer ergonomics
 

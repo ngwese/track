@@ -1,0 +1,37 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.95.0
+          components: rustfmt, clippy
+
+      - name: Install wasm32-wasip2 target
+        run: rustup target add wasm32-wasip2
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Build guest component
+        run: cargo build -p track-cli --target wasm32-wasip2
+
+      - name: Build host
+        run: cargo build -p track-host
+
+      - name: Unit tests
+        run: cargo test -p track-host
+
+      - name: Integration tests
+        run: cargo test -p track-host --test integration
+
+      - name: Smoke run
+        run: cargo run -p track-host -- version

@@ -184,4 +184,10 @@ mod tests {
         assert!(!policy.capabilities.network);
         assert_eq!(policy.areas, vec![Area::ProjectConfig]);
     }
+
+    #[test]
+    fn push_requires_project_root_at_host() {
+        assert!(requires_project(&["track".into(), "push".into()]));
+        assert!(!requires_project(&["track".into(), "auth".into(), "login".into()]));
+    }
 }
