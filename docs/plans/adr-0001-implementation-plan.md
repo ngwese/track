@@ -156,14 +156,14 @@ cargo build -p track-host --release
 - [ ] Host errors before guest load when project required but not found
 - [ ] Map all six storage areas to real paths and WASI preopens (narrow, per ADR 0002)
 
-### Phase 2 — Real host implementations
+### Phase 2 — Real host implementations ✅
 
-- [ ] `user-config` — read/write `config.json` under user-config area
-- [ ] `auth` — resolve workspace tokens from config (no env leakage)
-- [ ] `project-state` — read/write `.track/state.json` with advisory `project-lock`
-- [ ] `offline-queue` — persist mutation queue under user-state
-- [ ] `capabilities` — per-command policy (network allowlist, area visibility)
-- [ ] Resource-based `project-lock` (replace function stub when Wasmtime resource wiring is ready)
+- [x] `user-config` — read/write `config.json` under user-config area (0600 perms, validation)
+- [x] `auth` — resolve workspace tokens from config (no env leakage)
+- [x] `project-state` — read/write `.track/state.json` with advisory `project-lock`
+- [x] `offline-queue` — persist mutation queue under user-state (`offline-queue/<slug>.json`)
+- [x] `capabilities` — per-command policy (network allowlist from `track.yaml` workspace, area visibility)
+- [ ] Resource-based `project-lock` via Wasmtime resources (file advisory lock implemented on function API)
 
 ### Phase 3 — CLI logic in guest
 

@@ -15,6 +15,8 @@ clap = { version = "4", features = ["derive"] }
 dirs = "6"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+serde_yaml = "0.9"
+fs2 = "0.4"
 wasmtime = "45"
 wasmtime-wasi = "45"
 wit-bindgen = "0.57"

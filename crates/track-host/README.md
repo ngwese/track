@@ -18,7 +18,13 @@ The bulk of Track behavior lives in **`track-cli`** (the guest component), versi
 | Module | Responsibility |
 |--------|----------------|
 | `bootstrap.rs` | argv, `--project`, project-root discovery, component path resolution (`TRACK_CLI_COMPONENT` or `target/wasm32-wasip2/debug/track_cli.wasm`) |
-| `host_impl.rs` | Host-side implementations of WIT imports (`session`, `locations`, `auth`, …) on `HostState` |
+| `host_impl.rs` | WIT `Host` trait implementations on `HostState` |
+| `user_config.rs` | `~/.config/track/config.json` read/write/validate |
+| `policy.rs` | Per-command capabilities and area visibility (ADR 0002 matrix) |
+| `lock_store.rs` | Advisory `.track/state.lock` via `fs2` |
+| `state_store.rs` | `.track/state.json` atomic read/write |
+| `queue_store.rs` | Hub mutation queue under user-state |
+| `paths.rs` | Storage area → native path mapping |
 | `main.rs` | Wasmtime engine, linker setup, WASI context, guest instantiation |
 
 ## Dependencies

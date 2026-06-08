@@ -1,8 +1,10 @@
 use crate::bootstrap::Bootstrap;
-use std::path::PathBuf;
+use crate::{lock_store, paths, policy, queue_store, state_store, user_config};
+use policy::CommandPolicy;
+use lock_store::HeldLock;
 use track_host_wit::track::host::{
     auth, capabilities, locations, offline_queue, project_lock, project_state, registry,
-    session, user_config,
+    session, user_config as user_config_wit,
 };
 use wasmtime::component::ResourceTable;
 use wasmtime_wasi::{WasiCtx, WasiCtxView, WasiView};
@@ -11,57 +13,31 @@ pub struct HostState {
     pub bootstrap: Bootstrap,
     pub wasi_ctx: WasiCtx,
     pub resource_table: ResourceTable,
+    policy: CommandPolicy,
+    project_lock: Option<HeldLock>,
 }
 
 impl HostState {
     pub fn new(bootstrap: Bootstrap, wasi_ctx: WasiCtx) -> Self {
+        let policy = policy::from_argv(
+            &bootstrap.argv,
+            bootstrap.project_root.as_deref(),
+        );
         Self {
             bootstrap,
             wasi_ctx,
             resource_table: ResourceTable::new(),
+            policy,
+            project_lock: None,
         }
     }
 
-    fn user_config_dir() -> PathBuf {
-        dirs::config_dir()
-            .unwrap_or_else(|| PathBuf::from("."))
-            .join("track")
+    fn project_root(&self) -> Option<&std::path::Path> {
+        self.bootstrap.project_root.as_deref()
     }
 
-    fn user_state_dir() -> PathBuf {
-        dirs::state_dir()
-            .unwrap_or_else(|| dirs::data_local_dir().unwrap_or_else(|| PathBuf::from(".")))
-            .join("track")
-    }
-
-    fn user_cache_dir() -> PathBuf {
-        dirs::cache_dir()
-            .unwrap_or_else(|| PathBuf::from("."))
-            .join("track")
-    }
-
-    fn area_path(&self, area: locations::Area) -> Result<PathBuf, locations::Error> {
-        match area {
-            locations::Area::UserConfig => Ok(Self::user_config_dir()),
-            locations::Area::UserState => Ok(Self::user_state_dir()),
-            locations::Area::UserCache => Ok(Self::user_cache_dir()),
-            locations::Area::ProjectConfig
-            | locations::Area::ProjectState
-            | locations::Area::ProjectCache => {
-                let root = self.bootstrap.project_root.clone().ok_or_else(|| {
-                    locations::Error {
-                        code: locations::ErrorCode::NotInProject,
-                        message: "no project root discovered".into(),
-                    }
-                })?;
-                Ok(match area {
-                    locations::Area::ProjectConfig => root,
-                    locations::Area::ProjectState => root.join(".track"),
-                    locations::Area::ProjectCache => root.join(".track").join("cache"),
-                    _ => unreachable!(),
-                })
-            }
-        }
+    fn area_allowed(&self, area: locations::Area) -> bool {
+        self.policy.areas.contains(&area)
     }
 }
 
@@ -107,19 +83,19 @@ impl session::Host for HostState {
 
 impl capabilities::Host for HostState {
     fn get(&mut self) -> capabilities::CapabilityFlags {
-        capabilities::CapabilityFlags {
-            network: true,
-            hub_allowlist: Vec::new(),
-            stdin: true,
-            stdout: true,
-            stderr: true,
-        }
+        self.policy.capabilities.clone()
     }
 }
 
 impl locations::Host for HostState {
     fn get(&mut self, area: locations::Area) -> Result<locations::PathInfo, locations::Error> {
-        let native_path = self.area_path(area)?;
+        if !self.area_allowed(area) {
+            return Err(locations::Error {
+                code: locations::ErrorCode::AreaUnavailable,
+                message: format!("area {area:?} is not available for this command"),
+            });
+        }
+        let native_path = paths::area_path(self.project_root(), area)?;
         std::fs::create_dir_all(&native_path).map_err(|err| locations::Error {
             code: locations::ErrorCode::PermissionDenied,
             message: err.to_string(),
@@ -132,111 +108,134 @@ impl locations::Host for HostState {
     }
 
     fn list_available(&mut self) -> Vec<locations::Area> {
-        let mut areas = vec![
-            locations::Area::UserConfig,
-            locations::Area::UserState,
-            locations::Area::UserCache,
-        ];
-        if self.bootstrap.project_root.is_some() {
-            areas.extend([
-                locations::Area::ProjectConfig,
-                locations::Area::ProjectState,
-                locations::Area::ProjectCache,
-            ]);
-        }
-        areas
+        self.policy.areas.clone()
     }
 }
 
 impl auth::Host for HostState {
     fn resolve(&mut self, slug: String) -> Result<auth::WorkspaceAuth, auth::Error> {
-        Err(auth::Error {
-            code: auth::ErrorCode::NotConfigured,
-            message: format!("workspace {slug} not configured (stub)"),
+        let config = user_config::load().map_err(map_config_error)?;
+        let workspace = config
+            .workspaces
+            .into_iter()
+            .find(|w| w.slug == slug)
+            .ok_or_else(|| auth::Error {
+                code: auth::ErrorCode::UnknownWorkspace,
+                message: format!("workspace {slug} is not configured"),
+            })?;
+        Ok(auth::WorkspaceAuth {
+            slug: workspace.slug,
+            hub_url: workspace.hub_url,
+            token: workspace.token,
+            default_actor: workspace.default_actor,
         })
     }
 
     fn list_workspaces(&mut self) -> Vec<auth::WorkspaceSummary> {
-        Vec::new()
+        user_config::load()
+            .map(|config| {
+                config
+                    .workspaces
+                    .into_iter()
+                    .map(|w| auth::WorkspaceSummary {
+                        slug: w.slug,
+                        hub_url: w.hub_url,
+                        default_actor: w.default_actor,
+                    })
+                    .collect()
+            })
+            .unwrap_or_default()
     }
 }
 
-impl user_config::Host for HostState {
-    fn read(&mut self) -> Result<String, user_config::Error> {
-        Ok(r#"{"workspaces":[]}"#.into())
+impl user_config_wit::Host for HostState {
+    fn read(&mut self) -> Result<String, user_config_wit::Error> {
+        user_config::read()
     }
 
-    fn write(&mut self, _json: String) -> Result<(), user_config::Error> {
-        Ok(())
+    fn write(&mut self, json: String) -> Result<(), user_config_wit::Error> {
+        user_config::write(&json)
     }
 
     fn upsert_workspace(
         &mut self,
-        _entry: user_config::WorkspaceEntry,
-    ) -> Result<(), user_config::Error> {
-        Ok(())
+        entry: user_config_wit::WorkspaceEntry,
+    ) -> Result<(), user_config_wit::Error> {
+        user_config::upsert_workspace(entry)
     }
 
-    fn remove_workspace(&mut self, _slug: String) -> Result<(), user_config::Error> {
-        Ok(())
+    fn remove_workspace(&mut self, slug: String) -> Result<(), user_config_wit::Error> {
+        user_config::remove_workspace(&slug)
     }
 }
 
 impl project_lock::Host for HostState {
-    fn acquire(&mut self, _blocking: bool) -> Result<(), project_lock::Error> {
+    fn acquire(&mut self, blocking: bool) -> Result<(), project_lock::Error> {
+        if self.project_lock.is_some() {
+            return Err(project_lock::Error {
+                code: project_lock::ErrorCode::AlreadyHeld,
+                message: "project state lock already held in this invocation".into(),
+            });
+        }
+        let root = self.project_root().ok_or_else(|| project_lock::Error {
+            code: project_lock::ErrorCode::IoError,
+            message: "no project root discovered".into(),
+        })?;
+        let held = lock_store::acquire(root, blocking)?;
+        self.project_lock = Some(held);
         Ok(())
     }
 
     fn release(&mut self) -> Result<(), project_lock::Error> {
-        Ok(())
+        let Some(held) = self.project_lock.take() else {
+            return Err(project_lock::Error {
+                code: project_lock::ErrorCode::Unavailable,
+                message: "project state lock is not held".into(),
+            });
+        };
+        held.release()
     }
 }
 
 impl project_state::Host for HostState {
     fn read(&mut self) -> Result<String, project_state::Error> {
-        Ok(r#"{"stub":true}"#.into())
+        state_store::read(self.project_root())
     }
 
-    fn write(&mut self, _json: String) -> Result<(), project_state::Error> {
-        Ok(())
+    fn write(&mut self, json: String) -> Result<(), project_state::Error> {
+        state_store::write(self.project_root(), &json)
     }
 }
 
 impl offline_queue::Host for HostState {
-    fn enqueue(
-        &mut self,
-        _mutation: offline_queue::Mutation,
-    ) -> Result<(), offline_queue::Error> {
-        Ok(())
+    fn enqueue(&mut self, mutation: offline_queue::Mutation) -> Result<(), offline_queue::Error> {
+        queue_store::enqueue(mutation)
     }
 
     fn list_queued(
         &mut self,
-        _workspace_slug: Option<String>,
+        workspace_slug: Option<String>,
     ) -> Result<Vec<offline_queue::Mutation>, offline_queue::Error> {
-        Ok(Vec::new())
+        queue_store::list_queued(workspace_slug.as_deref())
     }
 
     fn drain(
         &mut self,
-        _workspace_slug: String,
-        _limit: u32,
+        workspace_slug: String,
+        limit: u32,
     ) -> Result<Vec<offline_queue::Mutation>, offline_queue::Error> {
-        Ok(Vec::new())
+        queue_store::drain(&workspace_slug, limit)
     }
 
-    fn ack(&mut self, _ids: Vec<String>) -> Result<(), offline_queue::Error> {
-        Ok(())
+    fn ack(&mut self, ids: Vec<String>) -> Result<(), offline_queue::Error> {
+        queue_store::ack(&ids)
     }
 
     fn get_status(
         &mut self,
-        _workspace_slug: String,
+        workspace_slug: String,
     ) -> Result<offline_queue::QueueStatus, offline_queue::Error> {
-        Ok(offline_queue::QueueStatus {
-            pending: 0,
-            oldest: None,
-        })
+        queue_store::status(&workspace_slug)
     }
 }
 
@@ -254,5 +253,12 @@ impl registry::Host for HostState {
                 self.bootstrap.tool_version
             ),
         })
+    }
+}
+
+fn map_config_error(err: user_config_wit::Error) -> auth::Error {
+    auth::Error {
+        code: auth::ErrorCode::NotConfigured,
+        message: err.message,
     }
 }

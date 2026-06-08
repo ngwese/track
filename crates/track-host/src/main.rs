@@ -1,5 +1,11 @@
 mod bootstrap;
 mod host_impl;
+mod lock_store;
+mod paths;
+mod policy;
+mod queue_store;
+mod state_store;
+mod user_config;
 
 use anyhow::Result;
 use bootstrap::from_argv;
