@@ -1,12 +1,7 @@
-package track:lock@0.1.0;
 
 /// Advisory lock for project state files (`.track/state.lock`).
+/// Feasibility stub uses acquire/release functions; resource-based lock in a later phase.
 interface project-lock {
-    resource lock {
-        /// Release the lock. Dropped on component exit if not explicitly released.
-        release: func() -> result<(), error>;
-    }
-
     record error {
         code: error-code,
         message: string,
@@ -19,5 +14,8 @@ interface project-lock {
     }
 
     /// Acquire the project state lock. When `blocking` is false, returns `unavailable` if held.
-    acquire: func(blocking: bool) -> result<lock, error>;
+    acquire: func(blocking: bool) -> result<_, error>;
+
+    /// Release the project state lock for this invocation.
+    release: func() -> result<_, error>;
 }

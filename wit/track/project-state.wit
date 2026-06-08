@@ -1,4 +1,3 @@
-package track:state@0.1.0;
 
 /// Structured access to `.track/state.json`.
 /// Aligns with SRD §3.7 (content hashes, materialization registry, event cursor).
@@ -19,5 +18,5 @@ interface project-state {
     read: func() -> result<string, error>;
 
     /// Replace `state.json` entirely.
-    write: func(json: string) -> result<(), error>;
+    write: func(json: string) -> result<_, error>;
 }

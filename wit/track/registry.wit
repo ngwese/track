@@ -1,11 +1,10 @@
-package track:components@0.1.0;
 
 /// Resolve `track-cli` WebAssembly components from the user cache (ADR 0001).
 interface registry {
     record artifact {
         version: string,
         digest: string,
-        /// Path within the user-cache bucket where the `.wasm` component is stored.
+        /// Path within the user-cache area where the `.wasm` component is stored.
         cache-path: string,
     }
 

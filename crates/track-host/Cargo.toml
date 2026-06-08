@@ -1,0 +1,20 @@
+[package]
+name = "track-host"
+description = "Track native host; produces the track executable"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "track"
+path = "src/main.rs"
+
+[dependencies]
+anyhow = { workspace = true }
+clap = { workspace = true }
+dirs = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+track-host-wit = { path = "../track-host-wit" }
+wasmtime = { workspace = true }
+wasmtime-wasi = { workspace = true }

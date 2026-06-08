@@ -1,0 +1,20 @@
+[workspace]
+resolver = "2"
+members = ["crates/track-host", "crates/track-host-wit", "crates/track-cli"]
+default-members = ["crates/track-host", "crates/track-host-wit"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/ngwese/track"
+
+[workspace.dependencies]
+anyhow = "1"
+clap = { version = "4", features = ["derive"] }
+dirs = "6"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+wasmtime = "45"
+wasmtime-wasi = "45"
+wit-bindgen = "0.57"

@@ -1,10 +1,7 @@
-package track:hub@0.1.0;
 
 /// Durable hub mutation queue in user state (SRD §5.1, §6.3).
 /// Used when the sync hub is unreachable; flushed on reconnect.
 interface offline-queue {
-    use wasi:clocks/wall-clock.{datetime};
-
     record mutation {
         id: string,
         workspace-slug: string,
@@ -13,12 +10,14 @@ interface offline-queue {
         path: string,
         body: option<string>,
         idempotency-key: string,
-        enqueued-at: datetime,
+        /// RFC 3339 timestamp string.
+        enqueued-at: string,
     }
 
-    record status {
+    record queue-status {
         pending: u32,
-        oldest: option<datetime>,
+        /// RFC 3339 timestamp of oldest pending item, if any.
+        oldest: option<string>,
     }
 
     record error {
@@ -32,15 +31,15 @@ interface offline-queue {
         duplicate-id,
     }
 
-    enqueue: func(mutation: mutation) -> result<(), error>;
+    enqueue: func(mutation: mutation) -> result<_, error>;
 
-    list: func(workspace-slug: option<string>) -> result<list<mutation>, error>;
+    list-queued: func(workspace-slug: option<string>) -> result<list<mutation>, error>;
 
     /// Remove and return up to `limit` pending mutations for a workspace (FIFO).
     drain: func(workspace-slug: string, limit: u32) -> result<list<mutation>, error>;
 
     /// Drop acknowledged mutation ids after successful hub flush.
-    ack: func(ids: list<string>) -> result<(), error>;
+    ack: func(ids: list<string>) -> result<_, error>;
 
-    status: func(workspace-slug: string) -> result<status, error>;
+    get-status: func(workspace-slug: string) -> result<queue-status, error>;
 }

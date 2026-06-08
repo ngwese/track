@@ -1,0 +1,13 @@
+[package]
+name = "track-wit-deps"
+description = "Populates wit/deps from wit/deps.toml at build time"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+
+[lib]
+path = "lib.rs"
+
+[build-dependencies]
+wit-deps = "0.6"

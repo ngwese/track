@@ -1,8 +1,7 @@
-package track:capabilities@0.1.0;
 
 /// Host policy for optional capabilities (network, stdio) beyond mandatory storage access.
 interface capabilities {
-    record flags {
+    record capability-flags {
         /// When false, `wasi:sockets` imports are not linked.
         network: bool,
         /// Hub hostnames or URL prefixes the guest may contact when `network` is true.
@@ -12,5 +11,5 @@ interface capabilities {
         stderr: bool,
     }
 
-    get: func() -> flags;
+    get: func() -> capability-flags;
 }

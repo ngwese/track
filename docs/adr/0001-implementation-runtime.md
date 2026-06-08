@@ -117,7 +117,7 @@ The host records `project-root` and `manifest-path` (`<project-root>/track.yaml`
 
 1. If a project is in scope, read `tool.version` from `track.yaml` (see below). Commands without a project (e.g. `track auth login`) use the host's default or latest compatible `track-cli` version.
 2. Ensure the matching `track-cli` component is present in user-cache (content-addressed or semver-keyed); fetch from a release registry or mirror if missing and network policy allows.
-3. Map [storage buckets](0002-host-guest-wit-interfaces.md) to absolute paths: user buckets from OS conventions; project buckets from the discovered project root.
+3. Map [storage areas](0002-host-guest-wit-interfaces.md) to absolute paths: user areas from OS conventions; project areas from the discovered project root.
 
 **Phase 4 — Instantiate guest**
 
@@ -156,7 +156,7 @@ The host is the **only** code with direct OS access. Responsibilities:
 | Responsibility | Mechanism |
 |----------------|-----------|
 | Map config dir across OSes | `track:config` WIT (returns base path; guest opens files via WASI FS preopens) |
-| Scope filesystem access | WASI preopens: discovered project root (SRD §3.2.1), `.track/` under that root, user buckets — not arbitrary `~/` |
+| Scope filesystem access | WASI preopens: discovered project root (SRD §3.2.1), `.track/` under that root, user areas — not arbitrary `~/` |
 | Network to sync hub | `wasi:sockets` or host-mediated HTTP WIT; optional per-workspace allowlist |
 | Credentials | Host reads `~/.config/track/config.json`; exposes token to guest via WIT handle, not env vars in project repos |
 | Stdio / exit code | `wasi:cli` for agent-friendly stdout/stderr; guest exit propagates to host process |

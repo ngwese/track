@@ -1,12 +1,9 @@
-package track:locations@0.1.0;
 
-/// Resolved on-disk locations for user- and project-scoped storage buckets.
+/// Resolved on-disk locations for user- and project-scoped storage areas.
 /// The host maps these to OS-specific paths (XDG on Linux, Application Support on macOS, etc.).
 interface locations {
-    use wasi:filesystem/types.{descriptor};
-
-    /// Storage bucket the guest may request as a preopened directory descriptor.
-    enum bucket {
+    /// Storage area the guest may request as a preopened directory descriptor.
+    enum area {
         /// User config: credentials, workspace registry (`config.json`).
         user-config,
         /// User state: offline queues, global cursors, host diagnostics.
@@ -22,11 +19,11 @@ interface locations {
     }
 
     record path-info {
-        bucket: bucket,
-        /// Host-native path for error messages and logging only.
+        area: area,
+        /// Host-native absolute path for the area root.
         native-path: string,
-        /// Preopened directory descriptor rooted at this bucket.
-        root: descriptor,
+        /// Guest-relative path label (feasibility stub; WASI descriptors in a later phase).
+        guest-path: string,
     }
 
     record error {
@@ -36,14 +33,14 @@ interface locations {
 
     enum error-code {
         not-in-project,
-        bucket-unavailable,
+        area-unavailable,
         permission-denied,
     }
 
-    /// Return path metadata and a preopened descriptor for `bucket`.
-    /// Project buckets require a discovered project root; returns `not-in-project` otherwise.
-    get: func(bucket: bucket) -> result<path-info, error>;
+    /// Return path metadata for `area`.
+    /// Project areas require a discovered project root; returns `not-in-project` otherwise.
+    get: func(area: area) -> result<path-info, error>;
 
-    /// Return all buckets available for the current invocation.
-    list-available: func() -> list<bucket>;
+    /// Return all areas available for the current invocation.
+    list-available: func() -> list<area>;
 }

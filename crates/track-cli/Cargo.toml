@@ -1,0 +1,15 @@
+[package]
+name = "track-cli"
+description = "Track CLI guest component (wasm32-wasip2)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+crate-type = ["cdylib"]
+
+[build-dependencies]
+track-wit-deps = { path = "../track-wit-deps" }
+
+[dependencies]
+wit-bindgen = { workspace = true }

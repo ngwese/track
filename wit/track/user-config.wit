@@ -1,4 +1,3 @@
-package track:config@0.1.0;
 
 /// Read/write user-level configuration (`config.json`). The host validates structure on write.
 interface user-config {
@@ -25,11 +24,11 @@ interface user-config {
     read: func() -> result<string, error>;
 
     /// Replace the full config file. Host validates before persisting.
-    write: func(json: string) -> result<(), error>;
+    write: func(json: string) -> result<_, error>;
 
     /// Upsert a single workspace entry (`track auth login` path).
-    upsert-workspace: func(entry: workspace-entry) -> result<(), error>;
+    upsert-workspace: func(entry: workspace-entry) -> result<_, error>;
 
     /// Remove a workspace entry by slug.
-    remove-workspace: func(slug: string) -> result<(), error>;
+    remove-workspace: func(slug: string) -> result<_, error>;
 }

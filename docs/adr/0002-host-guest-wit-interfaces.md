@@ -20,7 +20,7 @@ ADR 0001 left WIT interface design as an open question. Without explicit contrac
 
 This ADR defines:
 
-1. **Six on-disk storage buckets** — user config/state/cache and project config/state/cache
+1. **Six on-disk storage areas** — user config/state/cache and project config/state/cache
 2. **Host → guest interfaces** — invocation control, policy, credentials, and bootstrap configuration
 3. **Guest → disk interfaces** — scoped filesystem access and structured state APIs
 
@@ -28,7 +28,7 @@ Canonical WIT source files live in [`wit/track/`](../../wit/track/).
 
 ## Decision drivers
 
-1. **Align with SRD layout** — buckets map directly to paths and files already specified in the SRD.
+1. **Align with SRD layout** — areas map directly to paths and files already specified in the SRD.
 2. **Capability separation** — guest receives only the storage scopes and network policy required for the current command.
 3. **Secrets handling** — tokens stay in user config; host mediates reads/writes rather than preopening raw credential files to all invocations.
 4. **Offline-first** — user-state APIs support hub mutation queues (PRD §4.3, SRD §6.3).
@@ -36,11 +36,11 @@ Canonical WIT source files live in [`wit/track/`](../../wit/track/).
 
 ## On-disk storage model
 
-The host resolves six **buckets**. Paths below are illustrative; the host maps buckets to OS conventions (XDG on Linux, `Library/Application Support` on macOS, `%APPDATA%` / `%LOCALAPPDATA%` on Windows).
+The host resolves six **storage areas**. Paths below are illustrative; the host maps areas to OS conventions (XDG on Linux, `Library/Application Support` on macOS, `%APPDATA%` / `%LOCALAPPDATA%` on Windows).
 
 ### User scope
 
-| Bucket | Typical path | Contents | Git |
+| Area | Typical path | Contents | Git |
 |--------|--------------|----------|-----|
 | **user-config** | `~/.config/track/` | `config.json` — workspace registry, hub URLs, tokens, default actors | No |
 | **user-state** | `~/.local/state/track/` | `cursors.json` (global hub poll cursors), `offline-queue/` (per-workspace mutation queues), `host.json` (diagnostics) | No |
@@ -48,9 +48,9 @@ The host resolves six **buckets**. Paths below are illustrative; the host maps b
 
 ### Project scope
 
-Project buckets are rooted at the **project root** — the directory that directly contains `track.yaml` (SRD §3.2.1). This is not necessarily the repository root; embedded layouts use `<repo-root>/track/` as the project root.
+Project areas are rooted at the **project root** — the directory that directly contains `track.yaml` (SRD §3.2.1). This is not necessarily the repository root; embedded layouts use `<repo-root>/track/` as the project root.
 
-| Bucket | Resolved path | Contents | Git |
+| Area | Resolved path | Contents | Git |
 |--------|---------------|----------|-----|
 | **project-config** | `<project-root>/` | `track.yaml`, `schema/`, `work/` — issue tracking as code | Yes (subject to `.gitignore`) |
 | **project-state** | `<project-root>/.track/` | `state.json` (hashes, materialization registry, event cursor — SRD §3.7), `state.lock` | Usually no |
@@ -100,7 +100,7 @@ The embedded `track/` layout reduces repo-root naming conflicts and allows `<rep
 
 ### Project root discovery
 
-The host resolves the project root **before** opening project buckets or reading `tool.version`:
+The host resolves the project root **before** opening project areas or reading `tool.version`:
 
 1. **`--project PATH`** — `PATH` is the project root (must contain `track.yaml`, except `track init`).
 2. **Upward walk** — from the process working directory, search ancestors for `track.yaml`; the containing directory is the project root.
@@ -112,7 +112,7 @@ Examples: cwd `api-server/src/` discovers `api-server/track/track.yaml` → proj
 
 **Rules:**
 
-- Project buckets are unavailable when no project root is discovered (global commands like `track auth login` use user buckets only).
+- Project areas are unavailable when no project root is discovered (global commands like `track auth login` use user areas only).
 - `track init` creates the project tree under the target directory (default `./track/` for embedded repos per SRD §3.2.2); host ensures `.track/` exists before guest starts.
 - User-cache component artifacts are resolved during host bootstrap (ADR 0001); guest may call `registry.resolve` when pinning or upgrading tool versions.
 
@@ -122,7 +122,7 @@ Examples: cwd `api-server/src/` discovers `api-server/track/track.yaml` → proj
 ┌──────────────── track-host ────────────────────────────────────────┐
 │  Parse argv → session                                              │
 │  Policy      → capabilities                                        │
-│  OS paths    → locations (preopened descriptors per bucket)      │
+│  OS paths    → locations (preopened descriptors per area)      │
 │  Secrets     → user-config, auth                                   │
 │  Bootstrap   → registry (component cache)                          │
 │  Concurrency → project-lock, project-state                         │
@@ -151,11 +151,11 @@ Examples: cwd `api-server/src/` discovers `api-server/track/track.yaml` → proj
 | Control | `track:components` | Host ↔ guest | resolve `track-cli` artifacts in user-cache |
 | Configuration | `track:config` | Guest → host | read/write `config.json` (validated by host) |
 | Configuration | `track:auth` | Guest → host | resolve workspace tokens for hub API calls |
-| Storage | `track:locations` | Host → guest | preopened directory descriptors per bucket |
+| Storage | `track:locations` | Host → guest | preopened directory descriptors per area |
 | Storage | `track:state` | Guest → host | read/write `.track/state.json` |
 | Storage | `track:lock` | Guest → host | advisory `.track/state.lock` |
 | Storage | `track:hub` | Guest → host | durable hub mutation queue in user-state |
-| Storage | `wasi:filesystem` | Guest → disk | YAML, SQLite, cache files via bucket descriptors |
+| Storage | `wasi:filesystem` | Guest → disk | YAML, SQLite, cache files via area descriptors |
 | I/O | `wasi:cli`, `wasi:clocks`, `wasi:sockets` | Guest ↔ OS | stdio, time, hub HTTP (when network allowed) |
 
 ## Host → guest interfaces (control and configuration)
@@ -183,7 +183,7 @@ Declares what the host linked for this run:
 | `hub-allowlist` | When network is true, restrict outbound connections to registered hub URLs |
 | `stdin` / `stdout` / `stderr` | Agent/CI runs may disable stdin; JSON mode still uses stdout |
 
-Example: `track schema validate` inside an air-gapped project may run with `network: false` and only project buckets available.
+Example: `track schema validate` inside an air-gapped project may run with `network: false` and only project areas available.
 
 ### `track:components/registry`
 
@@ -192,15 +192,15 @@ Host ensures `track-cli` artifacts exist in **user-cache** before guest executio
 - `track init` pins a `tool.version` and records the resolved digest
 - `track upgrade` checks for a newer compatible component
 
-Returns `{ version, digest, cache-path }` where `cache-path` is relative to the user-cache bucket root.
+Returns `{ version, digest, cache-path }` where `cache-path` is relative to the user-cache area root.
 
 ## Guest → disk interfaces (state and declarative files)
 
 ### `track:locations/locations` (primary filesystem scoping)
 
-The host preopens one directory descriptor per available bucket. The guest uses standard `wasi:filesystem` operations on `path-info.root` — it never receives the full host filesystem.
+The host preopens one directory descriptor per available area. The guest uses standard `wasi:filesystem` operations on `path-info.root` — it never receives the full host filesystem.
 
-| Bucket | Guest access pattern |
+| Area | Guest access pattern |
 |--------|---------------------|
 | `user-config` | Rarely needed when `user-config` and `auth` WIT are used; available for `track auth` diagnostics |
 | `user-state` | Direct file I/O for `cursors.json`; prefer `offline-queue` for mutation queues |
@@ -209,7 +209,7 @@ The host preopens one directory descriptor per available bucket. The guest uses 
 | `project-state` | Lock file presence; optional direct read — prefer `project-state` WIT for `state.json` |
 | `project-cache` | Read/write `index.sqlite`, validation cache files |
 
-`list-available` returns which buckets are linked for the current invocation (e.g. no project buckets for `track auth login`).
+`list-available` returns which areas are linked for the current invocation (e.g. no project areas for `track auth login`).
 
 ### `track:state/project-state`
 
@@ -244,9 +244,9 @@ Operations: `enqueue`, `list`, `drain`, `ack`, `status`.
 
 ### `wasi:filesystem` (declarative config and project cache)
 
-The bulk of on-disk manipulation uses WASI filesystem APIs on bucket descriptors:
+The bulk of on-disk manipulation uses WASI filesystem APIs on area descriptors:
 
-| Data | Bucket | Examples |
+| Data | Area | Examples |
 |------|--------|----------|
 | Project manifest + schema | `project-config` | `track.yaml`, `schema/types.yaml` |
 | Materialized work | `project-config` | `work/issues/<eid>/issue.yaml` |
@@ -275,11 +275,11 @@ Short-lived credentials for hub API calls:
 
 Tokens are never written to project repos. For `track auth login`, the guest writes via `user-config.upsert-workspace`; for normal commands, `auth.resolve` supplies ephemeral tokens for the invocation.
 
-## Command → bucket and interface matrix
+## Command → area and interface matrix
 
 Illustrative mapping for v0.1 commands (SRD §4). The host may narrow capabilities further per subcommand.
 
-| Command | Project buckets | User buckets | Key WIT imports |
+| Command | Project areas | User areas | Key WIT imports |
 |---------|-----------------|--------------|-----------------|
 | `track auth login` | — | config, state | `user-config`, `session` |
 | `track init` | config, state, cache | cache, config | `locations`, `registry`, `project-state`, `session` |
@@ -320,8 +320,8 @@ The `cli-guest` world imports all `track:*` interfaces plus WASI Preview 2 (`was
 
 ### Positive
 
-- **Auditable sandbox** — agent deployments can inspect exactly which buckets and network hosts a command receives.
-- **SRD alignment** — buckets correspond to documented paths; no parallel config story.
+- **Auditable sandbox** — agent deployments can inspect exactly which areas and network hosts a command receives.
+- **SRD alignment** — areas correspond to documented paths; no parallel config story.
 - **Independent evolution** — host adds `offline-queue` flush strategies or `auth` token refresh without recompiling guest logic (within the same major WIT version).
 - **Testability** — mock host implementations can implement the `host` world for guest unit tests without a real filesystem.
 
@@ -333,7 +333,7 @@ The `cli-guest` world imports all `track:*` interfaces plus WASI Preview 2 (`was
 
 ### Follow-up work
 
-- Normative bucket paths and `.track/cache/` layout — documented in SRD §3.2.1–§3.2.3.
+- Normative area paths and `.track/cache/` layout — documented in SRD §3.2.1–§3.2.3.
 - Add `tool.version` block to SRD §3.3 `track.yaml` (per ADR 0001).
 - Decide whether hub HTTP stays in guest (`wasi:sockets`) or moves to `track:http@0.2.0` host export.
 - Add WIT conformance tests: mock host + guest component in CI.
@@ -341,7 +341,7 @@ The `cli-guest` world imports all `track:*` interfaces plus WASI Preview 2 (`was
 ## Compliance
 
 - CI validates WIT syntax (`wit-deps` / `wasm-tools component wit`).
-- Integration tests cover bucket listing per command class (with/without project root).
+- Integration tests cover area listing per command class (with/without project root).
 - Capability tests verify guest cannot open paths outside `locations` descriptors.
 - Lock tests verify concurrent `project-state` writes serialize via `project-lock`.
 
