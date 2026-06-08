@@ -96,7 +96,7 @@ cargo_install_if_missing() {
 ensure_cargo_tools() {
   # Build-time WIT vendoring uses the wit-deps library crate; the CLI is only
   # needed when updating pins in wit/deps.toml / wit/deps.lock.
-  cargo_install_if_missing "wit-deps" "0.6"
+  cargo_install_if_missing "wit-deps" "0.6.0"
 }
 
 main() {
