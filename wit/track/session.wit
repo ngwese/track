@@ -1,16 +1,8 @@
 
-/// Invocation context and CLI flags parsed by the host and passed to the guest at startup.
+/// Invocation context established by the host and passed to the guest at startup.
 interface session {
-    record cli-flags {
-        json-output: bool,
-        dry-run: bool,
-        force: bool,
-        verbose: bool,
-        debug: bool,
-    }
-
     record invocation {
-        /// Original process argv (`track` subcommand and arguments).
+        /// Guest argv after host bootstrap flags are removed (`track` plus subcommand args).
         argv: list<string>,
         /// Host process working directory at launch.
         cwd: string,
@@ -19,17 +11,15 @@ interface session {
         /// Absolute path to `track.yaml` when a project is in scope.
         manifest-path: option<string>,
         /// Resolved `track-cli` component version for this run.
-        tool-version: string,
+        cli-version: string,
         /// Optional content digest of the loaded component artifact.
-        tool-digest: option<string>,
+        cli-digest: option<string>,
         /// `track-host` semver.
         host-version: string,
-        /// Parsed global flags.
-        parsed-flags: cli-flags,
-        /// `--project PATH` override, if set.
-        project-override: option<string>,
-        /// `TRACK_TOOL_VERSION` or `--tool-version` override, if set.
-        tool-version-override: option<string>,
+        /// Log level for the guest (`--log-level` / `TRACK_LOG_LEVEL`).
+        log-level: string,
+        /// Usage text for host-only bootstrap flags (shown before guest command help).
+        host-options-help: string,
     }
 
     /// Immutable invocation context for the component lifetime.

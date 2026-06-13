@@ -7,9 +7,16 @@ use std::path::{Path, PathBuf};
 use track_host_wit::track::host::registry::{self, Error, ErrorCode};
 
 pub fn resolve(version: &str, expected_digest: Option<&str>) -> Result<registry::Artifact, Error> {
+    let source = locate_source_artifact()?;
     let cache_file = component_cache_path(version);
-    if !cache_file.is_file() {
-        let source = locate_source_artifact()?;
+    let source_digest = file_digest(&source)?;
+
+    let refresh_cache = !cache_file.is_file()
+        || file_digest(&cache_file)
+            .map(|digest| digest != source_digest)
+            .unwrap_or(true);
+
+    if refresh_cache {
         fs::create_dir_all(cache_file.parent().expect("cache parent")).map_err(io_error)?;
         fs::copy(&source, &cache_file).map_err(io_error)?;
     }
@@ -35,6 +42,17 @@ pub fn runtime_component_path(
     version: &str,
     expected_digest: Option<&str>,
 ) -> Result<PathBuf, Error> {
+    if let Ok(path) = env::var("TRACK_CLI_COMPONENT") {
+        let path = PathBuf::from(path);
+        if path.is_file() {
+            return Ok(path);
+        }
+        return Err(Error {
+            code: ErrorCode::NotFound,
+            message: format!("TRACK_CLI_COMPONENT not found: {}", path.display()),
+        });
+    }
+
     resolve(version, expected_digest)?;
     Ok(component_cache_path(version))
 }

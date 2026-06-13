@@ -1,7 +1,6 @@
 use crate::bootstrap::Bootstrap;
-use crate::{lock_store, paths, policy, queue_store, state_store, user_config};
+use crate::{lock_store, paths, preopen, queue_store, state_store, user_config};
 use lock_store::HeldLock;
-use policy::CommandPolicy;
 use track_host_wit::track::host::{
     auth, capabilities, locations, offline_queue, project_lock, project_state, registry, session,
     user_config as user_config_wit,
@@ -13,18 +12,18 @@ pub struct HostState {
     pub bootstrap: Bootstrap,
     pub wasi_ctx: WasiCtx,
     pub resource_table: ResourceTable,
-    policy: CommandPolicy,
+    areas: Vec<locations::Area>,
     project_lock: Option<HeldLock>,
 }
 
 impl HostState {
     pub fn new(bootstrap: Bootstrap, wasi_ctx: WasiCtx) -> Self {
-        let policy = policy::from_argv(&bootstrap.argv, bootstrap.project_root.as_deref());
+        let areas = preopen::preopened_areas(bootstrap.project_root.as_deref());
         Self {
             bootstrap,
             wasi_ctx,
             resource_table: ResourceTable::new(),
-            policy,
+            areas,
             project_lock: None,
         }
     }
@@ -34,7 +33,7 @@ impl HostState {
     }
 
     fn area_allowed(&self, area: locations::Area) -> bool {
-        self.policy.areas.contains(&area)
+        self.areas.contains(&area)
     }
 }
 
@@ -50,7 +49,7 @@ impl WasiView for HostState {
 impl session::Host for HostState {
     fn get(&mut self) -> session::Invocation {
         session::Invocation {
-            argv: self.bootstrap.argv.clone(),
+            argv: self.bootstrap.guest_argv.clone(),
             cwd: self.bootstrap.cwd.display().to_string(),
             project_root: self
                 .bootstrap
@@ -62,25 +61,18 @@ impl session::Host for HostState {
                 .manifest_path
                 .as_ref()
                 .map(|p| p.display().to_string()),
-            tool_version: self.bootstrap.tool_version.clone(),
-            tool_digest: self.bootstrap.tool_digest.clone(),
+            cli_version: self.bootstrap.cli_version.clone(),
+            cli_digest: self.bootstrap.cli_digest.clone(),
             host_version: env!("CARGO_PKG_VERSION").to_string(),
-            parsed_flags: session::CliFlags {
-                json_output: self.bootstrap.parsed.flags.json_output,
-                dry_run: self.bootstrap.parsed.flags.dry_run,
-                force: self.bootstrap.parsed.flags.force,
-                verbose: self.bootstrap.parsed.flags.verbose,
-                debug: self.bootstrap.parsed.flags.debug,
-            },
-            project_override: self.bootstrap.parsed.overrides.project.clone(),
-            tool_version_override: self.bootstrap.parsed.overrides.tool_version.clone(),
+            log_level: self.bootstrap.log_level.clone(),
+            host_options_help: self.bootstrap.host_options_help.clone(),
         }
     }
 }
 
 impl capabilities::Host for HostState {
     fn get(&mut self) -> capabilities::CapabilityFlags {
-        self.policy.capabilities.clone()
+        preopen::capability_flags()
     }
 }
 
@@ -89,7 +81,7 @@ impl locations::Host for HostState {
         if !self.area_allowed(area) {
             return Err(locations::Error {
                 code: locations::ErrorCode::AreaUnavailable,
-                message: format!("area {area:?} is not available for this command"),
+                message: format!("area {area:?} is not available for this invocation"),
             });
         }
         let native_path = paths::area_path(self.project_root(), area)?;
@@ -105,7 +97,7 @@ impl locations::Host for HostState {
     }
 
     fn list_available(&mut self) -> Vec<locations::Area> {
-        self.policy.areas.clone()
+        self.areas.clone()
     }
 }
 

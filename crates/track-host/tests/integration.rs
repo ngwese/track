@@ -6,8 +6,13 @@ fn track_bin() -> PathBuf {
 }
 
 fn wasm_component() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("../../target/wasm32-wasip2/debug/track_cli.wasm")
+    let track_exe = track_bin();
+    track_exe
+        .parent()
+        .expect("track exe parent")
+        .parent()
+        .expect("target directory")
+        .join("wasm32-wasip2/debug/track_cli.wasm")
 }
 
 fn fixture_kitchen() -> PathBuf {
@@ -17,6 +22,7 @@ fn fixture_kitchen() -> PathBuf {
 fn run_track(args: &[&str]) -> std::process::Output {
     let mut command = Command::new(track_bin());
     command.env("TRACK_CLI_COMPONENT", wasm_component());
+    command.env("TRACK_LOG_LEVEL", "warn");
     command.args(args);
     command.output().expect("spawn track")
 }
@@ -58,9 +64,43 @@ fn schema_validate_in_fixture_project() {
 }
 
 #[test]
-fn push_without_project_fails_before_guest() {
+fn help_lists_host_and_guest_options() {
+    let output = run_track(&["help"]);
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("Host options:"));
+    assert!(stdout.contains("--project"));
+    assert!(stdout.contains("Guest options:"));
+}
+
+#[test]
+fn track_project_env_overrides_discovery() {
+    let fixture = fixture_kitchen();
+    let expected = std::fs::canonicalize(&fixture).expect("canonicalize fixture");
+    let output = Command::new(track_bin())
+        .env("TRACK_CLI_COMPONENT", wasm_component())
+        .env("TRACK_LOG_LEVEL", "warn")
+        .env("TRACK_PROJECT", &expected)
+        .args(["interfaces"])
+        .output()
+        .expect("spawn track");
+    assert!(
+        output.status.success(),
+        "stderr: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains(&format!("project-root: {}", expected.display())));
+}
+
+#[test]
+fn push_without_project_reaches_guest() {
     let output = run_track(&["push"]);
     assert!(!output.status.success());
-    let stderr = String::from_utf8_lossy(&output.stderr);
-    assert!(stderr.contains("requires a project"));
+    let combined = format!(
+        "{}{}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
+    assert!(!combined.contains("requires a project"));
 }

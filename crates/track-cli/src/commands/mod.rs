@@ -9,16 +9,33 @@ use crate::track::host::{
 };
 use track_types::CommandResult;
 
-pub fn help(json: bool) -> Result<(), ()> {
-    let text = "track — CLI-first issue tracker\n\nCommands:\n  version\n  help\n  auth list|login\n  schema validate\n  interfaces (debug)";
+const GUEST_COMMANDS_HELP: &str = "Commands:
+  version
+  help
+  auth list|login
+  schema validate
+  interfaces (debug)
+
+Guest options:
+  --json       Emit JSON output
+  --dry-run    Plan without writing
+  --force      Skip confirmation prompts
+  --verbose    Verbose output
+  --debug      Debug output";
+
+pub fn help(invocation: &session::Invocation, json: bool) -> Result<(), ()> {
+    let text = format!(
+        "track — CLI-first issue tracker\n\n{}\n\n{}",
+        invocation.host_options_help, GUEST_COMMANDS_HELP
+    );
     if json {
         output::print_json(&CommandResult {
             ok: true,
             command: "help".into(),
-            message: Some(text.into()),
+            message: Some(text),
         });
     } else {
-        output::print_text(text);
+        output::print_text(&text);
     }
     Ok(())
 }
@@ -41,8 +58,9 @@ pub fn interfaces() -> Result<(), ()> {
     let caps = capabilities::get();
     let areas = locations::list_available();
 
-    output::print_text(&format!("track-cli {} (stub)", invocation.tool_version));
+    output::print_text(&format!("track-cli {} (stub)", invocation.cli_version));
     output::print_text(&format!("argv: {:?}", invocation.argv));
+    output::print_text(&format!("log-level: {}", invocation.log_level));
     if let Some(root) = &invocation.project_root {
         output::print_text(&format!("project-root: {root}"));
     }
@@ -56,6 +74,6 @@ pub fn interfaces() -> Result<(), ()> {
     let _ = user_config::read();
     let _ = project_state::read();
     let _ = offline_queue::list_queued(None);
-    let _ = registry::resolve(&invocation.tool_version, None);
+    let _ = registry::resolve(&invocation.cli_version, None);
     Ok(())
 }

@@ -6,43 +6,46 @@ Native launcher for Track. Produces the `track` executable on `PATH`.
 
 `track-host` is the thin native **host** in [ADR 0001](../../docs/adr/0001-implementation-runtime.md). It is the only code with direct OS access. Before any CLI logic runs, it:
 
-1. Parses the invocation and discovers the project root (`track.yaml` walk per [SRD §3.2.1](../../docs/SRD.md))
-2. Resolves the `track-cli` WebAssembly component path
-3. Configures Wasmtime with WASI Preview 2 and `track:host/*` imports
-4. Instantiates the guest and delegates to `wasi:cli/run`
+1. Parses host bootstrap flags with **clap** (`--project`, `--log-level`)
+2. Discovers the project root (`track.yaml` walk per [SRD §3.2.1](../../docs/SRD.md))
+3. Resolves the `track-cli` component from `track-version.yaml` or `TRACK_CLI_VERSION`
+4. Preopens user and project storage areas for WASI
+5. Instantiates the guest with a clean argv and delegates to `wasi:cli/run`
 
-The bulk of Track behavior lives in **`track-cli`** (the guest component), versioned per project.
+Command routing, project manifest parsing, and guest flags (`--json`, etc.) live entirely in **`track-cli`**.
+
+## Host bootstrap flags
+
+| Flag / env | Purpose |
+|------------|---------|
+| `--project PATH` / `TRACK_PROJECT` | Override project-root discovery |
+| `--log-level LEVEL` / `TRACK_LOG_LEVEL` | Log level for host and guest (default: `info`) |
+| `TRACK_CLI_VERSION` | Override CLI component version (else `track-version.yaml` beside `track.yaml`) |
+| `TRACK_CLI_COMPONENT` | Dev override: load this `track_cli.wasm` directly |
+
+Host flags are stripped from argv before the guest runs. See `track help` for the host-options section in usage text.
 
 ## Modules
 
 | Module | Responsibility |
 |--------|----------------|
-| `bootstrap.rs` | argv, `--project`, project-root discovery, component path resolution (`TRACK_CLI_COMPONENT` or `target/wasm32-wasip2/debug/track_cli.wasm`) |
+| `host_cli.rs` | clap parsing; strip host flags; build guest argv |
+| `bootstrap.rs` | Project discovery, CLI version resolution, component path |
+| `version_config.rs` | Read `track-version.yaml` (host-only pin file) |
+| `preopen.rs` | Storage areas and capability flags from project presence |
+| `preopens.rs` | WASI directory preopens + logging |
+| `registry_store.rs` | Component cache and `TRACK_CLI_COMPONENT` override |
 | `host_impl.rs` | WIT `Host` trait implementations on `HostState` |
-| `user_config.rs` | `~/.config/track/config.json` read/write/validate |
-| `policy.rs` | Per-command capabilities and area visibility (ADR 0002 matrix) |
-| `lock_store.rs` | Advisory `.track/state.lock` via `fs2` |
-| `state_store.rs` | `.track/state.json` atomic read/write |
-| `queue_store.rs` | Hub mutation queue under user-state |
-| `paths.rs` | Storage area → native path mapping |
-| `main.rs` | Wasmtime engine, linker setup, WASI context, guest instantiation |
-
-## Dependencies
-
-- **`track-host-wit`** — generated Wasmtime bindings and `CliGuest` linker API
-- **Wasmtime 45** + **wasmtime-wasi** — component runtime and WASI p2
+| `logging.rs` | `env_logger` initialization |
 
 ## Build and run
 
 ```bash
-# Build guest first (or set TRACK_CLI_COMPONENT)
 cargo build -p track-cli --target wasm32-wasip2
-
-cargo run -p track-host
-cargo run -p track-host -- interfaces
+TRACK_CLI_COMPONENT=target/wasm32-wasip2/debug/track_cli.wasm cargo run -p track-host -- version
 ```
 
 ## See also
 
 - [ADR 0002 — Host–guest WIT interfaces](../../docs/adr/0002-host-guest-wit-interfaces.md)
-- [Implementation plan](../../docs/plans/adr-0001-implementation-plan.md)
+- [Development workflow](../../docs/development.md)
