@@ -1,6 +1,9 @@
 # Agent instructions
 
-This repository is **Track** — a CLI-first, local-first issue tracker with a sync hub. Read [docs/PRD.md](docs/PRD.md) for product intent and [docs/SRD.md](docs/SRD.md) for technical design before making structural changes.
+This repository is **Track** — a CLI-first, local-first issue tracker with a
+sync hub. Read [docs/PRD.md](docs/PRD.md) for product intent and
+[docs/SRD.md](docs/SRD.md) for technical design before making structural
+changes.
 
 ## Markdown
 
@@ -20,13 +23,49 @@ file must pass all of the following checks:
 
 Fix violations in the same change set; do not leave follow-up cleanup for later.
 
+## Rust / Cargo
+
+This repository is a
+[Cargo workspace](https://doc.rust-lang.org/cargo/reference/workspaces.html).
+Individual crates live under `crates/` and are listed in the root
+`Cargo.toml` `members` array.
+
+Before any change to files under `crates/` can be considered complete, the
+file must pass all of the following checks. Run from the repo root:
+
+1. **Build** — the workspace compiles:
+
+   ```bash
+   cargo build --workspace
+   ```
+
+2. **Format** — code is formatted with rustfmt (no diff after formatting):
+
+   ```bash
+   cargo fmt --all
+   ```
+
+3. **Lint** — no Clippy warnings or errors:
+
+   ```bash
+   cargo clippy --workspace --all-targets -- -D warnings
+   ```
+
+4. **Tests** — all defined tests pass:
+
+   ```bash
+   cargo test --workspace
+   ```
+
+Fix violations in the same change set; do not leave follow-up cleanup for later.
+
 ## Commits
 
 Use **[Conventional Commits](https://www.conventionalcommits.org/)** for every commit.
 
 ### Format
 
-```
+```text
 <type>[optional scope]: <description>
 
 [optional body]
@@ -34,14 +73,17 @@ Use **[Conventional Commits](https://www.conventionalcommits.org/)** for every c
 [optional footer(s)]
 ```
 
-- **Description:** imperative mood, lowercase, no trailing period (e.g. `add claim API`, not `Added claim API.`).
-- **Scope:** optional noun in parentheses after the type (e.g. `feat(hub):`, `docs(srd):`).
-- **Breaking changes:** add `!` after type/scope (`feat(cli)!:`) or a `BREAKING CHANGE:` footer.
+- **Description:** imperative mood, lowercase, no trailing period (e.g.
+  `add claim API`, not `Added claim API.`).
+- **Scope:** optional noun in parentheses after the type (e.g. `feat(hub):`,
+  `docs(srd):`).
+- **Breaking changes:** add `!` after type/scope (`feat(cli)!:`) or a
+  `BREAKING CHANGE:` footer.
 
 ### Types
 
 | Type | Use for |
-|------|---------|
+| --- | --- |
 | `feat` | New user-facing capability |
 | `fix` | Bug fix |
 | `docs` | Documentation only |
@@ -55,11 +97,12 @@ Prefer `feat` / `fix` / `docs` / `chore` for most work in this repo.
 
 ### Scopes (suggested)
 
-`cli`, `hub`, `infra`, `docs`, `srd`, `prd`, `schema` — use when it clarifies the diff; omit when the change spans multiple areas.
+`cli`, `hub`, `infra`, `docs`, `srd`, `prd`, `schema` — use when it clarifies
+the diff; omit when the change spans multiple areas.
 
 ### Examples
 
-```
+```text
 docs(srd): clarify operational telemetry vs comments
 
 feat(hub): append progress entries to operational log
