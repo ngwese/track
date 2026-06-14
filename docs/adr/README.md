@@ -8,7 +8,7 @@ ADRs use a numbered, immutable sequence. Superseded decisions remain in place; a
 
 | Field | Meaning |
 |-------|---------|
-| **Status** | `Proposed` → `Accepted` → (`Deprecated` \| `Superseded`) |
+| **Status** | `Proposed` → `Accepted` → (`Deferred` \| `Deprecated` \| `Superseded`) |
 | **Date** | When the decision was recorded |
 | **Deciders** | Who approved (or is reviewing) the decision |
 
@@ -16,5 +16,5 @@ ADRs use a numbered, immutable sequence. Superseded decisions remain in place; a
 
 | ADR | Title | Status |
 |-----|-------|--------|
-| [0001](0001-implementation-runtime.md) | Implementation runtime (WASIp2 + WebAssembly components) | Proposed |
-| [0002](0002-host-guest-wit-interfaces.md) | Host–guest WIT interfaces and on-disk storage scopes | Proposed |
+| [0001](0001-implementation-runtime.md) | Implementation runtime (WASIp2 + WebAssembly components) | Deferred |
+| [0002](0002-host-guest-wit-interfaces.md) | Host–guest WIT interfaces and on-disk storage scopes | Deferred |

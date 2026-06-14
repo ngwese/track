@@ -1,9 +1,19 @@
 # ADR 0001: Implementation runtime (WASIp2 + WebAssembly components)
 
-> **Status:** Proposed — CLI logic runs as a `wasm32-wasip2` WebAssembly component under a thin native host.
+> **Status:** Deferred — revisit when per-project or per-type configurable CLI logic is a clear requirement.
 
 **Date:** 2026-06-07  
 **Deciders:** Track maintainers (draft for review)
+
+## Deferral
+
+A proof of concept on branch `feat/adr-0001-implementation-plan` demonstrated that the WASIp2 host/guest split is technically viable, but the costs outweigh the benefits for the current MVP:
+
+- **Startup overhead** — pushing most or all CLI functionality into a WebAssembly guest added significant invocation latency compared with a native binary.
+- **Split argv surface** — some flags were handled by the native host while others were handled by the guest, which duplicated parsing logic and produced a confusing CLI structure.
+- **Bootstrap complexity** — the host had to parse project metadata (including tool version overrides) before loading the guest, coupling version selection to project layout earlier than necessary.
+
+**Conclusion:** Focus on core Track functionality in a native CLI first. Revisit WebAssembly when there is a clearer need to support configurable logic per project or project type.
 
 ## Context
 

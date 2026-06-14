@@ -1,9 +1,15 @@
 # ADR 0002: Host–guest WIT interfaces and on-disk storage scopes
 
-> **Status:** Proposed — defines WIT contracts between `track-host` and `track-cli`, and maps them to user- and project-scoped config, state, and cache locations.
+> **Status:** Deferred — depends on [ADR 0001](0001-implementation-runtime.md); not pursued while the runtime split is deferred.
 
 **Date:** 2026-06-07  
 **Deciders:** Track maintainers (draft for review)
+
+## Deferral
+
+This ADR specifies WIT contracts and storage scopes for the host/guest split described in ADR 0001. That split is [deferred](0001-implementation-runtime.md#deferral) after the `feat/adr-0001-implementation-plan` proof of concept surfaced startup overhead, duplicated argv handling, and brittle bootstrap logic around project-scoped tool version resolution.
+
+The on-disk storage model (user and project config/state/cache areas) remains aligned with the [SRD](../SRD.md). A native CLI can adopt those paths without the WIT layer defined here.
 
 ## Context
 
