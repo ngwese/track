@@ -1,0 +1,17 @@
+{
+  "event_uuid": "01J0G7YF1P8Q4CN0V0VJ8G8F13",
+  "workspace_uuid": "01JHM8X9K2Q4W0000000000000",
+  "project_uuid": "01JHM8X9K2Q4P0000000000000",
+  "node_uuid": "01JHM8X9K2Q4N1000000000000",
+  "actor": "user:greg",
+  "stream_id": "item:01JHM8X9K2Q4Z0000000000000",
+  "stream_seq": 5,
+  "hlc": "2026-06-14T17:36:02.101Z/01JHM8X9K2Q4N1000000000000/0005",
+  "schema_version": "17",
+  "kind": "item.set-field",
+  "payload": {
+    "entity_uuid": "01JHM8X9K2Q4Z0000000000000",
+    "field": "priority",
+    "value": "urgent"
+  }
+}

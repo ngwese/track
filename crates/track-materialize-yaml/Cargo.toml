@@ -1,0 +1,24 @@
+[package]
+name = "track-materialize-yaml"
+version = "0.1.0"
+description = "Track YAML materialization from reduced entity state"
+publish = false
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+indexmap.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+serde_yaml.workspace = true
+sha2.workspace = true
+thiserror.workspace = true
+track-entity.workspace = true
+track-id.workspace = true
+track-store.workspace = true
+time.workspace = true
+
+[dev-dependencies]
+insta.workspace = true
+tempfile = "3"

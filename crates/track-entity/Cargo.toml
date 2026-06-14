@@ -1,0 +1,19 @@
+[package]
+name = "track-entity"
+version = "0.1.0"
+description = "Track domain entity and schema materialized state types"
+publish = false
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+indexmap.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+strum.workspace = true
+time.workspace = true
+track-id.workspace = true
+
+[dev-dependencies]
+serde_json.workspace = true

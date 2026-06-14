@@ -448,7 +448,7 @@ src/
 ├── quarantine_store.rs
 ├── conflict_store.rs
 ├── snapshot_store.rs
-├── yaml_projector.rs           # YamlProjector trait (read side for YAML crate)
+├── file_projector.rs           # FileProjector trait (read side for file materializers)
 └── memory/
     ├── mod.rs
     ├── memory_log_store.rs     # one impl file per trait
@@ -490,9 +490,9 @@ pub trait SchemaStore {
         -> Result<Option<CanonicalSchema>, StoreError>;
 }
 
-/// Lazy YAML export surface — implemented by `track-materialize-yaml`, not SQLite.
-pub trait YamlProjector {
-    fn project_item(&self, entity_uuid: &TrackUlid) -> Result<YamlIssueBundle, ProjectError>;
+/// Lazy file export surface — implemented by format-specific materializer crates.
+pub trait FileProjector {
+    fn project_item(&self, entity_uuid: &TrackUlid) -> Result<FileIssueBundle, ProjectError>;
     fn project_schema(&self, project_root: &Path) -> Result<(), ProjectError>;
 }
 ```
@@ -667,7 +667,7 @@ src/
 │   ├── effort_projector.rs
 │   ├── component_projector.rs
 │   └── state_json_projector.rs # .track/state.json
-└── default_projector.rs        # YamlProjector impl composing projectors/
+└── default_projector.rs        # MaterializeWriter impl composing projectors/
 ```
 
 Golden tests use **insta** (`insta::assert_yaml_snapshot!`) against fixtures
@@ -718,7 +718,7 @@ slice:
 
 | Consumer | Uses |
 | --- | --- |
-| `track-cli` | `ReductionEngine`, `TrackSqliteStore`, `YamlProjector` |
+| `track-cli` | `ReductionEngine`, `TrackSqliteStore`, file materializer |
 | Hub client (ADR 0004) | `EventEnvelope`, `LogStore` append/fetch |
 | `track push` diff | `MaterializeReader` trait (inverse of YAML writer; future) |
 

@@ -1,0 +1,22 @@
+{
+  "event_uuid": "01J0G7YB4YBXJX1V9M1V3Q6Y11",
+  "workspace_uuid": "01JHM8X9K2Q4W0000000000000",
+  "project_uuid": "01JHM8X9K2Q4P0000000000000",
+  "node_uuid": "01JHM8X9K2Q4N0000000000000",
+  "actor": "user:greg",
+  "stream_id": "schema",
+  "stream_seq": 7,
+  "hlc": "2026-06-14T17:36:10.050Z/01JHM8X9K2Q4N0000000000000/0007",
+  "schema_version": "17",
+  "kind": "schema.add-field",
+  "payload": {
+    "entity_type": "issue",
+    "field": "priority",
+    "definition": {
+      "type": "enum",
+      "enum_name": "priority",
+      "required": false,
+      "default": "medium"
+    }
+  }
+}

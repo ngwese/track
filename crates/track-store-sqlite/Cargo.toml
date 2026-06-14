@@ -1,0 +1,23 @@
+[package]
+name = "track-store-sqlite"
+version = "0.1.0"
+description = "Track SQLite store implementing ADR 0003 persistence"
+publish = false
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+indexmap.workspace = true
+refinery.workspace = true
+rusqlite.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+track-entity.workspace = true
+track-id.workspace = true
+track-replication.workspace = true
+track-store.workspace = true
+
+[dev-dependencies]
+tempfile = "3"

@@ -1,0 +1,21 @@
+{
+  "event_uuid": "01J0G7YD7Q2Y8MGM7J6C2DM912",
+  "workspace_uuid": "01JHM8X9K2Q4W0000000000000",
+  "project_uuid": "01JHM8X9K2Q4P0000000000000",
+  "node_uuid": "01JHM8X9K2Q4N0000000000000",
+  "actor": "agent:cursor",
+  "stream_id": "item:01JHM8X9K2Q4Z0000000000000",
+  "stream_seq": 42,
+  "hlc": "2026-06-14T17:35:21.184Z/01JHM8X9K2Q4N0000000000000/0042",
+  "schema_version": "17",
+  "kind": "item.create",
+  "payload": {
+    "entity_uuid": "01JHM8X9K2Q4Z0000000000000",
+    "entity_kind": "issue",
+    "item_type": "bug",
+    "fields": {
+      "title": "Sync fails when schema changes offline",
+      "priority": "high"
+    }
+  }
+}

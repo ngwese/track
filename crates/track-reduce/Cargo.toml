@@ -1,0 +1,25 @@
+[package]
+name = "track-reduce"
+version = "0.1.0"
+description = "Track event reducers and merge primitives"
+publish = false
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+indexmap = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+time = { workspace = true }
+track-entity = { workspace = true }
+track-id = { workspace = true }
+track-replication = { workspace = true }
+track-store = { workspace = true }
+
+[dev-dependencies]
+serde_json = { workspace = true }
+tempfile = "3"
+track-materialize-yaml = { workspace = true }
+track-store = { workspace = true }

@@ -1,0 +1,11 @@
+---
+source: crates/track-materialize-yaml/src/projectors/issue_projector.rs
+expression: yaml
+---
+entity_uuid: 01JHM8X9K2Q4Z0000000000000
+number: 42
+identifier: KITCHEN-42
+type: Task
+state: Todo
+title: Order demo cabinets
+priority: high

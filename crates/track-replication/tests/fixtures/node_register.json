@@ -1,0 +1,15 @@
+{
+  "event_uuid": "01J0G7Y1A4VQ0PV3A0MZ7Q0R01",
+  "workspace_uuid": "01JHM8X9K2Q4W0000000000000",
+  "project_uuid": "00000000000000000000000000",
+  "node_uuid": "01JHM8X9K2Q4N0000000000000",
+  "actor": "user:greg",
+  "stream_id": "node:01JHM8X9K2Q4N0000000000000",
+  "stream_seq": 1,
+  "hlc": "2026-06-14T17:30:00.000Z/01JHM8X9K2Q4N0000000000000/0001",
+  "schema_version": "0",
+  "kind": "node.register",
+  "payload": {
+    "node_uuid": "01JHM8X9K2Q4N0000000000000"
+  }
+}
