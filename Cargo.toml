@@ -8,6 +8,10 @@ members = [
     "crates/track-store",
     "crates/track-store-sqlite",
     "crates/track-materialize-yaml",
+    "crates/track-hub-protocol",
+    "crates/track-hub",
+    "crates/track-hub-memory",
+    "crates/track-sync",
 ]
 
 [workspace.package]
@@ -23,6 +27,10 @@ track-reduce = { path = "crates/track-reduce" }
 track-store = { path = "crates/track-store" }
 track-store-sqlite = { path = "crates/track-store-sqlite" }
 track-materialize-yaml = { path = "crates/track-materialize-yaml" }
+track-hub-protocol = { path = "crates/track-hub-protocol" }
+track-hub = { path = "crates/track-hub" }
+track-hub-memory = { path = "crates/track-hub-memory" }
+track-sync = { path = "crates/track-sync" }
 
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
@@ -37,3 +45,15 @@ rusqlite = { version = "0.32", features = ["bundled"] }
 refinery = { version = "0.8", features = ["rusqlite"] }
 sha2 = "0.10"
 insta = { version = "1", features = ["yaml"] }
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "net", "io-util", "sync"] }
+async-trait = "0.1"
+axum = { version = "0.8", features = ["macros"] }
+hyper = "1"
+tower = "0.5"
+tower-http = { version = "0.6", features = ["limit", "timeout"] }
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "stream", "json"] }
+bytes = "1"
+futures = "0.3"
+url = "2"
+urlencoding = "2"
+base64 = "0.22"

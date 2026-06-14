@@ -1,0 +1,20 @@
+[package]
+name = "track-hub"
+version = "0.1.0"
+description = "Hub service logic and storage traits (ADR 0004)"
+publish = false
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+async-trait = { workspace = true }
+futures = { workspace = true }
+indexmap = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true }
+track-hub-protocol = { workspace = true }
+track-id = { workspace = true }
+track-replication = { workspace = true }

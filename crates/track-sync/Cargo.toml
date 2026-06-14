@@ -1,0 +1,32 @@
+[package]
+name = "track-sync"
+version = "0.1.0"
+description = "Async hub sync client orchestration (ADR 0004)"
+publish = false
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+async-trait = { workspace = true }
+bytes = { workspace = true }
+futures = { workspace = true }
+indexmap = { workspace = true }
+reqwest = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true }
+track-hub = { workspace = true }
+track-hub-protocol = { workspace = true }
+track-id = { workspace = true }
+track-reduce = { workspace = true }
+track-replication = { workspace = true }
+track-store = { workspace = true }
+url = { workspace = true }
+urlencoding = { workspace = true }
+
+[dev-dependencies]
+track-hub-memory = { workspace = true }
+track-replication = { workspace = true }
+tokio = { workspace = true }
