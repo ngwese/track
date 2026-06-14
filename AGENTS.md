@@ -2,6 +2,24 @@
 
 This repository is **Track** — a CLI-first, local-first issue tracker with a sync hub. Read [docs/PRD.md](docs/PRD.md) for product intent and [docs/SRD.md](docs/SRD.md) for technical design before making structural changes.
 
+## Markdown
+
+Before any change to a Markdown document (`.md`) can be considered complete, the
+file must pass all of the following checks:
+
+1. **Linting** — no markdownlint errors. Run from the repo root:
+
+   ```bash
+   npx markdownlint-cli2 "**/*.md"
+   ```
+
+   Per-directory configs (for example `docs/.markdownlint-cli2.jsonc`) apply
+   where present.
+
+2. **Trailing whitespace** — no trailing spaces or tabs at the end of a line.
+
+Fix violations in the same change set; do not leave follow-up cleanup for later.
+
 ## Commits
 
 Use **[Conventional Commits](https://www.conventionalcommits.org/)** for every commit.
