@@ -16,8 +16,7 @@ file must pass all of the following checks:
    npx markdownlint-cli2 "**/*.md"
    ```
 
-   Per-directory configs (for example `docs/.markdownlint-cli2.jsonc`) apply
-   where present.
+   Rules are defined in `.markdownlint-cli2.jsonc` at the repository root.
 
 2. **Trailing whitespace** — no trailing spaces or tabs at the end of a line.
 
