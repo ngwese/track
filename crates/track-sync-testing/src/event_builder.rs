@@ -198,6 +198,137 @@ impl EventBuilder {
         )
     }
 
+    /// `item.clear-field` on a scalar column.
+    pub fn item_clear_field(&mut self, field: &str) -> EventEnvelope {
+        self.item_stream_seq += 1;
+        self.envelope(
+            StreamId::Item(self.ids.entity),
+            self.item_stream_seq,
+            EventKind::ItemClearField,
+            serde_json::json!({
+                "entity_uuid": self.ids.entity.to_string(),
+                "field": field,
+            }),
+        )
+    }
+
+    /// `item.unassign-user`.
+    pub fn item_unassign_user(&mut self, user: &str) -> EventEnvelope {
+        self.item_stream_seq += 1;
+        self.envelope(
+            StreamId::Item(self.ids.entity),
+            self.item_stream_seq,
+            EventKind::ItemUnassignUser,
+            serde_json::json!({
+                "entity_uuid": self.ids.entity.to_string(),
+                "user": user,
+            }),
+        )
+    }
+
+    /// `comment.edit`.
+    pub fn comment_edit(&mut self, comment_uuid: TrackUlid, body: &str) -> EventEnvelope {
+        self.item_stream_seq += 1;
+        self.envelope(
+            StreamId::Item(self.ids.entity),
+            self.item_stream_seq,
+            EventKind::CommentEdit,
+            serde_json::json!({
+                "comment_uuid": comment_uuid.to_string(),
+                "entity_uuid": self.ids.entity.to_string(),
+                "body_markdown": body,
+            }),
+        )
+    }
+
+    /// `comment.delete`.
+    pub fn comment_delete(&mut self, comment_uuid: TrackUlid) -> EventEnvelope {
+        self.item_stream_seq += 1;
+        self.envelope(
+            StreamId::Item(self.ids.entity),
+            self.item_stream_seq,
+            EventKind::CommentDelete,
+            serde_json::json!({
+                "comment_uuid": comment_uuid.to_string(),
+                "entity_uuid": self.ids.entity.to_string(),
+            }),
+        )
+    }
+
+    /// `relation.delete`.
+    pub fn relation_delete(&mut self, relation_uuid: TrackUlid) -> EventEnvelope {
+        self.item_stream_seq += 1;
+        self.envelope(
+            StreamId::Relation(relation_uuid),
+            self.item_stream_seq,
+            EventKind::RelationDelete,
+            serde_json::json!({
+                "relation_uuid": relation_uuid.to_string(),
+                "from_entity_uuid": self.ids.entity.to_string(),
+            }),
+        )
+    }
+
+    /// `relation.set-attr`.
+    pub fn relation_set_attr(
+        &mut self,
+        relation_uuid: TrackUlid,
+        key: &str,
+        value: serde_json::Value,
+    ) -> EventEnvelope {
+        self.item_stream_seq += 1;
+        self.envelope(
+            StreamId::Relation(relation_uuid),
+            self.item_stream_seq,
+            EventKind::RelationSetAttr,
+            serde_json::json!({
+                "relation_uuid": relation_uuid.to_string(),
+                "attrs": { key: value },
+            }),
+        )
+    }
+
+    /// `item.archive`.
+    pub fn item_archive(&mut self) -> EventEnvelope {
+        self.item_stream_seq += 1;
+        self.envelope(
+            StreamId::Item(self.ids.entity),
+            self.item_stream_seq,
+            EventKind::ItemArchive,
+            serde_json::json!({
+                "entity_uuid": self.ids.entity.to_string(),
+            }),
+        )
+    }
+
+    /// `item.restore`.
+    pub fn item_restore(&mut self) -> EventEnvelope {
+        self.item_stream_seq += 1;
+        self.envelope(
+            StreamId::Item(self.ids.entity),
+            self.item_stream_seq,
+            EventKind::ItemRestore,
+            serde_json::json!({
+                "entity_uuid": self.ids.entity.to_string(),
+            }),
+        )
+    }
+
+    /// `execution.claim`.
+    pub fn execution_claim(&mut self, claim_expires_at: &str) -> EventEnvelope {
+        self.item_stream_seq += 1;
+        self.envelope(
+            StreamId::Item(self.ids.entity),
+            self.item_stream_seq,
+            EventKind::ExecutionClaim,
+            serde_json::json!({
+                "entity_uuid": self.ids.entity.to_string(),
+                "executor": "agent:cursor",
+                "claim_expires_at": claim_expires_at,
+            }),
+        )
+    }
+
     /// `relation.create`.
     pub fn relation_create(
         &mut self,

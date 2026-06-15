@@ -1,8 +1,11 @@
 # ADR 0003: Domain model and replication log
 
-> **Status:** Proposed
+> **Status:** Proposed (amended 2026-06-15)\
+> **Amendments:** [Integration test gaps](../plans/replication-sync-gap-log.md)
+> — quarantine drain, reducer coverage, collection-merge invariants
 
-**Date:** 2026-06-14
+**Date:** 2026-06-14\
+**Amended:** 2026-06-15
 **Deciders:** Track maintainers (draft for review)
 
 ## Context
@@ -544,6 +547,27 @@ entity overwrite.
 | relation map | observed-remove map keyed by `relation_uuid` | supports create/delete/recreate semantics |
 | counter | additive reduction / PN-counter | optional for estimates or metrics |
 
+#### Collection-merge invariants
+
+Observed-remove sets (labels, assignees, watchers) and append-only comment
+collections must converge **independently of authoring node and sync order**:
+
+- **`item.add-label` / `item.remove-label`** — union and tombstone semantics
+  apply to events from any node after pull-and-reduce; a label added on node A
+  and a distinct label added on node B must both appear in the reduced state on
+  every replica once both events are durable locally (`HUB_SYNC-031`,
+  `HUB_SYNC-064`).
+- **`item.assign-user` / `item.unassign-user`** — same OR-set rules as labels
+  (`HUB_SYNC-033`, `HUB_SYNC-065`).
+- **`comment.add`** — distinct `comment_uuid` values union; order is replay
+  order, not wall clock (`HUB_SYNC-034`, `HUB_SYNC-066`).
+- **`comment.edit` / `comment.delete`** — supersession and tombstone by
+  `comment_uuid` using `hlc` ordering (`HUB_SYNC-035`).
+
+These invariants hold whether the event was authored locally or received from
+the hub. Merge policy is defined on the **event kind and field shape**, not on
+transport direction.
+
 ### Semantic conflicts
 
 Convergence of bytes is not enough; the resulting state must also be valid with
@@ -793,6 +817,59 @@ following algorithm:
     event and reduced state provenance
 8. mark the event reduced, advance `replica_progress`, and update YAML
     projections when materialized paths are affected
+9. if the event was a schema event that advanced the active schema version,
+    **drain `quarantined_events`** for the affected project: for each quarantined
+    record whose prerequisites are now satisfied, remove it from quarantine and
+    re-enter this algorithm at step 5 (`HUB_SYNC-023`)
+10. after a sync session completes one or more schema updates, repeat step 9
+    until the quarantine queue is stable or no quarantined event becomes
+    applicable
+
+Step 9 is mandatory. Quarantine is a **deferral**, not a terminal outcome.
+Events quarantined because the active schema was absent or behind the writer’s
+`schema_version` must be retried automatically when schema catches up. A replica
+must not require manual intervention or a full log replay to apply deferred work
+events after `schema.init` or other schema migrations arrive.
+
+### Quarantine prerequisites
+
+An event may be quarantined when **either**:
+
+- no active schema exists for the project yet, or
+- the event’s `schema_version` is greater than the schema version currently
+  available to reducers
+
+Quarantine records retain the original `event_uuid`, quarantine reason, and
+writer `schema_version` for deterministic retry.
+
+### Reducer coverage
+
+Every work event kind listed in §Core work event kinds must have a reducer that
+implements the merge policy for its shape. The following kinds are **required for
+v1 convergence** (integration tests `HUB_SYNC-*`):
+
+| Event kind | Merge shape | Reducer responsibility |
+| :-- | :-- | :-- |
+| `item.remove-label` | OR-set remove | tombstone label member (`HUB_SYNC-032`) |
+| `item.assign-user` | OR-set add | add assignee actor (`HUB_SYNC-033`, `HUB_SYNC-065`) |
+| `item.unassign-user` | OR-set remove | tombstone assignee (`HUB_SYNC-033`) |
+| `comment.edit` | comment supersession | replace visible body by `hlc` (`HUB_SYNC-035`) |
+| `comment.delete` | comment tombstone | hide comment in thread view |
+| `relation.delete` | OR-map tombstone | mark relation deleted (`HUB_SYNC-070`) |
+| `relation.set-attr` | OR-map scalar attrs | merge relation metadata |
+
+Until a reducer exists, the sync client may persist and fetch the event, but
+local materialization is incomplete and multi-node convergence tests for that
+kind must fail.
+
+### Conflict emission after multi-node merge
+
+When step 6 validation fails after concurrent events from multiple nodes have
+been merged, the replica must insert a row in `conflicts` and set local state
+`conflicted` while retaining the underlying event (`HUB_SYNC-080`). Validation
+runs after merge, not per-event in isolation, so strict-mode enum or required-
+field violations surfaced only after sync must still produce auditable conflict
+records.
 
 This keeps raw history immutable while making local state recomputable.
 

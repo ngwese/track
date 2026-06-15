@@ -1,7 +1,7 @@
 //! HUB_SYNC group B — clock skew and timezone scenarios.
 
 use track_replication::Hlc;
-use track_test_cluster::{
+use track_sync_testing::{
     SyntheticHlc, TestCluster, TestIds, assert_all_converged, bootstrap_node, bootstrap_project,
     priority_of, pull_and_assert_converged,
 };

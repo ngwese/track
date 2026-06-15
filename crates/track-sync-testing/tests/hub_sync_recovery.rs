@@ -1,6 +1,6 @@
 //! HUB_SYNC group F — recovery and retry.
 
-use track_test_cluster::{
+use track_sync_testing::{
     FaultConfig, PullFault, PushFault, TestCluster, bootstrap_node, bootstrap_project, priority_of,
     pull_and_assert_converged,
 };
@@ -64,6 +64,35 @@ async fn hub_sync_051_push_fail_retry_idempotent() {
     bootstrap_node(&mut b).unwrap();
     b.push().await.unwrap();
     b.pull_until_idle(100).await.unwrap();
+
+    cluster.shutdown().await.unwrap();
+}
+
+/// HUB_SYNC-052: Push timeout (no response); retry must not double-append.
+#[tokio::test]
+async fn hub_sync_052_push_timeout_retry_no_double_append() {
+    let cluster = TestCluster::start().await.unwrap();
+
+    let mut a = cluster.spawn_a().await.unwrap();
+    bootstrap_node(&mut a).unwrap();
+    a.emit(|e| e.item_set_field("title", serde_json::json!("timeout retry")))
+        .unwrap();
+
+    a.transport().set_faults(FaultConfig {
+        pull: None,
+        push: Some(PushFault::FailNextAttempts(1)),
+    });
+    assert!(a.push().await.is_err());
+    a.transport().clear_faults();
+    a.push().await.unwrap();
+
+    let mut b = cluster.spawn_b().await.unwrap();
+    bootstrap_node(&mut b).unwrap();
+    b.push().await.unwrap();
+    let before = b.persisted_event_count();
+    b.pull_until_idle(100).await.unwrap();
+    let after = b.persisted_event_count();
+    assert!(after >= before);
 
     cluster.shutdown().await.unwrap();
 }

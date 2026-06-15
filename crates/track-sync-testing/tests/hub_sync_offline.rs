@@ -1,7 +1,7 @@
 //! HUB_SYNC group C — remote updates between sync (offline / lagging replica).
 
 use track_id::TrackUlid;
-use track_test_cluster::{
+use track_sync_testing::{
     TestCluster, assert_comments_match, bootstrap_node, bootstrap_project, emit_item, emit_schema,
     field_string, priority_of, pull_and_assert_converged,
 };

@@ -16,12 +16,14 @@ use track_sync::{HttpTransport, HubTransport, SyncError};
 pub enum PullFault {
     /// Abort the NDJSON stream after delivering `n` records.
     InterruptAfter(usize),
+    /// Re-deliver the first `n` records once before continuing (duplicate page).
+    DuplicateFirstRecords(usize),
 }
 
 /// Push-side fault configuration.
 #[derive(Clone, Debug)]
 pub enum PushFault {
-    /// Fail the next `n` push attempts with a transport error.
+    /// Fail the next `n` push attempts with a transport error (timeout / no response).
     FailNextAttempts(usize),
 }
 
@@ -107,6 +109,24 @@ impl HubTransport for FaultInjectingTransport {
                 }
             });
             return Ok(Box::pin(mapped));
+        }
+
+        if let Some(PullFault::DuplicateFirstRecords(n)) = pull_fault {
+            let buffered: Vec<Result<PulledEvent, SyncError>> = stream.collect().await;
+            let mut ok_events = Vec::new();
+            let mut errors = Vec::new();
+            for item in buffered {
+                match item {
+                    Ok(pulled) => ok_events.push(pulled),
+                    Err(err) => errors.push(err),
+                }
+            }
+            let dup_count = n.min(ok_events.len());
+            let mut output: Vec<Result<PulledEvent, SyncError>> =
+                ok_events.iter().take(dup_count).cloned().map(Ok).collect();
+            output.extend(ok_events.into_iter().map(Ok));
+            output.extend(errors.into_iter().map(Err));
+            return Ok(Box::pin(futures::stream::iter(output)));
         }
 
         Ok(stream)

@@ -1,6 +1,6 @@
 //! HUB_SYNC group E — three-node convergence.
 
-use track_test_cluster::{
+use track_sync_testing::{
     TestCluster, assert_all_converged, bootstrap_node, bootstrap_project, priority_of,
     pull_and_assert_converged,
 };

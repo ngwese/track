@@ -1,8 +1,11 @@
 # ADR 0004: Hub sync protocol, cursors, acknowledgements, and compaction
 
-> **Status:** Proposed
+> **Status:** Proposed (amended 2026-06-15)\
+> **Amendments:** [Integration test gaps](../plans/replication-sync-gap-log.md)
+> — protocol versioning, NDJSON errors, sync loop, snapshot pull
 
-**Date:** 2026-06-14
+**Date:** 2026-06-14\
+**Amended:** 2026-06-15
 **Deciders:** Track maintainers (draft for review)
 
 ## Context
@@ -283,6 +286,17 @@ Streaming transport does not change the logical semantics of append and fetch:
 - Duplicate delivery remains valid and must be tolerated through `event_uuid`
    idempotency.
 
+**Malformed NDJSON lines.** If a pull response contains a line that is not
+valid JSON or does not decode to an expected pull record shape, the client
+**must not** advance cursors for that line or any subsequent lines in the same
+HTTP response. Lines already persisted in prior pull pages remain committed.
+The client retries from the last fully persisted cursor set (`HUB_SYNC-091`).
+
+If a push request body contains a malformed line, the hub **must not** mark
+later lines in that request as `durable`. Events already acknowledged `durable`
+before the malformed line remain committed; the client retries uncommitted event
+UUIDs.
+
 #### Framing independence
 
 The protocol semantics in this ADR must not depend on NDJSON specifically.
@@ -299,6 +313,31 @@ the same logical guarantees:
 NDJSON is the preferred initial transport because it is simple to debug, easy to
 implement in CLI environments, and well aligned with Track’s JSON-first agent
 and scripting interfaces.[^2][^3]
+
+### Protocol versioning
+
+v1 hub routes require clients to advertise a supported protocol version and
+clients to reject incompatible hub responses before applying payloads.
+
+#### Request headers (v1)
+
+| Header | Direction | Meaning |
+| :-- | :-- | :-- |
+| `Track-Protocol-Version` | client → hub | Client-supported protocol version (e.g. `1`) |
+| `Accept` | client → hub | Must include `application/x-ndjson` for streaming pull |
+| `Content-Type` | client → hub | `application/x-ndjson` for streaming push bodies |
+| `Track-Protocol-Version` | hub → client | Hub protocol version for the response |
+
+If the hub cannot satisfy `Track-Protocol-Version`, it returns **HTTP 406** with
+a JSON error body. The client must surface a retryable configuration error and
+must not partially apply an incompatible response (`HUB_SYNC-093`).
+
+If the client receives a response whose `Track-Protocol-Version` is unsupported,
+it aborts the session without cursor advancement.
+
+Protocol version governs **wire framing and HTTP semantics**, not event payload
+schema. Event-level evolution remains governed by `schema_version` and ADR 0003
+schema migration events.
 
 ### Acknowledgement levels
 
@@ -422,6 +461,50 @@ These are local states, not hub protocol states:
 
 This preserves the ADR 0003 separation between transport durability and local
 semantic integration.[^1]
+
+### Sync integration loop
+
+After each pull page (or end of push-then-pull session), the sync client runs a
+**local integration loop** with these properties:
+
+1. **Persist then reduce** — each fetched event is inserted into `log_events`
+   before cursors advance; reduction runs in the same transaction or immediately
+   after durable insert.
+2. **Schema-triggered quarantine drain** — when a schema event reduces
+   successfully, the client runs ADR 0003 reduction step 9 (drain
+   `quarantined_events`) before completing the session (`HUB_SYNC-023`).
+3. **Idempotent reduce** — re-fetch of an already-persisted `event_uuid` skips
+   reduction when `log_events.is_reduced` is true.
+4. **Collection merges on pull** — remote `item.add-label`, `item.assign-user`,
+   and `comment.add` events use the same reducers as locally authored events
+   so OR-set and comment unions converge across nodes (`HUB_SYNC-031`,
+   `HUB_SYNC-033`).
+
+Cursor advancement reflects **durable local persist** only. Quarantine and
+conflict outcomes do not block cursor progress, but quarantine drain must run
+before the session is considered complete for materialization purposes.
+
+#### Snapshot-assisted sync
+
+Long-disconnected clients may bootstrap from a **published snapshot** plus a
+tail of events after the snapshot watermark (`HUB_SYNC-042`). The sync client
+must support:
+
+1. fetch the newest applicable published snapshot for the workspace/project
+2. hydrate local materialized state from the snapshot payload
+3. set cursors to the snapshot’s `through_hub_offset` / `through_event_uuid`
+4. pull and reduce events with hub offset strictly greater than the snapshot
+   watermark
+
+Until this path exists, clients must fall back to full event replay from cursors
+at zero.
+
+#### Test hub vs production hub
+
+Embeddable in-memory test hubs (loopback HTTP without durable storage) are
+permitted for integration tests but **do not** satisfy restart-recovery
+requirements. Production hubs must durably retain the log across process
+restart (`HUB_SYNC-053`).
 
 ## Snapshot protocol
 
@@ -580,6 +663,10 @@ If the client receives a work event whose schema prerequisites are missing, it
 stores the event locally and marks it quarantined, as defined in ADR 0003. Pull
 cursor advancement is based on durable fetch and local persistence, not
 successful immediate reduction.[^1]
+
+After schema events reduce successfully in the same or a subsequent sync
+session, the client **must** drain quarantined work events per ADR 0003
+reduction step 9 before reporting sync complete (`HUB_SYNC-023`).
 
 ### Duplicate delivery
 

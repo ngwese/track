@@ -12,7 +12,7 @@ members = [
     "crates/track-hub",
     "crates/track-hub-memory",
     "crates/track-sync",
-    "crates/track-test-cluster",
+    "crates/track-sync-testing",
 ]
 
 [workspace.package]
@@ -32,7 +32,7 @@ track-hub-protocol = { path = "crates/track-hub-protocol" }
 track-hub = { path = "crates/track-hub" }
 track-hub-memory = { path = "crates/track-hub-memory" }
 track-sync = { path = "crates/track-sync" }
-track-test-cluster = { path = "crates/track-test-cluster" }
+track-sync-testing = { path = "crates/track-sync-testing" }
 
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"

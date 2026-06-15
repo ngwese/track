@@ -1,6 +1,6 @@
 //! HUB_SYNC group A — multi-node baseline scenarios.
 
-use track_test_cluster::{
+use track_sync_testing::{
     TestCluster, assert_all_converged, bootstrap_node, bootstrap_project, emit_item, emit_schema,
     field_string, pull_and_assert_converged,
 };

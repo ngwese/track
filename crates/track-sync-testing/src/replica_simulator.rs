@@ -9,8 +9,7 @@ use track_reduce::ReductionEngine;
 use track_replication::EventEnvelope;
 use track_store::EntityStore;
 use track_store::memory::{
-    MemoryConflictStore, MemoryEntityStore, MemoryLogStore, MemoryQuarantineStore,
-    MemorySchemaStore,
+    MemoryConflictStore, MemoryEntityStore, MemoryQuarantineStore, MemorySchemaStore,
 };
 use track_sync::{MemoryCursorStore, SyncEngine, SyncError};
 
@@ -18,9 +17,10 @@ use crate::error::ClusterError;
 use crate::event_builder::EventBuilder;
 use crate::fault_injection::FaultInjectingTransport;
 use crate::ids::TestIds;
+use crate::shared_log_store::SharedMemoryLogStore;
 
 type Engine = ReductionEngine<
-    MemoryLogStore,
+    SharedMemoryLogStore,
     MemorySchemaStore,
     MemoryEntityStore,
     MemoryQuarantineStore,
@@ -31,9 +31,9 @@ type Engine = ReductionEngine<
 pub struct ReplicaSimulator {
     ids: TestIds,
     node_uuid: TrackUlid,
-    log: MemoryLogStore,
+    log: SharedMemoryLogStore,
     transport: FaultInjectingTransport,
-    sync: SyncEngine<FaultInjectingTransport, MemoryCursorStore, MemoryLogStore>,
+    sync: SyncEngine<FaultInjectingTransport, MemoryCursorStore, SharedMemoryLogStore>,
     reducer: Arc<Mutex<Engine>>,
     events: EventBuilder,
 }
@@ -51,7 +51,7 @@ impl ReplicaSimulator {
             .await
             .map_err(|err| ClusterError::Hub(track_hub_memory::TestHubError::Hub(err)))?;
 
-        let log = MemoryLogStore::new();
+        let log = SharedMemoryLogStore::new();
         let reducer = Arc::new(Mutex::new(ReductionEngine::new(
             log.clone(),
             MemorySchemaStore::new(),

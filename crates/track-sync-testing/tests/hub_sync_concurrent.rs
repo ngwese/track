@@ -1,7 +1,7 @@
 //! HUB_SYNC group D — concurrent edits from divergent sync state.
 
 use track_id::TrackUlid;
-use track_test_cluster::{
+use track_sync_testing::{
     TestCluster, assert_all_converged, assert_comments_match, bootstrap_node, bootstrap_project,
     field_string, priority_of, pull_and_assert_converged,
 };
@@ -160,6 +160,7 @@ async fn hub_sync_034_concurrent_comments_union() {
 #[ignore = "gap: comment.edit reducer not implemented (HUB_SYNC-035)"]
 async fn hub_sync_035_concurrent_comment_edit() {
     let cluster = TestCluster::start().await.unwrap();
+    let entity = cluster.ids.entity;
     let comment = TrackUlid::parse("01J0CMNT000000000000000012").unwrap();
 
     let mut a = cluster.spawn_a().await.unwrap();
@@ -170,6 +171,48 @@ async fn hub_sync_035_concurrent_comment_edit() {
     let mut b = cluster.spawn_b().await.unwrap();
     bootstrap_node(&mut b).unwrap();
     b.pull_until_idle(100).await.unwrap();
+
+    a.emit(|e| e.comment_edit(comment, "From A")).unwrap();
+    b.emit(|e| e.comment_edit(comment, "From B wins")).unwrap();
+    TestCluster::sync_all(&mut [&mut a, &mut b]).await.unwrap();
+    pull_and_assert_converged(&cluster, &mut [&mut a, &mut b])
+        .await
+        .unwrap();
+
+    let comments = a.comments(&entity).unwrap();
+    assert_eq!(comments.len(), 1);
+    assert_eq!(comments[0].body_markdown, "From B wins");
+
+    cluster.shutdown().await.unwrap();
+}
+
+/// HUB_SYNC-036: Relation create → delete → recreate same UUID (OR-map).
+#[tokio::test]
+#[ignore = "gap: relation.delete reducer not wired in reduce_work (HUB_SYNC-036)"]
+async fn hub_sync_036_relation_delete_recreate() {
+    let cluster = TestCluster::start().await.unwrap();
+    let entity = cluster.ids.entity;
+    let rel = track_sync_testing::TestIds::pad("01J0REF00000000000002");
+    let target = track_sync_testing::TestIds::pad("01JHM8X9K2Q4TGT1");
+
+    let mut a = cluster.spawn_a().await.unwrap();
+    bootstrap_project(&mut a).await.unwrap();
+    a.emit(|e| e.relation_create(rel, "blocks", target))
+        .unwrap();
+
+    let mut b = cluster.spawn_b().await.unwrap();
+    bootstrap_node(&mut b).unwrap();
+    b.pull_until_idle(100).await.unwrap();
+    b.emit(|e| e.relation_delete(rel)).unwrap();
+
+    a.emit(|e| e.relation_create(rel, "blocks", target))
+        .unwrap();
+
+    TestCluster::sync_all(&mut [&mut a, &mut b]).await.unwrap();
+    pull_and_assert_converged(&cluster, &mut [&mut a, &mut b])
+        .await
+        .unwrap();
+    assert_eq!(a.relation_count(&entity).unwrap(), 1);
 
     cluster.shutdown().await.unwrap();
 }

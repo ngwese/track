@@ -1,5 +1,5 @@
 [package]
-name = "track-test-cluster"
+name = "track-sync-testing"
 version = "0.1.0"
 description = "Multi-node replication sync integration test harness"
 publish = false

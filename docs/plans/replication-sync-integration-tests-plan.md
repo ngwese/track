@@ -69,13 +69,13 @@ collection merges, and error recovery are **largely untested**.
 
 ## Test harness architecture
 
-### New crate: `track-test-cluster`
+### New crate: `track-sync-testing`
 
-Add `crates/track-test-cluster` — shared integration harness (not shipped in
+Add `crates/track-sync-testing` — shared integration harness (not shipped in
 production binaries).
 
 ```text
-crates/track-test-cluster/
+crates/track-sync-testing/
 ├── Cargo.toml
 ├── src/
 │   ├── lib.rs
@@ -87,19 +87,24 @@ crates/track-test-cluster/
 │   ├── assert_convergence.rs   # compare ReducedItem across replicas
 │   └── schema_fixtures.rs      # canonical schema_init for merge matrix
 └── tests/
-    ├── multi_node/             # one file per scenario group
-    ├── clocks/
-    ├── offline/
-    ├── concurrent/
-    ├── recovery/
-    ├── merge_matrix/
-    └── protocol/
+    ├── hub_sync_multi_node.rs
+    ├── hub_sync_clocks.rs
+    ├── hub_sync_offline.rs
+    ├── hub_sync_concurrent.rs
+    ├── hub_sync_convergence.rs
+    ├── hub_sync_recovery.rs
+    ├── hub_sync_merge_matrix.rs
+    ├── hub_sync_protocol.rs
+    ├── hub_sync_ack.rs
+    ├── hub_sync_pull_paging.rs
+    ├── hub_sync_compaction.rs
+    └── hub_sync_event_kinds.rs
 ```
 
 ### Dependency graph
 
 ```text
-track-test-cluster
+track-sync-testing
   ├── track-hub-memory
   ├── track-sync
   ├── track-reduce
@@ -110,7 +115,7 @@ track-test-cluster
 ```
 
 Workspace `Cargo.toml` member + `[dev-dependencies]` from other crates may
-re-export helpers; **scenario tests live primarily in `track-test-cluster/tests/`**.
+re-export helpers; **scenario tests live primarily in `track-sync-testing/tests/`**.
 
 ### Core types
 
@@ -161,12 +166,12 @@ still prove robustness when:
 
 Wrap `HubTransport` with `FaultInjectingTransport`:
 
-| Fault | Simulates |
-| --- | --- |
-| `InterruptPullAfter(n)` | NDJSON stream cut after n records |
-| `InterruptPushMidStream` | TCP reset during push body |
-| `TimeoutBeforeResponse` | client retry path |
-| `DuplicateDelivery` | hub returns same page twice |
+| Fault | Simulates | HUB_SYNC |
+| --- | --- | --- |
+| `InterruptPullAfter(n)` | NDJSON stream cut after n records | 050 |
+| `InterruptPushMidStream` | TCP reset during push body | 102 |
+| `TimeoutBeforeResponse` | client retry with no response body | 052, 101 |
+| `DuplicateDelivery` | hub returns same pull page twice | 111 |
 
 Recovery assertions:
 
@@ -255,6 +260,12 @@ ADR 0003 policies.
 | OR-map | `relations` | `relation.create`, `relation.delete`, `relation.set-attr` | 069–070 |
 | Counter (if enabled) | estimate points PN-counter | TBD payload | 071 *gap* |
 | Workflow scalar | `state_key` | `item.set-state` | 072 |
+| Scalar clear | `title`, `due_at`, … | `item.clear-field` | 073 |
+| OR-set remove | assignees | `item.unassign-user` | 074 |
+| OR-map attrs | relation metadata | `relation.set-attr` | 075 |
+| Lifecycle | archived flag | `item.archive`, `item.restore` | 076 |
+| Hub-assigned id | `number`, `identifier` | `item.allocate-number` | 077 |
+| Execution log | claim lease | `execution.claim` | 078 |
 
 Each test pattern:
 
@@ -284,6 +295,39 @@ conflicts); tests must assert the correct bucket.
 | HUB_SYNC-093 | Hub protocol version header mismatch | HTTP 4xx; client retryable error |
 | HUB_SYNC-094 | Event for foreign `workspace_uuid` | hub reject |
 | HUB_SYNC-095 | Regressed `stream_seq` | hub reject; no partial commit |
+| HUB_SYNC-096 | Malformed NDJSON line mid-push stream | prior `durable` committed; later retried |
+
+### Group J — Acknowledgement semantics
+
+| ID | Scenario | Expected |
+| --- | --- | --- |
+| HUB_SYNC-100 | Hub returns `accepted` before `durable` | client must not treat as pull-visible |
+| HUB_SYNC-101 | Push timeout (no response); retry same UUIDs | idempotent; no double append |
+| HUB_SYNC-102 | Push stream abort after partial `durable` acks | committed prefix retained; tail retried |
+
+### Group K — Pull paging and delivery
+
+| ID | Scenario | Expected |
+| --- | --- | --- |
+| HUB_SYNC-110 | Multi-page pull (`limit` < total events) | all events; stable `has_more` |
+| HUB_SYNC-111 | Duplicate pull page redelivery | idempotent by `event_uuid` |
+| HUB_SYNC-112 | Project filter on pull request | only matching `project_uuid` events |
+
+### Group L — Compaction and retention
+
+| ID | Scenario | Expected |
+| --- | --- | --- |
+| HUB_SYNC-120 | Inactive replica returns after compaction horizon | snapshot bootstrap + tail |
+| HUB_SYNC-121 | OR-set tombstones correct after prefix compaction | labels/assignees converge |
+| HUB_SYNC-122 | Compaction blocked by lagging replica watermark | prefix retained until catch-up |
+
+### Group M — Hub validation reject matrix
+
+| ID | Scenario | Expected |
+| --- | --- | --- |
+| HUB_SYNC-130 | Unauthorized `actor` on push | hub reject; no partial commit |
+| HUB_SYNC-131 | `event.node_uuid` ≠ path `node_uuid` | hub reject |
+| HUB_SYNC-094 | Event `workspace_uuid` ≠ route workspace | hub reject |
 
 ## Assertion helpers
 
@@ -322,7 +366,7 @@ Optional: `insta` snapshot of serialized `ReducedItem` per scenario.
 | Job | Purpose |
 | --- | --- |
 | `test:unit` | existing workspace tests (must pass) |
-| `test:integration` | `track-test-cluster` non-ignored tests (must pass) |
+| `test:integration` | `track-sync-testing` non-ignored tests (must pass) |
 | `test:integration-gaps` | `--ignored` only; allowed fail until Phase N |
 
 Start with all HUB_SYNC scenarios **ignored** except 001, 010, 030, 050; burn
@@ -332,7 +376,7 @@ down ignore list per sprint.
 
 ### Phase 0 — harness skeleton
 
-- Create `track-test-cluster` with `TestCluster`, `ReplicaSimulator`,
+- Create `track-sync-testing` with `TestCluster`, `ReplicaSimulator`,
   `SyntheticHlc`, `assert_convergence`.
 - Port `dual_node_priority` logic into shared builders.
 - Deliverable: HUB_SYNC-001 green.
@@ -361,9 +405,23 @@ down ignore list per sprint.
 - HUB_SYNC-060–072 exhaustive table.
 - One PR per shape if needed.
 
-### Phase 6 — conflicts and protocol (Groups H, I)
+### Phase 6 — conflicts and protocol (Groups H, I, M)
 
-- HUB_SYNC-080–095; amend ADR 0004 for HTTP version headers if needed.
+- HUB_SYNC-080–096, 130–131; amend ADR 0004 for HTTP version headers if needed.
+
+### Phase 7 — ack and paging (Groups J, K)
+
+- Extend `FaultInjectingTransport` with timeout and duplicate delivery.
+- HUB_SYNC-100–102, 110–112.
+
+### Phase 8 — compaction (Group L)
+
+- Simulated compaction watermark + snapshot fixtures; HUB_SYNC-120–122.
+- Requires persistent hub or compaction simulator beyond in-memory MVP.
+
+### Phase 9 — event-kind sweep (Group G extension)
+
+- HUB_SYNC-067–068, 071, 073–078.
 
 ## ADR gap log (living document)
 
@@ -389,12 +447,18 @@ These scenarios are **expected to fail** on first implementation:
 6. **Persistent hub** across restart (HUB_SYNC-053) — in-memory hub only.
 7. **Protocol version** negotiation (HUB_SYNC-093) — unspecified in ADR 0004.
 8. **HLC timezone normalization** (HUB_SYNC-011) — may need ADR 0004 HLC follow-on.
+9. **`accepted` vs `durable`** split (HUB_SYNC-100) — in-memory hub may only emit
+   `durable`.
+10. **Compaction** (HUB_SYNC-120–122) — no compaction simulator in test hub yet.
+11. **Pull project filter** (HUB_SYNC-112) — sync client does not set `projects`.
+12. **Push malformed NDJSON** (HUB_SYNC-096) — symmetric to pull 091.
+13. **IAM actor rejection** (HUB_SYNC-130) — test hub uses allow-all authorizer.
 
 ## Acceptance criteria (programme complete)
 
-- [ ] ≥ 40 HUB_SYNC scenarios implemented (ignored or passing)
-- [ ] All Group A, D (037), E (040–041), F (050–051), G (scalar + OR-set +
-  comments) passing without ignore
+- [ ] ≥ 70 HUB_SYNC scenarios implemented (ignored or passing)
+- [ ] All Group A, D (037), E (040–041), F (050–051, 054–055), G (scalar +
+  comments append) passing without ignore
 - [ ] Gap log documents every remaining `#[ignore]`
 - [ ] ADR amendments merged for each gap type (A) item
 - [ ] CI `test:integration` green; `test:integration-gaps` trend downward
