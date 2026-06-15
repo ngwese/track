@@ -178,7 +178,7 @@ Recovery assertions:
 
 Each scenario gets:
 
-- **ID** — `RSYNC-###` for traceability in ADR gaps
+- **ID** — `HUB_SYNC-###` for traceability in ADR gaps
 - **Replicas** — node count
 - **Expected** — convergence / quarantine / conflict
 - **Status** — `planned` | `implemented` | `ignored(gap:…)`
@@ -187,67 +187,67 @@ Each scenario gets:
 
 | ID | Scenario | Nodes | Expected |
 | --- | --- | --- | --- |
-| RSYNC-001 | Node A creates issue; B and C pull; all converge | 3 | identical `ReducedItem` |
-| RSYNC-002 | A pushes schema.init + item.create; B/C pull schema before work | 3 | no quarantine after full pull |
-| RSYNC-003 | Interleaved push order A→B→A; C cold-syncs once | 3 | identical state |
-| RSYNC-004 | Each node pushes own item; all pull all | 3 | 3 distinct items visible everywhere |
+| HUB_SYNC-001 | Node A creates issue; B and C pull; all converge | 3 | identical `ReducedItem` |
+| HUB_SYNC-002 | A pushes schema.init + item.create; B/C pull schema before work | 3 | no quarantine after full pull |
+| HUB_SYNC-003 | Interleaved push order A→B→A; C cold-syncs once | 3 | identical state |
+| HUB_SYNC-004 | Each node pushes own item; all pull all | 3 | 3 distinct items visible everywhere |
 
 ### Group B — Clock skew and time zones
 
 | ID | Scenario | Nodes | Expected |
 | --- | --- | --- | --- |
-| RSYNC-010 | Skewed HLC: “earlier” wall clock wins on higher HLC stamp | 2 | LWW follows **HLC**, not wall clock |
-| RSYNC-011 | Same logical instant, different TZ offset in HLC wire string | 2 | parse equality or defined reject |
-| RSYNC-012 | Concurrent scalar edits with crossed skew (A future, B past) | 2 | higher HLC wins |
-| RSYNC-013 | Three-node tie on HLC → node_uuid lexicographic tie-break | 3 | deterministic winner |
+| HUB_SYNC-010 | Skewed HLC: “earlier” wall clock wins on higher HLC stamp | 2 | LWW follows **HLC**, not wall clock |
+| HUB_SYNC-011 | Same logical instant, different TZ offset in HLC wire string | 2 | parse equality or defined reject |
+| HUB_SYNC-012 | Concurrent scalar edits with crossed skew (A future, B past) | 2 | higher HLC wins |
+| HUB_SYNC-013 | Three-node tie on HLC → node_uuid lexicographic tie-break | 3 | deterministic winner |
 
 ### Group C — Remote updates between sync (offline / lagging replica)
 
 | ID | Scenario | Nodes | Expected |
 | --- | --- | --- | --- |
-| RSYNC-020 | A creates + assigns owner; B offline; A adds comment; B syncs | 2 | B has create+comment+assignee |
-| RSYNC-021 | Remote burst: create, priority×3, comment×2, relation, label add/remove | 2 | full state on catch-up |
-| RSYNC-022 | C never synced; A and B exchange edits for days; C syncs once | 3 | C converges to A/B final state |
-| RSYNC-023 | Work event arrives before schema on lagging node → quarantine → schema → retry | 2 | quarantine cleared, event applied |
+| HUB_SYNC-020 | A creates + assigns owner; B offline; A adds comment; B syncs | 2 | B has create+comment+assignee |
+| HUB_SYNC-021 | Remote burst: create, priority×3, comment×2, relation, label add/remove | 2 | full state on catch-up |
+| HUB_SYNC-022 | C never synced; A and B exchange edits for days; C syncs once | 3 | C converges to A/B final state |
+| HUB_SYNC-023 | Work event arrives before schema on lagging node → quarantine → schema → retry | 2 | quarantine cleared, event applied |
 
 ### Group D — Concurrent edits (divergent sync state)
 
 | ID | Scenario | Nodes | Expected |
 | --- | --- | --- | --- |
-| RSYNC-030 | A and B edit **title** offline; sync | 2 | LWW scalar |
-| RSYNC-031 | A and B add **different labels** offline | 2 | OR-set union |
-| RSYNC-032 | A adds label X, B removes label X offline | 2 | OR-set tombstone rules |
-| RSYNC-033 | A and B assign **different users** offline | 2 | OR-set assignees |
-| RSYNC-034 | A and B add **comments** offline (distinct UUIDs) | 2 | append-only union |
-| RSYNC-035 | A edits comment body, B edits same comment offline | 2 | supersession by HLC |
-| RSYNC-036 | A creates relation R, B deletes R offline, A recreates same uuid | 2 | OR-map semantics |
-| RSYNC-037 | All of the above in one offline window | 3 | full convergence |
+| HUB_SYNC-030 | A and B edit **title** offline; sync | 2 | LWW scalar |
+| HUB_SYNC-031 | A and B add **different labels** offline | 2 | OR-set union |
+| HUB_SYNC-032 | A adds label X, B removes label X offline | 2 | OR-set tombstone rules |
+| HUB_SYNC-033 | A and B assign **different users** offline | 2 | OR-set assignees |
+| HUB_SYNC-034 | A and B add **comments** offline (distinct UUIDs) | 2 | append-only union |
+| HUB_SYNC-035 | A edits comment body, B edits same comment offline | 2 | supersession by HLC |
+| HUB_SYNC-036 | A creates relation R, B deletes R offline, A recreates same uuid | 2 | OR-map semantics |
+| HUB_SYNC-037 | All of the above in one offline window | 3 | full convergence |
 
 ### Group E — Three-node convergence (canonical)
 
 | ID | Scenario | Nodes | Expected |
 | --- | --- | --- | --- |
-| RSYNC-040 | Ring: A→hub, B pull, B→hub, C pull, C→hub, A pull | 3 | all equal |
-| RSYNC-041 | Simultaneous push same item field from A,B,C then all pull | 3 | single winner + identical |
-| RSYNC-042 | Snapshot checkpoint mid-history; late node bootstraps snapshot + tail | 3 | *gap if snapshot pull unimplemented* |
+| HUB_SYNC-040 | Ring: A→hub, B pull, B→hub, C pull, C→hub, A pull | 3 | all equal |
+| HUB_SYNC-041 | Simultaneous push same item field from A,B,C then all pull | 3 | single winner + identical |
+| HUB_SYNC-042 | Snapshot checkpoint mid-history; late node bootstraps snapshot + tail | 3 | *gap if snapshot pull unimplemented* |
 
 ### Group F — Recovery and retry
 
 | ID | Scenario | Nodes | Expected |
 | --- | --- | --- | --- |
-| RSYNC-050 | Pull interrupted after 2 of 5 events; retry | 2 | 5 events, no dup rows |
-| RSYNC-051 | Push interrupted mid-NDJSON; retry same UUIDs | 2 | idempotent hub |
-| RSYNC-052 | Push timeout (no response); retry | 2 | no double append |
-| RSYNC-053 | Hub restart (new `TestHubHandle`) — *persistent hub gap* | 2 | document in-memory limitation |
-| RSYNC-054 | Node offline 30 simulated days; cursor stale; full catch-up | 2 | converges |
-| RSYNC-055 | New sync session (new `SyncEngine`) same cursor file | 2 | continues not resets |
+| HUB_SYNC-050 | Pull interrupted after 2 of 5 events; retry | 2 | 5 events, no dup rows |
+| HUB_SYNC-051 | Push interrupted mid-NDJSON; retry same UUIDs | 2 | idempotent hub |
+| HUB_SYNC-052 | Push timeout (no response); retry | 2 | no double append |
+| HUB_SYNC-053 | Hub restart (new `TestHubHandle`) — *persistent hub gap* | 2 | document in-memory limitation |
+| HUB_SYNC-054 | Node offline 30 simulated days; cursor stale; full catch-up | 2 | converges |
+| HUB_SYNC-055 | New sync session (new `SyncEngine`) same cursor file | 2 | continues not resets |
 
 ### Group G — Merge matrix (field shape × type)
 
 One test per **shape** with typed payload; scalar uses LWW, collections use
 ADR 0003 policies.
 
-| Shape | Representative fields | Event kinds | RSYNC ID |
+| Shape | Representative fields | Event kinds | HUB_SYNC ID |
 | --- | --- | --- | --- |
 | Scalar register | `title` (text), `due_at` (date), `estimate` (int), `priority` (enum) | `item.set-field`, `item.clear-field` | 060–063 |
 | OR-set | `labels`, assignees | `item.add-label`, `item.remove-label`, assign events | 064–065 |
@@ -267,9 +267,9 @@ Each test pattern:
 
 | ID | Scenario | Expected |
 | --- | --- | --- |
-| RSYNC-080 | Unknown enum after schema rename (strict mode) | `conflicts` row, event retained |
-| RSYNC-081 | Valid merge but invalid schema (missing required field) | conflict record |
-| RSYNC-082 | Relation to missing entity | conflict or quarantine per ADR |
+| HUB_SYNC-080 | Unknown enum after schema rename (strict mode) | `conflicts` row, event retained |
+| HUB_SYNC-081 | Valid merge but invalid schema (missing required field) | conflict record |
+| HUB_SYNC-082 | Relation to missing entity | conflict or quarantine per ADR |
 
 Merge resolution and validation outcome are **distinct** (ADR 0003 §Semantic
 conflicts); tests must assert the correct bucket.
@@ -278,12 +278,12 @@ conflicts); tests must assert the correct bucket.
 
 | ID | Scenario | Expected |
 | --- | --- | --- |
-| RSYNC-090 | Unknown `EventKind` on wire | reject or quarantine — document |
-| RSYNC-091 | Malformed NDJSON line mid-stream | stream abort; prior durable committed |
-| RSYNC-092 | `schema_version` on event ahead of local schema | quarantine until schema events |
-| RSYNC-093 | Hub protocol version header mismatch | HTTP 4xx; client retryable error |
-| RSYNC-094 | Event for foreign `workspace_uuid` | hub reject |
-| RSYNC-095 | Regressed `stream_seq` | hub reject; no partial commit |
+| HUB_SYNC-090 | Unknown `EventKind` on wire | reject or quarantine — document |
+| HUB_SYNC-091 | Malformed NDJSON line mid-stream | stream abort; prior durable committed |
+| HUB_SYNC-092 | `schema_version` on event ahead of local schema | quarantine until schema events |
+| HUB_SYNC-093 | Hub protocol version header mismatch | HTTP 4xx; client retryable error |
+| HUB_SYNC-094 | Event for foreign `workspace_uuid` | hub reject |
+| HUB_SYNC-095 | Regressed `stream_seq` | hub reject; no partial commit |
 
 ## Assertion helpers
 
@@ -325,7 +325,7 @@ Optional: `insta` snapshot of serialized `ReducedItem` per scenario.
 | `test:integration` | `track-test-cluster` non-ignored tests (must pass) |
 | `test:integration-gaps` | `--ignored` only; allowed fail until Phase N |
 
-Start with all RSYNC scenarios **ignored** except 001, 010, 030, 050; burn
+Start with all HUB_SYNC scenarios **ignored** except 001, 010, 030, 050; burn
 down ignore list per sprint.
 
 ## Implementation phases
@@ -335,42 +335,42 @@ down ignore list per sprint.
 - Create `track-test-cluster` with `TestCluster`, `ReplicaSimulator`,
   `SyntheticHlc`, `assert_convergence`.
 - Port `dual_node_priority` logic into shared builders.
-- Deliverable: RSYNC-001 green.
+- Deliverable: HUB_SYNC-001 green.
 
 ### Phase 1 — multi-node + clocks (Groups A, B)
 
-- RSYNC-001–004, 010–013.
-- Document HLC timezone rule in ADR 0003 follow-on if RSYNC-011 fails.
+- HUB_SYNC-001–004, 010–013.
+- Document HLC timezone rule in ADR 0003 follow-on if HUB_SYNC-011 fails.
 
 ### Phase 2 — offline and concurrent (Groups C, D)
 
-- RSYNC-020–037.
+- HUB_SYNC-020–037.
 - Likely gaps: assignee events, comment.edit across nodes, relation OR-map.
 
 ### Phase 3 — three-node canonical (Group E)
 
-- RSYNC-040–041 mandatory; 042 drives snapshot protocol if missing.
+- HUB_SYNC-040–041 mandatory; 042 drives snapshot protocol if missing.
 
 ### Phase 4 — recovery (Group F)
 
-- `FaultInjectingTransport`; RSYNC-050–055.
+- `FaultInjectingTransport`; HUB_SYNC-050–055.
 - Gaps: cursor file persistence, `accepted` vs `durable` delay.
 
 ### Phase 5 — merge matrix (Group G)
 
-- RSYNC-060–072 exhaustive table.
+- HUB_SYNC-060–072 exhaustive table.
 - One PR per shape if needed.
 
 ### Phase 6 — conflicts and protocol (Groups H, I)
 
-- RSYNC-080–095; amend ADR 0004 for HTTP version headers if needed.
+- HUB_SYNC-080–095; amend ADR 0004 for HTTP version headers if needed.
 
 ## ADR gap log (living document)
 
 Maintain `docs/plans/replication-sync-gap-log.md` (created in Phase 0) with:
 
 ```markdown
-| RSYNC ID | Failure | Gap type | ADR / PR | Status |
+| HUB_SYNC ID | Failure | Gap type | ADR / PR | Status |
 ```
 
 Update on every ignored test merge.
@@ -385,14 +385,14 @@ These scenarios are **expected to fail** on first implementation:
    sync loop may not retry quarantine).
 3. **Conflict rows** for strict validation after concurrent schema change.
 4. **`FaultInjectingTransport`** not yet in `track-sync`.
-5. **Snapshot-assisted catch-up** (RSYNC-042) — snapshot publish/pull incomplete.
-6. **Persistent hub** across restart (RSYNC-053) — in-memory hub only.
-7. **Protocol version** negotiation (RSYNC-093) — unspecified in ADR 0004.
-8. **HLC timezone normalization** (RSYNC-011) — may need ADR 0004 HLC follow-on.
+5. **Snapshot-assisted catch-up** (HUB_SYNC-042) — snapshot publish/pull incomplete.
+6. **Persistent hub** across restart (HUB_SYNC-053) — in-memory hub only.
+7. **Protocol version** negotiation (HUB_SYNC-093) — unspecified in ADR 0004.
+8. **HLC timezone normalization** (HUB_SYNC-011) — may need ADR 0004 HLC follow-on.
 
 ## Acceptance criteria (programme complete)
 
-- [ ] ≥ 40 RSYNC scenarios implemented (ignored or passing)
+- [ ] ≥ 40 HUB_SYNC scenarios implemented (ignored or passing)
 - [ ] All Group A, D (037), E (040–041), F (050–051), G (scalar + OR-set +
   comments) passing without ignore
 - [ ] Gap log documents every remaining `#[ignore]`

@@ -19,6 +19,15 @@ impl MemoryLogStore {
     pub fn new() -> Self {
         Self::default()
     }
+    /// Returns the number of persisted events.
+    pub fn len(&self) -> usize {
+        self.events.len()
+    }
+
+    /// Returns true when no events are stored.
+    pub fn is_empty(&self) -> bool {
+        self.events.is_empty()
+    }
 }
 
 impl LogStore for MemoryLogStore {
