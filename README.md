@@ -7,6 +7,10 @@ and CI convergent.
 
 > **Status:** PRD and SRD approved (v0.4). Sync hub MVP and CLI
 > implementation in progress; see [docs/adr/](docs/adr/) for runtime decisions.
+>
+> **Warning:** Track is experimental and incomplete. APIs, on-disk formats, and
+> sync behavior will change without notice. Do not rely on it for production
+> work—it may eat your lunch.
 
 ## Why Track
 
