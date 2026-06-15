@@ -9,7 +9,7 @@ algorithm](../adr/0003-domain-model-and-replication-log.md),
 
 | HUB_SYNC ID | Test | Gap type | ADR / PR | Status |
 | --- | --- | --- | --- | --- |
-| HUB_SYNC-023 | `hub_sync_023_quarantine_until_schema_arrives` | Quarantine drain after schema pull (ADR 0003 step 9; ADR 0004 sync loop) | ADR amended; impl pending | **failing** |
+| HUB_SYNC-023 | `hub_sync_023_quarantine_until_schema_arrives` | Quarantine drain after schema pull (ADR 0003 step 9; ADR 0004 sync loop) | ADR amended; impl pending | ignored |
 | HUB_SYNC-031 | `hub_sync_031_concurrent_labels_union` | Bidirectional label OR-set via hub sync | ADR 0003 §Collection-merge invariants; impl pending | ignored |
 | HUB_SYNC-032 | `hub_sync_032_label_add_remove_or_set` | `item.remove-label` reducer | ADR 0003 §Reducer coverage | ignored |
 | HUB_SYNC-033 | `hub_sync_033_concurrent_assignees_or_set` | `item.assign-user` reducer | ADR 0003 §Reducer coverage | ignored |
