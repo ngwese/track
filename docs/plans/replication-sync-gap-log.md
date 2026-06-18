@@ -11,7 +11,7 @@ algorithm](../adr/0003-domain-model-and-replication-log.md),
 | --- | --- | --- | --- | --- |
 | HUB_SYNC-053 | `hub_sync_053_hub_restart` | Persistent hub | ADR 0004 §Test hub vs production hub | ignored |
 | HUB_SYNC-071 | `hub_sync_071_pn_counter_estimate` | PN-counter merge shape | ADR 0003 §Merge and conflict rules | ignored |
-| HUB_SYNC-077 | `hub_sync_077_allocate_number_convergence` | `item.allocate-number` hub sync | ADR 0003 §Work events | ignored |
+| HUB_SYNC-077 | `hub_sync_077_allocate_number_convergence` | `item.allocate-number` reducer + hub sequence authority | ADR 0003 §Hub-assigned issue numbers; ADR 0004 §Hub-authored allocation | deferred |
 | HUB_SYNC-080 | `hub_sync_080_strict_enum_conflict` | Conflict rows via hub sync | ADR 0003 §Conflict emission | ignored |
 | HUB_SYNC-081 | `hub_sync_081_missing_required_field_conflict` | Required-field conflict via sync | ADR 0003 §Semantic conflicts | ignored |
 | HUB_SYNC-082 | `hub_sync_082_relation_to_missing_entity` | Dangling relation conflict/quarantine | ADR 0003 §Semantic conflicts | ignored |
@@ -25,3 +25,26 @@ algorithm](../adr/0003-domain-model-and-replication-log.md),
 | HUB_SYNC-121 | `hub_sync_121_or_set_tombstones_after_compaction` | Tombstones after compaction | ADR 0004 §Tombstones | ignored |
 | HUB_SYNC-122 | `hub_sync_122_compaction_blocked_by_lagging_replica` | Compaction watermark safety | ADR 0004 §Compaction watermarks | ignored |
 | HUB_SYNC-130 | `hub_sync_130_unauthorized_actor_rejected` | IAM actor rejection | ADR 0004 §Push guarantees | ignored |
+
+## HUB_SYNC-077 — `item.allocate-number` (deferred)
+
+Monotonic, project-wide issue `number` and derived `identifier` (`{KEY}-{n}`)
+require a **central authority** to allocate without collision. That authority is
+the workspace hub in the current model (SRD §2.12, [ADR 0003 §Hub-assigned issue
+numbers](../adr/0003-domain-model-and-replication-log.md#hub-assigned-issue-numbers-deferred)).
+
+**Trade-off.** Human-friendly shorthand identifiers are valuable for CLI, docs,
+and agent prompts, but they impose **connectivity and failure-mode costs**: nodes
+cannot finalize display ids offline; hub unavailability delays allocation;
+sequence state is hub-critical; and multi-hub federation cannot reuse a single
+global counter without coordination.
+
+**Status.** Reducer and sync convergence test (`HUB_SYNC-077`) are **deferred**
+until product decides the benefit outweighs these costs or an acceptable
+distributed numbering scheme exists.
+
+**Possible federation model.** If Track later supports multiple federated hubs,
+display ids might use a tuple such as `{hub-number}.{sequence-on-hub}` (for
+example `2.42`) rather than a single workspace-wide monotonic integer—preserving
+local sequence allocation per hub while keeping cross-hub uniqueness via hub
+prefix. This is not designed or implemented.

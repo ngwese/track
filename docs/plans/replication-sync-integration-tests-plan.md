@@ -264,7 +264,7 @@ ADR 0003 policies.
 | OR-set remove | assignees | `item.unassign-user` | 074 |
 | OR-map attrs | relation metadata | `relation.set-attr` | 075 |
 | Lifecycle | archived flag | `item.archive`, `item.restore` | 076 |
-| Hub-assigned id | `number`, `identifier` | `item.allocate-number` | 077 |
+| Hub-assigned id | `number`, `identifier` | `item.allocate-number` | 077 *deferred* — central sequence authority; see [gap log §077](replication-sync-gap-log.md#hub_sync-077--itemallocate-number-deferred) |
 | Execution log | claim lease | `execution.claim` | 078 |
 
 Each test pattern:

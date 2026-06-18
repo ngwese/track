@@ -2,7 +2,8 @@
 
 > **Status:** Proposed (amended 2026-06-15)\
 > **Amendments:** [Integration test gaps](../plans/replication-sync-gap-log.md)
-> — protocol versioning, NDJSON errors, sync loop, snapshot pull
+> — protocol versioning, NDJSON errors, sync loop, snapshot pull, deferred
+> hub-assigned issue numbers
 
 **Date:** 2026-06-14\
 **Amended:** 2026-06-15
@@ -174,6 +175,19 @@ described in
    unexpectedly.
 - The hub may accept events in batch order while still persisting each as an
    immutable independent record.
+
+#### Hub-authored allocation events (deferred)
+
+Some event kinds are **hub-authored** rather than pushed by nodes—for example
+`item.allocate-number` (ADR 0003). The hub emits these after accepting
+`item.create` for issues, ordering allocation by issue ULID timestamp (SRD §2.12).
+This path requires the hub to hold durable per-project sequence state and for
+clients to reconcile allocation on sync when not connected at create time.
+
+Reducer and sync integration for hub-authored allocation are **deferred**
+([HUB_SYNC-077](../plans/replication-sync-gap-log.md#hub_sync-077--itemallocate-number-deferred)).
+See ADR 0003 for the central-authority trade-off and possible federated
+`{hub-number}.{sequence-on-hub}` numbering.
 
 #### Push response
 

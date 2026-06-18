@@ -101,9 +101,9 @@ async fn hub_sync_076_archive_restore_lifecycle() {
     cluster.shutdown().await.unwrap();
 }
 
-/// HUB_SYNC-077: Hub-assigned `item.allocate-number` convergence.
+/// HUB_SYNC-077: Hub-assigned `item.allocate-number` convergence (deferred).
 #[tokio::test]
-#[ignore = "gap: item.allocate-number hub sync path untested (HUB_SYNC-077)"]
+#[ignore = "deferred: item.allocate-number requires central sequence authority (HUB_SYNC-077); see docs/plans/replication-sync-gap-log.md and ADR 0003"]
 async fn hub_sync_077_allocate_number_convergence() {
     let cluster = TestCluster::start().await.unwrap();
     cluster.shutdown().await.unwrap();

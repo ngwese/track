@@ -2,7 +2,8 @@
 
 > **Status:** Proposed (amended 2026-06-15)\
 > **Amendments:** [Integration test gaps](../plans/replication-sync-gap-log.md)
-> — quarantine drain, reducer coverage, collection-merge invariants
+> — quarantine drain, reducer coverage, collection-merge invariants, deferred
+> hub-assigned issue numbers
 
 **Date:** 2026-06-14\
 **Amended:** 2026-06-15
@@ -230,7 +231,8 @@ Supported `entity_type` values: `workspace`, `project`, `issue`, `effort`,
 `component`, `relation`, `effort_relation`, `comment`.
 
 **Display identifiers** (`KITCHEN-42`) remain hub-assigned, issue-only shorthand
-for humans and agents. See SRD §2.12.
+for humans and agents. See SRD §2.12. Implementation is **deferred**; see
+[Hub-assigned issue numbers (deferred)](#hub-assigned-issue-numbers-deferred).
 
 Entity identity never changes after creation. Renames and type changes are
 represented as events.
@@ -465,6 +467,23 @@ Operational telemetry (`execution.*`) is part of the replication log, not a
 separate channel. It is **not** materialized to project YAML (SRD §2.15). When
 real-time fan-out is implemented, the hub will derive notification events such as
 `issue.claimed` from these replication records.
+
+### Hub-assigned issue numbers (deferred)
+
+`item.allocate-number` assigns monotonic issue `number` and computed
+`identifier` (`{project.key}-{number}`). See SRD §2.12. Unlike most work events,
+this kind implies **central sequence authority**: only the hub (or an equivalent
+coordinator) can guarantee unique, monotonic allocation across all creating
+nodes.
+
+Track defers reducer implementation and hub sync coverage for this event kind
+([HUB_SYNC-077](../plans/replication-sync-gap-log.md#hub_sync-077--itemallocate-number-deferred)).
+Before shipping, weigh the user benefit of `{KEY}-{n}` shorthand against hub
+connectivity requirements, allocation latency while offline, and hub-as-SPOF for
+display identity. If multi-hub federation is introduced later, consider
+`{hub-number}.{sequence-on-hub}` (for example `2.42`) as an alternative to a
+single workspace-wide counter—local sequence per hub with cross-hub uniqueness
+via hub prefix.
 
 ### Example work event JSON
 
