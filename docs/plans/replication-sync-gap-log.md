@@ -12,9 +12,6 @@ algorithm](../adr/0003-domain-model-and-replication-log.md),
 | HUB_SYNC-053 | `hub_sync_053_hub_restart` | Persistent hub | ADR 0004 §Test hub vs production hub | ignored |
 | HUB_SYNC-071 | `hub_sync_071_pn_counter_estimate` | PN-counter merge shape | ADR 0003 §Merge and conflict rules | ignored |
 | HUB_SYNC-077 | `hub_sync_077_allocate_number_convergence` | `item.allocate-number` reducer + hub sequence authority | ADR 0003 §Hub-assigned issue numbers; ADR 0004 §Hub-authored allocation | deferred |
-| HUB_SYNC-080 | `hub_sync_080_strict_enum_conflict` | Conflict rows via hub sync | ADR 0003 §Conflict emission | ignored |
-| HUB_SYNC-081 | `hub_sync_081_missing_required_field_conflict` | Required-field conflict via sync | ADR 0003 §Semantic conflicts | ignored |
-| HUB_SYNC-082 | `hub_sync_082_relation_to_missing_entity` | Dangling relation conflict/quarantine | ADR 0003 §Semantic conflicts | ignored |
 | HUB_SYNC-091 | `hub_sync_091_malformed_ndjson_mid_stream` | Malformed NDJSON mid-pull | ADR 0004 §Partial failure semantics | ignored |
 | HUB_SYNC-093 | `hub_sync_093_protocol_version_mismatch` | Protocol version negotiation | ADR 0004 §Protocol versioning | ignored |
 | HUB_SYNC-096 | `hub_sync_096_malformed_ndjson_mid_push` | Malformed NDJSON mid-push | ADR 0004 §Partial failure semantics | ignored |

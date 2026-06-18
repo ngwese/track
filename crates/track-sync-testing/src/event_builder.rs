@@ -112,6 +112,20 @@ impl EventBuilder {
         )
     }
 
+    /// `schema.snapshot` checkpointing the full canonical schema.
+    pub fn schema_snapshot(&mut self, schema: &CanonicalSchema) -> EventEnvelope {
+        self.schema_stream_seq += 1;
+        self.envelope(
+            StreamId::Schema,
+            self.schema_stream_seq,
+            EventKind::SchemaSnapshot,
+            serde_json::json!({
+                "schema_version": schema.version,
+                "snapshot": schema,
+            }),
+        )
+    }
+
     /// `item.create` for the standard entity.
     pub fn item_create(&mut self, title: &str, priority: &str) -> EventEnvelope {
         self.item_stream_seq += 1;

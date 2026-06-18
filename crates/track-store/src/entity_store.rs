@@ -115,4 +115,16 @@ pub trait EntityStore {
 
     /// Assemble a [`ReducedItem`] read model for validation and projection.
     fn get_reduced_item(&self, entity_uuid: &TrackUlid) -> Result<Option<ReducedItem>, StoreError>;
+
+    /// Entity UUIDs with headers in `project_uuid`.
+    fn list_entity_uuids_for_project(
+        &self,
+        project_uuid: &TrackUlid,
+    ) -> Result<Vec<TrackUlid>, StoreError>;
+
+    /// Active relations whose endpoints belong to `project_uuid`.
+    fn list_active_relations_for_project(
+        &self,
+        project_uuid: &TrackUlid,
+    ) -> Result<Vec<Relation>, StoreError>;
 }

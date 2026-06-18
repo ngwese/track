@@ -20,6 +20,7 @@ mod reduction_engine;
 mod register_merge;
 mod relation_reducer;
 mod schema_reducer;
+mod semantic_validation;
 mod snapshot_project;
 
 pub use blob_reducer::BlobReducer;

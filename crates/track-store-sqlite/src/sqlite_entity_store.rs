@@ -430,6 +430,63 @@ impl EntityStore for TrackSqliteStore {
             assignees,
         }))
     }
+
+    fn list_entity_uuids_for_project(
+        &self,
+        project_uuid: &TrackUlid,
+    ) -> Result<Vec<TrackUlid>, StoreError> {
+        let mut stmt = self
+            .conn
+            .prepare("SELECT entity_uuid FROM entities WHERE project_uuid = ?1")
+            .map_err(map_rusqlite_error)?;
+        let mut rows = stmt
+            .query(params![ulid_to_text(project_uuid)])
+            .map_err(map_rusqlite_error)?;
+        let mut entity_uuids = Vec::new();
+        while let Some(row) = rows.next().map_err(map_rusqlite_error)? {
+            entity_uuids.push(text_to_ulid(row_get::<String>(row, 0)?.as_str())?);
+        }
+        Ok(entity_uuids)
+    }
+
+    fn list_active_relations_for_project(
+        &self,
+        project_uuid: &TrackUlid,
+    ) -> Result<Vec<Relation>, StoreError> {
+        let mut stmt = self
+            .conn
+            .prepare(
+                "SELECT relation_uuid, project_uuid, relation_kind, from_entity_uuid,
+                        to_entity_uuid, attrs_json, created_hlc, deleted_by_event_uuid
+                 FROM relations
+                 WHERE project_uuid = ?1 AND deleted_by_event_uuid IS NULL",
+            )
+            .map_err(map_rusqlite_error)?;
+
+        let mut rows = stmt
+            .query(params![ulid_to_text(project_uuid)])
+            .map_err(map_rusqlite_error)?;
+
+        let mut relations = Vec::new();
+        while let Some(row) = rows.next().map_err(map_rusqlite_error)? {
+            let attrs: Option<String> = row.get(5).map_err(map_rusqlite_error)?;
+            relations.push(Relation {
+                relation_uuid: text_to_ulid(row_get::<String>(row, 0)?.as_str())?,
+                project_uuid: text_to_ulid(row_get::<String>(row, 1)?.as_str())?,
+                relation_kind: row_get(row, 2)?,
+                from_entity_uuid: text_to_ulid(row_get::<String>(row, 3)?.as_str())?,
+                to_entity_uuid: text_to_ulid(row_get::<String>(row, 4)?.as_str())?,
+                attrs: attrs
+                    .as_ref()
+                    .map(|json| serde_json::from_str(json))
+                    .transpose()
+                    .map_err(|e| StoreError::Serialization(e.to_string()))?,
+                created_hlc: row_get(row, 6)?,
+                deleted: false,
+            });
+        }
+        Ok(relations)
+    }
 }
 
 fn latest_log_event_for_project(

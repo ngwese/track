@@ -356,4 +356,18 @@ impl EntityStore for MemoryEntityStore {
             assignees,
         }))
     }
+
+    fn list_entity_uuids_for_project(
+        &self,
+        project_uuid: &TrackUlid,
+    ) -> Result<Vec<TrackUlid>, StoreError> {
+        self.list_entities_for_project(project_uuid)
+    }
+
+    fn list_active_relations_for_project(
+        &self,
+        project_uuid: &TrackUlid,
+    ) -> Result<Vec<Relation>, StoreError> {
+        self.list_relations_for_project(project_uuid)
+    }
 }

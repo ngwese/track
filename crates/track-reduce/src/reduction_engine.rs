@@ -2,15 +2,15 @@
 
 use std::collections::HashSet;
 
-use track_entity::{DefaultEntityValidator, EntityValidator};
+use track_entity::DefaultEntityValidator;
 use track_id::TrackUlid;
 use track_replication::{
     DefaultEventClassifier, EventClassifier, EventEnvelope, EventKind, EventPayload,
     NodeRegisterPayload,
 };
 use track_store::{
-    ConflictRecord, ConflictStore, EntityStore, LogStore, QuarantineRecord, QuarantineStore,
-    ReplicaProgress, ReplicaProgressStore, SchemaStore, SnapshotStore,
+    ConflictStore, EntityStore, LogStore, QuarantineRecord, QuarantineStore, ReplicaProgress,
+    ReplicaProgressStore, SchemaStore, SnapshotStore,
     memory::{
         MemoryBlobStore, MemoryEntityStore, MemoryReplicaProgressStore, MemorySchemaStore,
         MemorySnapshotStore,
@@ -19,7 +19,7 @@ use track_store::{
 
 use crate::{
     BlobReducer, CommentReducer, EventReducer, ExecutionReducer, ItemReducer, QuarantinePolicy,
-    ReduceContext, ReduceError, ReduceOutcome, RelationReducer, SchemaReducer,
+    ReduceContext, ReduceError, ReduceOutcome, RelationReducer, SchemaReducer, semantic_validation,
 };
 
 /// Orchestrates log intake, reducer dispatch, validation, and checkpointing.
@@ -240,6 +240,14 @@ where
     pub fn entity_store(&self) -> &E {
         &self.entity_store
     }
+
+    /// Semantic conflicts recorded for `entity_uuid`.
+    pub fn conflicts_for_entity(
+        &self,
+        entity_uuid: &TrackUlid,
+    ) -> Result<Vec<track_store::ConflictRecord>, ReduceError> {
+        Ok(self.conflict_store.list_for_entity(entity_uuid)?)
+    }
 }
 
 impl<L, Q, C> ReductionEngine<L, MemorySchemaStore, MemoryEntityStore, Q, C>
@@ -303,7 +311,11 @@ fn dispatch(
 
     // Step 3: schema events
     if classifier.is_schema(event.kind) {
-        return schema_reducer.reduce(event, ctx);
+        let outcome = schema_reducer.reduce(event, ctx)?;
+        if matches!(outcome, ReduceOutcome::SchemaUpdated) {
+            semantic_validation::revalidate_project(ctx, &event.project_uuid, event, validator)?;
+        }
+        return Ok(outcome);
     }
 
     // Step 4: quarantine work events when schema is unavailable.
@@ -333,19 +345,19 @@ fn dispatch(
             execution_reducer,
         )?;
 
-        // Steps 6–7: validate reduced items when applicable.
+        // Steps 6–7: validate reduced items and relations when applicable.
         if let Some(entity_uuid) = affected_entity_uuid(event)
-            && let Some(item) = ctx.entity_store.get_reduced_item(&entity_uuid)?
-            && let Some(schema) = &ctx.schema
-            && let Err(report) = validator.validate_item(schema, &item)
+            && semantic_validation::validate_item_and_record(ctx, event, &entity_uuid, validator)?
         {
-            ctx.conflict_store.insert(ConflictRecord {
-                conflict_uuid: TrackUlid::generate(),
-                event_uuid: event.event_uuid,
-                entity_uuid: Some(entity_uuid),
-                report,
-                created_at_hlc: event.hlc.format(),
-            })?;
+            return Ok(ReduceOutcome::Conflict);
+        }
+
+        if event.kind == EventKind::RelationCreate
+            && let Ok(payload) =
+                track_replication::RelationCreatePayload::from_value(&event.payload)
+            && let Some(relation) = ctx.entity_store.get_relation(&payload.relation_uuid)?
+            && semantic_validation::validate_relation_and_record(ctx, event, &relation)?
+        {
             return Ok(ReduceOutcome::Conflict);
         }
 

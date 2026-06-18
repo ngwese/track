@@ -1,8 +1,26 @@
 //! HUB_SYNC groups H and I — conflicts and protocol mismatch.
 
-use track_id::TrackUlid;
+use track_entity::ConflictType;
+use track_id::{SchemaVersion, TrackUlid};
 use track_replication::EventKind;
-use track_sync_testing::{TestCluster, bootstrap_node, bootstrap_project};
+use track_sync_testing::{TestCluster, bootstrap_node, bootstrap_project, merge_matrix_schema};
+
+fn assert_conflict_type(
+    replica: &track_sync_testing::ReplicaSimulator,
+    entity: &TrackUlid,
+    kind: ConflictType,
+) {
+    let conflicts = replica.conflicts_for_entity(entity).unwrap();
+    assert!(
+        conflicts.iter().any(|record| record
+            .report
+            .conflicts
+            .iter()
+            .any(|c| c.conflict_type == kind)),
+        "expected {kind:?} conflict on replica `{}`",
+        replica.node_uuid()
+    );
+}
 
 /// HUB_SYNC-090: Unknown event kind rejected at parse time.
 #[test]
@@ -44,42 +62,71 @@ async fn hub_sync_092_schema_version_ahead_quarantine() {
     cluster.shutdown().await.unwrap();
 }
 
-/// HUB_SYNC-080: Strict validation conflict after concurrent invalid enum.
+/// HUB_SYNC-080: Strict validation conflict after schema removes an enum member.
 #[tokio::test]
-#[ignore = "gap: conflict row integration via hub sync untested (HUB_SYNC-080)"]
 async fn hub_sync_080_strict_enum_conflict() {
     let cluster = TestCluster::start().await.unwrap();
     let entity = cluster.ids.entity;
 
     let mut a = cluster.spawn_a().await.unwrap();
-    bootstrap_project(&mut a).await.unwrap();
-    a.emit(|e| e.item_set_field("priority", serde_json::json!("not-a-valid-enum")))
+    bootstrap_node(&mut a).unwrap();
+    track_sync_testing::emit_schema(&mut a).unwrap();
+    a.emit(|e| e.item_create("Priority urgent item", "urgent"))
         .unwrap();
+
+    let mut schema_v2 = merge_matrix_schema();
+    schema_v2.version = SchemaVersion::new(2);
+    schema_v2.enums.get_mut("priority").unwrap().values =
+        vec!["low".into(), "medium".into(), "high".into()];
+    a.emit(|e| e.schema_snapshot(&schema_v2)).unwrap();
     a.push().await.unwrap();
 
     let mut b = cluster.spawn_b().await.unwrap();
     bootstrap_node(&mut b).unwrap();
     b.pull_until_idle(100).await.unwrap();
 
-    let _ = entity;
+    assert_conflict_type(&a, &entity, ConflictType::UnknownEnumValue);
+    assert_conflict_type(&b, &entity, ConflictType::UnknownEnumValue);
+    assert!(
+        b.reduced_item(&entity).unwrap().is_some(),
+        "expected reduced item retained with conflict"
+    );
+    assert!(
+        b.persisted_event_count() >= 3,
+        "expected schema, item, and snapshot events retained in log"
+    );
+
     cluster.shutdown().await.unwrap();
 }
 
 /// HUB_SYNC-081: Valid merge but missing required field → conflict record.
 #[tokio::test]
-#[ignore = "gap: required-field conflict via hub sync untested (HUB_SYNC-081)"]
 async fn hub_sync_081_missing_required_field_conflict() {
     let cluster = TestCluster::start().await.unwrap();
+    let entity = cluster.ids.entity;
+
+    let mut a = cluster.spawn_a().await.unwrap();
+    bootstrap_project(&mut a).await.unwrap();
+    a.emit(|e| e.item_clear_field("title")).unwrap();
+    a.push().await.unwrap();
+
+    let mut b = cluster.spawn_b().await.unwrap();
+    bootstrap_node(&mut b).unwrap();
+    b.pull_until_idle(100).await.unwrap();
+
+    assert_conflict_type(&a, &entity, ConflictType::MissingRequiredField);
+    assert_conflict_type(&b, &entity, ConflictType::MissingRequiredField);
+
     cluster.shutdown().await.unwrap();
 }
 
-/// HUB_SYNC-082: Relation to missing entity → conflict or quarantine.
+/// HUB_SYNC-082: Relation to missing entity → conflict, event retained.
 #[tokio::test]
-#[ignore = "gap: dangling relation conflict/quarantine via hub sync untested (HUB_SYNC-082)"]
 async fn hub_sync_082_relation_to_missing_entity() {
     let cluster = TestCluster::start().await.unwrap();
+    let entity = cluster.ids.entity;
     let rel = track_sync_testing::TestIds::pad("01J0REF00000000000004");
-    let missing = track_sync_testing::TestIds::pad("01JHM8X9K2Q4MISS");
+    let missing = TrackUlid::generate();
 
     let mut a = cluster.spawn_a().await.unwrap();
     bootstrap_project(&mut a).await.unwrap();
@@ -90,6 +137,14 @@ async fn hub_sync_082_relation_to_missing_entity() {
     let mut b = cluster.spawn_b().await.unwrap();
     bootstrap_node(&mut b).unwrap();
     b.pull_until_idle(100).await.unwrap();
+
+    assert_conflict_type(&a, &entity, ConflictType::MissingEntityRef);
+    assert_conflict_type(&b, &entity, ConflictType::MissingEntityRef);
+    assert_eq!(
+        b.relation_count(&entity).unwrap(),
+        1,
+        "expected dangling relation materialized with conflict"
+    );
 
     cluster.shutdown().await.unwrap();
 }

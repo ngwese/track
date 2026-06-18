@@ -250,4 +250,15 @@ impl ReplicaSimulator {
             .list_relations_for_entity(entity_uuid)?
             .len())
     }
+
+    /// Semantic conflict rows for `entity_uuid`.
+    pub fn conflicts_for_entity(
+        &self,
+        entity_uuid: &TrackUlid,
+    ) -> Result<Vec<track_store::ConflictRecord>, track_reduce::ReduceError> {
+        self.reducer
+            .lock()
+            .expect("reducer lock")
+            .conflicts_for_entity(entity_uuid)
+    }
 }

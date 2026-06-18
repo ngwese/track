@@ -16,6 +16,8 @@ pub enum ConflictType {
     UnknownEnumValue,
     /// Field value kind does not match the schema field kind.
     FieldTypeMismatch,
+    /// Relation endpoint references an entity not present in materialized state.
+    MissingEntityRef,
 }
 
 /// One validation failure on a reduced entity.
@@ -107,6 +109,7 @@ impl std::fmt::Display for ConflictType {
             Self::MissingRequiredField => "missing_required_field",
             Self::UnknownEnumValue => "unknown_enum_value",
             Self::FieldTypeMismatch => "field_type_mismatch",
+            Self::MissingEntityRef => "missing_entity_ref",
         };
         f.write_str(label)
     }
