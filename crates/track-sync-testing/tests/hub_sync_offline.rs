@@ -119,9 +119,7 @@ async fn hub_sync_022_late_node_full_catchup() {
 }
 
 /// HUB_SYNC-023: Work before schema on lagging node → quarantine → schema → retry.
-/// Gap: see `docs/plans/replication-sync-gap-log.md`.
 #[tokio::test]
-#[ignore = "gap: quarantine drain after schema pull not implemented (HUB_SYNC-023)"]
 async fn hub_sync_023_quarantine_until_schema_arrives() {
     let cluster = TestCluster::start().await.unwrap();
     let entity = cluster.ids.entity;
@@ -147,7 +145,7 @@ async fn hub_sync_023_quarantine_until_schema_arrives() {
 
     assert!(
         b.reduced_item(&entity).unwrap().is_some(),
-        "gap: quarantine retry after schema pull — expected item after schema"
+        "expected item after schema"
     );
 
     cluster.shutdown().await.unwrap();

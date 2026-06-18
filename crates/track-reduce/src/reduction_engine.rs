@@ -155,6 +155,8 @@ where
 
         if matches!(outcome, ReduceOutcome::SchemaUpdated) {
             self.current_schema = ctx.schema.clone();
+            // ADR 0003 step 9–10: drain quarantined work events now that schema advanced.
+            self.drain_quarantine_for_project(&event.project_uuid)?;
         }
 
         // Step 8: mark reduced and advance progress for applied outcomes.
@@ -185,6 +187,42 @@ where
     /// Current canonical schema cached by the engine.
     pub fn schema(&self) -> Option<&track_entity::CanonicalSchema> {
         self.current_schema.as_ref()
+    }
+
+    /// Re-apply quarantined events for `project_uuid` after schema catches up (ADR step 9).
+    fn drain_quarantine_for_project(
+        &mut self,
+        project_uuid: &TrackUlid,
+    ) -> Result<(), ReduceError> {
+        loop {
+            let records = self.quarantine_store.list(project_uuid)?;
+            if records.is_empty() {
+                return Ok(());
+            }
+
+            let current_version = self.current_schema.as_ref().map(|s| s.version);
+            let mut progressed = false;
+
+            for record in records {
+                let Some(stored) = self.log.get(&record.event_uuid)? else {
+                    continue;
+                };
+                if self
+                    .quarantine_policy
+                    .should_quarantine(&stored, current_version)
+                {
+                    continue;
+                }
+
+                self.quarantine_store.release(&record.event_uuid)?;
+                self.ingest_and_reduce(stored)?;
+                progressed = true;
+            }
+
+            if !progressed {
+                return Ok(());
+            }
+        }
     }
 
     /// Read a reduced item from the entity store.
@@ -289,9 +327,15 @@ fn reduce_work(
         EventKind::ItemCreate
         | EventKind::ItemSetField
         | EventKind::ItemAddLabel
+        | EventKind::ItemRemoveLabel
+        | EventKind::ItemAssignUser
         | EventKind::ItemSetState => item_reducer.reduce(event, ctx),
-        EventKind::CommentAdd => comment_reducer.reduce(event, ctx),
-        EventKind::RelationCreate => relation_reducer.reduce(event, ctx),
+        EventKind::CommentAdd | EventKind::CommentEdit | EventKind::CommentDelete => {
+            comment_reducer.reduce(event, ctx)
+        }
+        EventKind::RelationCreate | EventKind::RelationDelete => {
+            relation_reducer.reduce(event, ctx)
+        }
         EventKind::ExecutionClaim => execution_reducer.reduce(event, ctx),
         EventKind::BlobAdd | EventKind::BlobLink | EventKind::BlobUnlink => {
             blob_reducer.reduce(event, ctx)
@@ -305,8 +349,12 @@ fn affected_entity_uuid(event: &EventEnvelope) -> Option<TrackUlid> {
         EventKind::ItemCreate
         | EventKind::ItemSetField
         | EventKind::ItemAddLabel
+        | EventKind::ItemRemoveLabel
+        | EventKind::ItemAssignUser
         | EventKind::ItemSetState
         | EventKind::CommentAdd
+        | EventKind::CommentEdit
+        | EventKind::CommentDelete
         | EventKind::ExecutionClaim => event
             .payload
             .get("entity_uuid")

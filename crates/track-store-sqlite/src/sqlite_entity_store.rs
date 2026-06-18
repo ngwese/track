@@ -6,6 +6,7 @@ use track_entity::{
     Claim, Comment, EntityKind, FieldProvenance, FieldValue, ItemHeader, ReducedItem, Relation,
 };
 use track_id::{Actor, TrackUlid};
+use track_replication::Hlc;
 use track_store::{EntityStore, SetAddOp, SetRemoveOp, StoreError};
 
 use crate::error::map_rusqlite_error;
@@ -137,9 +138,14 @@ impl EntityStore for TrackSqliteStore {
         let Some(row) = rows.next().map_err(map_rusqlite_error)? else {
             return Ok(None);
         };
+        let hlc_wire: String = row_get(row, 1)?;
         Ok(Some(FieldProvenance {
             event_uuid: text_to_ulid(row_get::<String>(row, 0)?.as_str())?,
-            hlc_wire: row_get(row, 1)?,
+            hlc_wire: hlc_wire.clone(),
+            node_uuid: Hlc::parse(&hlc_wire)
+                .map(|hlc| hlc.node_uuid)
+                .unwrap_or_else(|_| TrackUlid::generate()),
+            stream_seq: 0,
         }))
     }
 
@@ -562,7 +568,11 @@ fn load_fields(
             field_name,
             FieldProvenance {
                 event_uuid: text_to_ulid(&event_text)?,
-                hlc_wire,
+                hlc_wire: hlc_wire.clone(),
+                node_uuid: Hlc::parse(&hlc_wire)
+                    .map(|hlc| hlc.node_uuid)
+                    .unwrap_or_else(|_| TrackUlid::generate()),
+                stream_seq: 0,
             },
         );
     }

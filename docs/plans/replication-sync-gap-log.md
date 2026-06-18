@@ -9,19 +9,8 @@ algorithm](../adr/0003-domain-model-and-replication-log.md),
 
 | HUB_SYNC ID | Test | Gap type | ADR / PR | Status |
 | --- | --- | --- | --- | --- |
-| HUB_SYNC-023 | `hub_sync_023_quarantine_until_schema_arrives` | Quarantine drain after schema pull (ADR 0003 step 9; ADR 0004 sync loop) | ADR amended; impl pending | ignored |
-| HUB_SYNC-031 | `hub_sync_031_concurrent_labels_union` | Bidirectional label OR-set via hub sync | ADR 0003 §Collection-merge invariants; impl pending | ignored |
-| HUB_SYNC-032 | `hub_sync_032_label_add_remove_or_set` | `item.remove-label` reducer | ADR 0003 §Reducer coverage | ignored |
-| HUB_SYNC-033 | `hub_sync_033_concurrent_assignees_or_set` | `item.assign-user` reducer | ADR 0003 §Reducer coverage | ignored |
-| HUB_SYNC-035 | `hub_sync_035_concurrent_comment_edit` | `comment.edit` reducer | ADR 0003 §Reducer coverage | ignored |
-| HUB_SYNC-036 | `hub_sync_036_relation_delete_recreate` | `relation.delete` reducer + OR-map recreate | ADR 0003 §Reducer coverage | ignored |
 | HUB_SYNC-042 | `hub_sync_042_snapshot_bootstrap` | Snapshot pull in sync client | ADR 0004 §Snapshot-assisted sync | ignored |
 | HUB_SYNC-053 | `hub_sync_053_hub_restart` | Persistent hub | ADR 0004 §Test hub vs production hub | ignored |
-| HUB_SYNC-064 | `hub_sync_064_or_set_labels` | Bidirectional label OR-set via hub sync | ADR 0003 §Collection-merge invariants; impl pending | ignored |
-| HUB_SYNC-065 | `hub_sync_065_or_set_assignees` | `item.assign-user` reducer | ADR 0003 §Reducer coverage | ignored |
-| HUB_SYNC-067 | `hub_sync_067_comment_edit_supersession` | `comment.edit` reducer | ADR 0003 §Reducer coverage | ignored |
-| HUB_SYNC-068 | `hub_sync_068_comment_delete_tombstone` | `comment.delete` reducer | ADR 0003 §Reducer coverage | ignored |
-| HUB_SYNC-070 | `hub_sync_070_relation_delete` | `relation.delete` reducer | ADR 0003 §Reducer coverage | ignored |
 | HUB_SYNC-071 | `hub_sync_071_pn_counter_estimate` | PN-counter merge shape | ADR 0003 §Merge and conflict rules | ignored |
 | HUB_SYNC-073 | `hub_sync_073_scalar_clear_field` | `item.clear-field` reducer | ADR 0003 §Reducer coverage | ignored |
 | HUB_SYNC-074 | `hub_sync_074_unassign_user_or_set` | `item.unassign-user` reducer | ADR 0003 §Reducer coverage | ignored |

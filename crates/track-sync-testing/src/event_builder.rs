@@ -1,5 +1,7 @@
 //! Fluent [`EventEnvelope`] builders for integration scenarios.
 
+use std::sync::{Arc, Mutex};
+
 use track_entity::CanonicalSchema;
 use track_id::{Actor, SchemaVersion, StreamId, TrackUlid};
 use track_replication::{EventEnvelope, EventKind, Hlc};
@@ -21,11 +23,16 @@ pub struct EventBuilder {
 
 impl EventBuilder {
     /// Creates a builder for `node_uuid` with optional signed clock skew in seconds.
-    pub fn new(ids: TestIds, node_uuid: TrackUlid, skew_secs: i64) -> Self {
+    pub fn new(
+        ids: TestIds,
+        node_uuid: TrackUlid,
+        skew_secs: i64,
+        hlc_seq: Option<Arc<Mutex<u64>>>,
+    ) -> Self {
         Self {
             ids,
             node_uuid,
-            hlc: SyntheticHlc::new(node_uuid, skew_secs),
+            hlc: SyntheticHlc::with_shared_seq(node_uuid, skew_secs, hlc_seq),
             event_counter: 0,
             schema_stream_seq: 0,
             item_stream_seq: 0,
@@ -38,9 +45,22 @@ impl EventBuilder {
         self.node_uuid
     }
 
+    /// Returns the next per-node deterministic `event_uuid`.
+    ///
+    /// IDs embed the authoring node (`01J0EV0…`, `01J0EV1…`, …) plus a local
+    /// counter so they stay unique across replicas. A shared counter
+    /// (`01J0EVT00001` on every node) collides on pull: `insert_if_absent`
+    /// skips the event and reduction never runs (HUB_SYNC-031).
+    ///
+    /// We use fixed node-prefixed IDs rather than [`TrackUlid::generate`]:
+    /// integration scenarios stay reproducible, failure output is readable
+    /// (node digit + sequence), and this matches other deterministic fixtures
+    /// in [`TestIds`]. Random IDs would be unique but non-deterministic and
+    /// harder to debug when multi-node sync fails.
     fn next_event_uuid(&mut self) -> TrackUlid {
         self.event_counter += 1;
-        TestIds::pad(&format!("01J0EVT{:05X}", self.event_counter))
+        let node_digit = node_uuid_event_digit(&self.node_uuid);
+        TestIds::pad(&format!("01J0EV{node_digit}{:05X}", self.event_counter))
     }
 
     fn envelope(
@@ -371,5 +391,30 @@ impl EventBuilder {
         );
         event.hlc = hlc;
         event
+    }
+}
+
+/// Stable digit encoding for [`EventBuilder`] UUID prefixes.
+///
+/// Standard HUB_SYNC nodes use `…N0`, `…N1`, `…N2` before zero-padding.
+fn node_uuid_event_digit(node_uuid: &TrackUlid) -> char {
+    let s = node_uuid.as_str();
+    if let Some(pos) = s.find('N') {
+        return s.as_bytes().get(pos + 1).copied().unwrap_or(b'0') as char;
+    }
+    s.chars().rfind(|c| c.is_ascii_digit()).unwrap_or('0')
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::ids::TestIds;
+
+    #[test]
+    fn event_uuids_differ_across_nodes_for_same_counter() {
+        let ids = TestIds::standard();
+        let mut a = EventBuilder::new(ids, ids.node_a, 0, None);
+        let mut b = EventBuilder::new(ids, ids.node_b, 0, None);
+        assert_ne!(a.next_event_uuid(), b.next_event_uuid());
     }
 }

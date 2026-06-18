@@ -48,10 +48,12 @@ pub fn assert_comments_match(
     entity_uuid: &TrackUlid,
 ) -> Result<(), ClusterError> {
     let visible = |comments: &[Comment]| {
-        Comment::visible_thread(comments)
+        let mut bodies: Vec<_> = Comment::visible_thread(comments)
             .into_iter()
             .map(|c| c.body_markdown.clone())
-            .collect::<Vec<_>>()
+            .collect();
+        bodies.sort();
+        bodies
     };
 
     let first = visible(

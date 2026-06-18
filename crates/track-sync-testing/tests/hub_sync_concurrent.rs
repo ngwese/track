@@ -39,7 +39,6 @@ async fn hub_sync_030_concurrent_title_lww() {
 
 /// HUB_SYNC-031: Different labels added offline → OR-set union.
 #[tokio::test]
-#[ignore = "gap: bidirectional label OR-set merge via hub sync (HUB_SYNC-031)"]
 async fn hub_sync_031_concurrent_labels_union() {
     let cluster = TestCluster::start().await.unwrap();
     let entity = cluster.ids.entity;
@@ -68,7 +67,6 @@ async fn hub_sync_031_concurrent_labels_union() {
 
 /// HUB_SYNC-032: A adds label X, B removes label X offline.
 #[tokio::test]
-#[ignore = "gap: item.remove-label reducer not wired in reduce_work (HUB_SYNC-032)"]
 async fn hub_sync_032_label_add_remove_or_set() {
     let cluster = TestCluster::start().await.unwrap();
     let entity = cluster.ids.entity;
@@ -100,7 +98,6 @@ async fn hub_sync_032_label_add_remove_or_set() {
 
 /// HUB_SYNC-033: Different assignees offline.
 #[tokio::test]
-#[ignore = "gap: item.assign-user reducer not wired in reduce_work (HUB_SYNC-033)"]
 async fn hub_sync_033_concurrent_assignees_or_set() {
     let cluster = TestCluster::start().await.unwrap();
 
@@ -157,7 +154,6 @@ async fn hub_sync_034_concurrent_comments_union() {
 
 /// HUB_SYNC-035: Same comment edited on two nodes.
 #[tokio::test]
-#[ignore = "gap: comment.edit reducer not implemented (HUB_SYNC-035)"]
 async fn hub_sync_035_concurrent_comment_edit() {
     let cluster = TestCluster::start().await.unwrap();
     let entity = cluster.ids.entity;
@@ -188,7 +184,6 @@ async fn hub_sync_035_concurrent_comment_edit() {
 
 /// HUB_SYNC-036: Relation create → delete → recreate same UUID (OR-map).
 #[tokio::test]
-#[ignore = "gap: relation.delete reducer not wired in reduce_work (HUB_SYNC-036)"]
 async fn hub_sync_036_relation_delete_recreate() {
     let cluster = TestCluster::start().await.unwrap();
     let entity = cluster.ids.entity;

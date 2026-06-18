@@ -45,6 +45,7 @@ impl ReplicaSimulator {
         ids: TestIds,
         node_uuid: TrackUlid,
         skew_secs: i64,
+        hlc_seq: Option<Arc<Mutex<u64>>>,
     ) -> Result<Self, ClusterError> {
         hub.hub
             .register_node(ids.workspace, node_uuid)
@@ -91,7 +92,7 @@ impl ReplicaSimulator {
             transport,
             sync,
             reducer,
-            events: EventBuilder::new(ids, node_uuid, skew_secs),
+            events: EventBuilder::new(ids, node_uuid, skew_secs, hlc_seq),
         })
     }
 

@@ -8,6 +8,7 @@ mod memory_quarantine_store;
 mod memory_replica_progress_store;
 mod memory_schema_store;
 mod memory_snapshot_store;
+mod or_set_cell;
 
 pub use memory_blob_store::MemoryBlobStore;
 pub use memory_conflict_store::MemoryConflictStore;

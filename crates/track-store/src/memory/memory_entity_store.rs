@@ -10,6 +10,8 @@ use track_id::{Actor, TrackUlid};
 
 use crate::{EntityStore, SetAddOp, SetRemoveOp, StoreError};
 
+use super::or_set_cell::{OrSetMember, merge_set_add, merge_set_remove};
+
 type FieldKey = (TrackUlid, String);
 type SetKey = (TrackUlid, String);
 
@@ -19,7 +21,7 @@ pub struct MemoryEntityStore {
     headers: HashMap<TrackUlid, ItemHeader>,
     scalar_fields: HashMap<FieldKey, FieldValue>,
     field_provenance: HashMap<FieldKey, FieldProvenance>,
-    set_members: HashMap<SetKey, BTreeMap<String, String>>,
+    set_members: HashMap<SetKey, BTreeMap<String, OrSetMember>>,
     comments: HashMap<TrackUlid, Vec<Comment>>,
     relations: HashMap<TrackUlid, Relation>,
     claims: HashMap<TrackUlid, Claim>,
@@ -97,19 +99,26 @@ impl EntityStore for MemoryEntityStore {
     fn apply_set_add(&mut self, op: SetAddOp) -> Result<(), StoreError> {
         self.ensure_entity(&op.entity_uuid)?;
         let key = (op.entity_uuid, op.set_name.clone());
-        self.set_members
+        let cell = self
+            .set_members
             .entry(key)
             .or_default()
-            .insert(op.member.clone(), op.hlc_wire);
+            .entry(op.member.clone())
+            .or_default();
+        merge_set_add(cell, &op);
         Ok(())
     }
 
     fn apply_set_remove(&mut self, op: SetRemoveOp) -> Result<(), StoreError> {
         self.ensure_entity(&op.entity_uuid)?;
         let key = (op.entity_uuid, op.set_name.clone());
-        if let Some(set) = self.set_members.get_mut(&key) {
-            set.remove(&op.member);
-        }
+        let cell = self
+            .set_members
+            .entry(key)
+            .or_default()
+            .entry(op.member.clone())
+            .or_default();
+        merge_set_remove(cell, &op);
         Ok(())
     }
 
@@ -121,7 +130,12 @@ impl EntityStore for MemoryEntityStore {
         Ok(self
             .set_members
             .get(&(*entity_uuid, set_name.to_string()))
-            .map(|m| m.keys().cloned().collect())
+            .map(|members| {
+                members
+                    .iter()
+                    .filter_map(|(name, cell)| cell.is_active().then_some(name.clone()))
+                    .collect()
+            })
             .unwrap_or_default())
     }
 

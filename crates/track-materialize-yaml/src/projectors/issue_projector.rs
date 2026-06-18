@@ -103,6 +103,8 @@ mod tests {
             track_entity::FieldProvenance {
                 event_uuid: TrackUlid::generate(),
                 hlc_wire: "2026-06-14T17:35:21.184Z/01JHM8X9K2Q4N0/0042".into(),
+                node_uuid: TrackUlid::parse("01JHM8X9K2Q4N0000000000000").unwrap(),
+                stream_seq: 42,
             },
         );
         item.set_field(
@@ -111,6 +113,8 @@ mod tests {
             track_entity::FieldProvenance {
                 event_uuid: TrackUlid::generate(),
                 hlc_wire: "2026-06-14T17:35:21.184Z/01JHM8X9K2Q4N0/0042".into(),
+                node_uuid: TrackUlid::parse("01JHM8X9K2Q4N0000000000000").unwrap(),
+                stream_seq: 42,
             },
         );
         item

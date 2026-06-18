@@ -10,4 +10,8 @@ pub struct FieldProvenance {
     pub event_uuid: TrackUlid,
     /// Wire HLC of the winning write.
     pub hlc_wire: String,
+    /// Authoring node of the winning write (for LWW tie-break).
+    pub node_uuid: TrackUlid,
+    /// Stream sequence of the winning write (for LWW tie-break).
+    pub stream_seq: u64,
 }

@@ -1,5 +1,7 @@
 //! Shared hub + workspace for multi-node scenarios.
 
+use std::sync::{Arc, Mutex};
+
 use track_hub_memory::TestHubHandle;
 use track_id::TrackUlid;
 
@@ -13,6 +15,8 @@ pub struct TestCluster {
     pub hub: TestHubHandle,
     /// Shared test identifiers.
     pub ids: TestIds,
+    /// Cluster-wide HLC sequence for deterministic cross-node ordering.
+    hlc_seq: Arc<Mutex<u64>>,
 }
 
 impl TestCluster {
@@ -20,7 +24,11 @@ impl TestCluster {
     pub async fn start() -> Result<Self, ClusterError> {
         let ids = TestIds::standard();
         let hub = TestHubHandle::start(ids.workspace).await?;
-        Ok(Self { hub, ids })
+        Ok(Self {
+            hub,
+            ids,
+            hlc_seq: Arc::new(Mutex::new(0)),
+        })
     }
 
     /// Spawns a registered replica with optional clock skew.
@@ -29,7 +37,14 @@ impl TestCluster {
         node: TrackUlid,
         skew_secs: i64,
     ) -> Result<ReplicaSimulator, ClusterError> {
-        ReplicaSimulator::new(&self.hub, self.ids, node, skew_secs).await
+        ReplicaSimulator::new(
+            &self.hub,
+            self.ids,
+            node,
+            skew_secs,
+            Some(self.hlc_seq.clone()),
+        )
+        .await
     }
 
     /// Spawns replica A from standard test IDs.

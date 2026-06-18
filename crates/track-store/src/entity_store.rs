@@ -20,6 +20,10 @@ pub struct SetAddOp {
     pub event_uuid: TrackUlid,
     /// Wire HLC of the add.
     pub hlc_wire: String,
+    /// Authoring node for deterministic OR-set ordering.
+    pub node_uuid: TrackUlid,
+    /// Stream sequence for tie-break after HLC and node.
+    pub stream_seq: u64,
 }
 
 /// Observed-remove set remove operation for labels or assignees.
@@ -35,6 +39,10 @@ pub struct SetRemoveOp {
     pub event_uuid: TrackUlid,
     /// Wire HLC of the remove.
     pub hlc_wire: String,
+    /// Authoring node for deterministic OR-set ordering.
+    pub node_uuid: TrackUlid,
+    /// Stream sequence for tie-break after HLC and node.
+    pub stream_seq: u64,
 }
 
 /// Materialized entity rows — maps to SQLite or in-memory maps in tests.

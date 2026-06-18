@@ -1,5 +1,6 @@
 //! HUB_SYNC group G — merge matrix (field shape × type).
 
+use track_entity::Comment;
 use track_id::{Actor, TrackUlid};
 use track_sync_testing::{
     TestCluster, assert_all_converged, assert_comments_match, bootstrap_node, bootstrap_project,
@@ -117,7 +118,6 @@ async fn hub_sync_063_scalar_enum_lww() {
 
 /// HUB_SYNC-064: OR-set labels union.
 #[tokio::test]
-#[ignore = "gap: bidirectional label OR-set merge via hub sync (HUB_SYNC-064)"]
 async fn hub_sync_064_or_set_labels() {
     let cluster = TestCluster::start().await.unwrap();
     let entity = cluster.ids.entity;
@@ -217,7 +217,6 @@ async fn hub_sync_072_state_key_lww() {
 
 /// HUB_SYNC-065: OR-set assignees union.
 #[tokio::test]
-#[ignore = "gap: item.assign-user reducer not wired in reduce_work (HUB_SYNC-065)"]
 async fn hub_sync_065_or_set_assignees() {
     let cluster = TestCluster::start().await.unwrap();
     let entity = cluster.ids.entity;
@@ -245,7 +244,6 @@ async fn hub_sync_065_or_set_assignees() {
 
 /// HUB_SYNC-067: Comment edit supersession (merge matrix).
 #[tokio::test]
-#[ignore = "gap: comment.edit reducer not implemented (HUB_SYNC-067)"]
 async fn hub_sync_067_comment_edit_supersession() {
     let cluster = TestCluster::start().await.unwrap();
     let entity = cluster.ids.entity;
@@ -254,6 +252,7 @@ async fn hub_sync_067_comment_edit_supersession() {
     let mut a = cluster.spawn_a().await.unwrap();
     bootstrap_project(&mut a).await.unwrap();
     a.emit(|e| e.comment_add(comment, "Original")).unwrap();
+    a.push().await.unwrap();
 
     let mut b = cluster.spawn_b().await.unwrap();
     bootstrap_node(&mut b).unwrap();
@@ -274,7 +273,6 @@ async fn hub_sync_067_comment_edit_supersession() {
 
 /// HUB_SYNC-068: Comment delete tombstone (merge matrix).
 #[tokio::test]
-#[ignore = "gap: comment.delete reducer not implemented (HUB_SYNC-068)"]
 async fn hub_sync_068_comment_delete_tombstone() {
     let cluster = TestCluster::start().await.unwrap();
     let entity = cluster.ids.entity;
@@ -291,7 +289,8 @@ async fn hub_sync_068_comment_delete_tombstone() {
     b.emit(|e| e.comment_delete(comment)).unwrap();
 
     TestCluster::sync_all(&mut [&mut a, &mut b]).await.unwrap();
-    assert!(a.comments(&entity).unwrap().is_empty());
+    assert!(Comment::visible_thread(&a.comments(&entity).unwrap()).is_empty());
+    assert!(Comment::visible_thread(&b.comments(&entity).unwrap()).is_empty());
     cluster.shutdown().await.unwrap();
 }
 
@@ -305,7 +304,6 @@ async fn hub_sync_071_pn_counter_estimate() {
 
 /// HUB_SYNC-070: Relation delete OR-map tombstone.
 #[tokio::test]
-#[ignore = "gap: relation.delete reducer not wired in reduce_work (HUB_SYNC-070)"]
 async fn hub_sync_070_relation_delete() {
     let cluster = TestCluster::start().await.unwrap();
     let entity = cluster.ids.entity;

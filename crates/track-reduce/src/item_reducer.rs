@@ -9,7 +9,7 @@ use track_id::TrackUlid;
 use track_replication::{
     EventEnvelope, EventKind, EventPayload, ItemCreatePayload, ItemSetFieldPayload,
 };
-use track_store::SetAddOp;
+use track_store::{SetAddOp, SetRemoveOp};
 
 use crate::merge::LwwRegister;
 use crate::{EventReducer, ReduceContext, ReduceError, ReduceOutcome};
@@ -22,6 +22,18 @@ pub struct ItemReducer;
 struct ItemAddLabelPayload {
     entity_uuid: TrackUlid,
     label: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct ItemRemoveLabelPayload {
+    entity_uuid: TrackUlid,
+    label: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct ItemAssignUserPayload {
+    entity_uuid: TrackUlid,
+    user: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -68,6 +80,8 @@ impl ItemReducer {
                 let provenance = FieldProvenance {
                     event_uuid: event.event_uuid,
                     hlc_wire: event.hlc.format(),
+                    node_uuid: event.node_uuid,
+                    stream_seq: event.stream_seq,
                 };
                 ctx.entity_store.set_scalar_field(
                     &payload.entity_uuid,
@@ -104,7 +118,13 @@ impl ItemReducer {
                 .get_field_provenance(&payload.entity_uuid, &payload.field)?,
         ) && let Ok(hlc) = track_replication::Hlc::parse(&prov.hlc_wire)
         {
-            register.merge(existing, hlc, prov.event_uuid, hlc.node_uuid, 0);
+            register.merge(
+                existing,
+                hlc,
+                prov.event_uuid,
+                prov.node_uuid,
+                prov.stream_seq,
+            );
         }
 
         register.merge(
@@ -115,10 +135,12 @@ impl ItemReducer {
             event.stream_seq,
         );
 
-        if register.value() == Some(&incoming_value) {
+        if register.winning_event_uuid() == Some(event.event_uuid) {
             let provenance = FieldProvenance {
                 event_uuid: event.event_uuid,
                 hlc_wire: event.hlc.format(),
+                node_uuid: event.node_uuid,
+                stream_seq: event.stream_seq,
             };
             ctx.entity_store.set_scalar_field(
                 &payload.entity_uuid,
@@ -143,13 +165,42 @@ impl ItemReducer {
         payload: ItemAddLabelPayload,
         ctx: &mut ReduceContext<'_>,
     ) -> Result<(), ReduceError> {
-        ctx.entity_store.apply_set_add(SetAddOp {
-            entity_uuid: payload.entity_uuid,
-            set_name: "labels".into(),
-            member: payload.label,
-            event_uuid: event.event_uuid,
-            hlc_wire: event.hlc.format(),
-        })?;
+        ctx.entity_store.apply_set_add(set_add_op(
+            event,
+            payload.entity_uuid,
+            "labels",
+            payload.label,
+        ))?;
+        Ok(())
+    }
+
+    fn apply_remove_label(
+        &self,
+        event: &EventEnvelope,
+        payload: ItemRemoveLabelPayload,
+        ctx: &mut ReduceContext<'_>,
+    ) -> Result<(), ReduceError> {
+        ctx.entity_store.apply_set_remove(set_remove_op(
+            event,
+            payload.entity_uuid,
+            "labels",
+            payload.label,
+        ))?;
+        Ok(())
+    }
+
+    fn apply_assign_user(
+        &self,
+        event: &EventEnvelope,
+        payload: ItemAssignUserPayload,
+        ctx: &mut ReduceContext<'_>,
+    ) -> Result<(), ReduceError> {
+        ctx.entity_store.apply_set_add(set_add_op(
+            event,
+            payload.entity_uuid,
+            "assignees",
+            payload.user,
+        ))?;
         Ok(())
     }
 
@@ -211,6 +262,16 @@ impl EventReducer for ItemReducer {
                 let payload: ItemAddLabelPayload = serde_json::from_value(event.payload.clone())
                     .map_err(|e| ReduceError::Parse(e.to_string()))?;
                 self.apply_add_label(event, payload, ctx)?;
+            }
+            EventKind::ItemRemoveLabel => {
+                let payload: ItemRemoveLabelPayload = serde_json::from_value(event.payload.clone())
+                    .map_err(|e| ReduceError::Parse(e.to_string()))?;
+                self.apply_remove_label(event, payload, ctx)?;
+            }
+            EventKind::ItemAssignUser => {
+                let payload: ItemAssignUserPayload = serde_json::from_value(event.payload.clone())
+                    .map_err(|e| ReduceError::Parse(e.to_string()))?;
+                self.apply_assign_user(event, payload, ctx)?;
             }
             EventKind::ItemSetState => {
                 let payload: ItemSetStatePayload = serde_json::from_value(event.payload.clone())
@@ -315,5 +376,39 @@ fn typed_json_to_field(
                 track_id::EntityUrn::from_str(s).map_err(|e| ReduceError::Parse(e.to_string()))?;
             Ok(FieldValue::EntityRef(urn))
         }
+    }
+}
+
+fn set_add_op(
+    event: &EventEnvelope,
+    entity_uuid: TrackUlid,
+    set_name: &str,
+    member: String,
+) -> SetAddOp {
+    SetAddOp {
+        entity_uuid,
+        set_name: set_name.into(),
+        member,
+        event_uuid: event.event_uuid,
+        hlc_wire: event.hlc.format(),
+        node_uuid: event.node_uuid,
+        stream_seq: event.stream_seq,
+    }
+}
+
+fn set_remove_op(
+    event: &EventEnvelope,
+    entity_uuid: TrackUlid,
+    set_name: &str,
+    member: String,
+) -> SetRemoveOp {
+    SetRemoveOp {
+        entity_uuid,
+        set_name: set_name.into(),
+        member,
+        event_uuid: event.event_uuid,
+        hlc_wire: event.hlc.format(),
+        node_uuid: event.node_uuid,
+        stream_seq: event.stream_seq,
     }
 }
