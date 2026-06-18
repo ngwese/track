@@ -1,5 +1,7 @@
 //! In-memory [`crate::HubService`] implementation (ADR 0004).
 
+use std::sync::Arc;
+
 use async_trait::async_trait;
 use tokio::sync::Mutex;
 use track_hub_protocol::snapshot::ProjectSnapshot;
@@ -10,7 +12,7 @@ use track_id::{NodeUuid, TrackUlid};
 use track_replication::EventEnvelope;
 
 use crate::HubError;
-use crate::auth::{AllowAllAuthorizer, Authorizer};
+use crate::auth::{AllowAllAuthorizer, SharedAuthorizer};
 use crate::cursor_reports::CursorReports;
 use crate::hub_service::HubService;
 use crate::node_registry::NodeRegistry;
@@ -30,12 +32,17 @@ pub struct InMemoryHubService {
     snapshot_catalog: Mutex<InMemorySnapshotCatalog>,
     stream_index: Mutex<StreamSeqIndex>,
     push_test_hooks: Mutex<PushTestHooks>,
-    authorizer: AllowAllAuthorizer,
+    authorizer: SharedAuthorizer,
 }
 
 impl InMemoryHubService {
     /// Create a hub service with allow-all auth and empty stores.
     pub fn new() -> Self {
+        Self::with_authorizer(Arc::new(AllowAllAuthorizer))
+    }
+
+    /// Create a hub service with a custom authorizer and empty stores.
+    pub fn with_authorizer(authorizer: SharedAuthorizer) -> Self {
         Self {
             hub_log: Mutex::new(InMemoryHubLog::new()),
             node_registry: Mutex::new(InMemoryNodeRegistry::new()),
@@ -43,7 +50,7 @@ impl InMemoryHubService {
             snapshot_catalog: Mutex::new(InMemorySnapshotCatalog::new()),
             stream_index: Mutex::new(StreamSeqIndex::new()),
             push_test_hooks: Mutex::new(PushTestHooks::new()),
-            authorizer: AllowAllAuthorizer,
+            authorizer,
         }
     }
 

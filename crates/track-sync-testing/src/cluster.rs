@@ -2,6 +2,7 @@
 
 use std::sync::{Arc, Mutex};
 
+use track_hub::InMemoryHubService;
 use track_hub_memory::TestHubHandle;
 use track_id::TrackUlid;
 
@@ -22,8 +23,28 @@ pub struct TestCluster {
 impl TestCluster {
     /// Starts a hub on loopback with standard test IDs.
     pub async fn start() -> Result<Self, ClusterError> {
+        Self::start_with_hub(TestHubHandle::start).await
+    }
+
+    /// Starts a hub whose push IAM actors are restricted to `allowed`.
+    pub async fn start_with_actor_allowlist(allowed: &[&str]) -> Result<Self, ClusterError> {
+        Self::start_with_hub(|workspace| {
+            let authorizer = Arc::new(track_hub::ActorAllowlistAuthorizer::new(allowed));
+            TestHubHandle::start_with(
+                workspace,
+                Arc::new(InMemoryHubService::with_authorizer(authorizer)),
+            )
+        })
+        .await
+    }
+
+    async fn start_with_hub<F, Fut>(start_hub: F) -> Result<Self, ClusterError>
+    where
+        F: FnOnce(TrackUlid) -> Fut,
+        Fut: std::future::Future<Output = Result<TestHubHandle, track_hub_memory::TestHubError>>,
+    {
         let ids = TestIds::standard();
-        let hub = TestHubHandle::start(ids.workspace).await?;
+        let hub = start_hub(ids.workspace).await?;
         Ok(Self {
             hub,
             ids,

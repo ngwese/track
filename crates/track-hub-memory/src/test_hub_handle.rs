@@ -25,6 +25,14 @@ pub struct TestHubHandle {
 impl TestHubHandle {
     /// Starts a hub on `127.0.0.1:0` with allow-all auth.
     pub async fn start(workspace_uuid: TrackUlid) -> Result<Self, TestHubError> {
+        Self::start_with(workspace_uuid, Arc::new(InMemoryHubService::new())).await
+    }
+
+    /// Starts a hub on `127.0.0.1:0` using a preconfigured service instance.
+    pub async fn start_with(
+        workspace_uuid: TrackUlid,
+        hub: Arc<InMemoryHubService>,
+    ) -> Result<Self, TestHubError> {
         let listener = TcpListener::bind(SocketAddr::from(([127, 0, 0, 1], 0)))
             .await
             .map_err(|err| TestHubError::Server(err.to_string()))?;
@@ -33,7 +41,6 @@ impl TestHubHandle {
             .map_err(|err| TestHubError::Server(err.to_string()))?;
         let base_url = Url::parse(&format!("http://{addr}"))?;
 
-        let hub = Arc::new(InMemoryHubService::new());
         let app = build_router(workspace_uuid, hub.clone());
 
         let (shutdown_tx, shutdown_rx) = oneshot::channel();

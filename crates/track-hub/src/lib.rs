@@ -22,7 +22,7 @@ mod stream_validation;
 pub mod compaction;
 pub mod in_memory;
 
-pub use auth::{AllowAllAuthorizer, Authorizer};
+pub use auth::{ActorAllowlistAuthorizer, AllowAllAuthorizer, Authorizer, SharedAuthorizer};
 pub use cursor_reports::CursorReports;
 pub use error::HubError;
 pub use hub_log::HubLog;

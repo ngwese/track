@@ -1,7 +1,7 @@
 //! HUB_SYNC groups H and I — conflicts and protocol mismatch.
 
 use track_entity::ConflictType;
-use track_id::{SchemaVersion, TrackUlid};
+use track_id::{Actor, SchemaVersion, TrackUlid};
 use track_replication::EventKind;
 use track_sync_testing::{TestCluster, bootstrap_node, bootstrap_project, merge_matrix_schema};
 
@@ -188,9 +188,30 @@ async fn hub_sync_096_malformed_ndjson_mid_push() {
 
 /// HUB_SYNC-130: Unauthorized actor rejected by hub.
 #[tokio::test]
-#[ignore = "gap: test hub uses allow-all authorizer (HUB_SYNC-130)"]
 async fn hub_sync_130_unauthorized_actor_rejected() {
-    let cluster = TestCluster::start().await.unwrap();
+    let cluster = TestCluster::start_with_actor_allowlist(&["user:greg"])
+        .await
+        .unwrap();
+
+    let mut a = cluster.spawn_a().await.unwrap();
+    bootstrap_project(&mut a).await.unwrap();
+    let offset_before = cluster.max_hub_offset().await;
+
+    let mut event = a
+        .events()
+        .item_set_field("title", serde_json::json!("intruder"));
+    event.actor = Actor::try_new("agent:intruder".to_string()).unwrap();
+    a.enqueue_outbound(event);
+    assert!(
+        a.push().await.is_err(),
+        "hub should reject unauthorized actor"
+    );
+    assert_eq!(
+        cluster.max_hub_offset().await,
+        offset_before,
+        "unauthorized push must not commit partial batch"
+    );
+
     cluster.shutdown().await.unwrap();
 }
 
