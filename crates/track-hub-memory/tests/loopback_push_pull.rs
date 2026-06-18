@@ -2,7 +2,7 @@
 
 use track_hub_memory::TestHubHandle;
 use track_hub_protocol::{
-    CursorSet, HubOffset, NodeCursor,
+    CursorSet, HubOffset, NodeCursor, TRACK_PROTOCOL_VERSION_HEADER,
     ndjson::{PullRecordLine, read_line},
 };
 use track_id::TrackUlid;
@@ -29,6 +29,7 @@ async fn loopback_push_pull_roundtrip() {
     let push_response = client
         .post(push_url)
         .header("content-type", "application/x-ndjson")
+        .header(TRACK_PROTOCOL_VERSION_HEADER, "1")
         .body(push_body)
         .send()
         .await
@@ -47,6 +48,7 @@ async fn loopback_push_pull_roundtrip() {
     let pull_response = client
         .get(pull_url)
         .header("accept", "application/x-ndjson")
+        .header(TRACK_PROTOCOL_VERSION_HEADER, "1")
         .send()
         .await
         .unwrap();
@@ -74,7 +76,12 @@ async fn loopback_push_pull_roundtrip() {
             "/workspaces/{workspace}/events?limit=10&cursors={encoded}"
         ))
         .unwrap();
-    let empty_response = client.get(empty_pull_url).send().await.unwrap();
+    let empty_response = client
+        .get(empty_pull_url)
+        .header(TRACK_PROTOCOL_VERSION_HEADER, "1")
+        .send()
+        .await
+        .unwrap();
     assert!(empty_response.status().is_success());
     assert!(empty_response.text().await.unwrap().trim().is_empty());
 

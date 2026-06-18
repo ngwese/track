@@ -26,11 +26,17 @@ pub enum SyncError {
     /// Invalid configuration.
     #[error("configuration error: {0}")]
     Config(String),
+    /// Unsupported hub protocol version (ADR 0004 §Protocol versioning).
+    #[error("protocol version mismatch: {0}")]
+    ProtocolVersion(String),
 }
 
 impl SyncError {
     /// Returns true when the caller should retry the same operation.
     pub fn is_retryable(&self) -> bool {
-        matches!(self, Self::Transport(_))
+        matches!(
+            self,
+            Self::Transport(_) | Self::ProtocolVersion(_) | Self::Config(_)
+        )
     }
 }

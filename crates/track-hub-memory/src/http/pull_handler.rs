@@ -3,7 +3,7 @@
 use axum::{
     body::Body,
     extract::{Path, Query, State},
-    http::{HeaderValue, StatusCode, header},
+    http::{HeaderMap, HeaderValue, StatusCode, header},
     response::{IntoResponse, Response},
 };
 use base64::Engine;
@@ -17,6 +17,7 @@ use track_hub_protocol::{
 use track_id::TrackUlid;
 
 use super::app_state::AppState;
+use super::protocol_version::{ensure_supported_request_version, response_version_header};
 
 /// Query parameters for GET pull.
 #[derive(Debug, serde::Deserialize)]
@@ -34,12 +35,15 @@ pub struct PullQuery {
 /// Streams durable events as NDJSON lines.
 pub async fn pull_events(
     State(state): State<AppState>,
+    headers: HeaderMap,
     Path(workspace_uuid): Path<TrackUlid>,
     Query(query): Query<PullQuery>,
 ) -> Result<Response, PullHttpError> {
     if workspace_uuid != state.workspace_uuid {
         return Err(PullHttpError::WorkspaceMismatch);
     }
+    ensure_supported_request_version(&headers)
+        .map_err(|_| PullHttpError::UnsupportedProtocolVersion)?;
 
     let known_cursors = decode_cursors(query.cursors.as_deref())?;
     let projects = decode_projects(query.projects.as_deref())?;
@@ -66,6 +70,8 @@ pub async fn pull_events(
         header::CONTENT_TYPE,
         HeaderValue::from_static("application/x-ndjson"),
     );
+    let (version_name, version_value) = response_version_header();
+    response.headers_mut().insert(version_name, version_value);
     Ok(response)
 }
 
@@ -103,6 +109,8 @@ fn decode_json_param(raw: &str) -> Result<String, PullHttpError> {
 pub enum PullHttpError {
     /// Workspace path parameter does not match hub instance.
     WorkspaceMismatch,
+    /// Unsupported protocol version header.
+    UnsupportedProtocolVersion,
     /// Query parameter decode failure.
     Decode(#[allow(dead_code)] String),
     /// JSON parse failure.
@@ -115,6 +123,9 @@ impl IntoResponse for PullHttpError {
     fn into_response(self) -> Response {
         let (status, message) = match self {
             Self::WorkspaceMismatch => (StatusCode::NOT_FOUND, "workspace not found"),
+            Self::UnsupportedProtocolVersion => {
+                (StatusCode::NOT_ACCEPTABLE, "unsupported protocol version")
+            }
             Self::Decode(_) | Self::Json(_) => (StatusCode::BAD_REQUEST, "invalid pull query"),
             Self::Hub(_) => (StatusCode::INTERNAL_SERVER_ERROR, "pull failed"),
         };

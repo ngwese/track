@@ -1,9 +1,14 @@
 //! HUB_SYNC groups H and I — conflicts and protocol mismatch.
 
 use track_entity::ConflictType;
+use track_hub_protocol::HubOffset;
 use track_id::{Actor, SchemaVersion, TrackUlid};
 use track_replication::EventKind;
-use track_sync_testing::{TestCluster, bootstrap_node, bootstrap_project, merge_matrix_schema};
+use track_sync::SyncError;
+use track_sync_testing::{
+    FaultConfig, PullFault, PushFault, TestCluster, bootstrap_node, bootstrap_project,
+    merge_matrix_schema,
+};
 
 fn assert_conflict_type(
     replica: &track_sync_testing::ReplicaSimulator,
@@ -30,9 +35,23 @@ fn hub_sync_090_unknown_event_kind_rejected() {
 
 /// HUB_SYNC-093: Protocol version header mismatch.
 #[tokio::test]
-#[ignore = "gap: protocol version negotiation not specified in ADR 0004 (HUB_SYNC-093)"]
 async fn hub_sync_093_protocol_version_mismatch() {
     let cluster = TestCluster::start().await.unwrap();
+
+    let mut a = cluster.spawn_a().await.unwrap();
+    bootstrap_node(&mut a).unwrap();
+    a.emit(|e| e.item_set_field("title", serde_json::json!("version probe")))
+        .unwrap();
+
+    a.transport().set_protocol_version(99);
+    let err = a.push().await.unwrap_err();
+    if let track_sync_testing::ClusterError::Sync(sync_err) = &err {
+        assert!(matches!(sync_err, SyncError::ProtocolVersion(_)));
+        assert!(sync_err.is_retryable());
+    } else {
+        panic!("expected protocol version error, got {err:?}");
+    }
+
     cluster.shutdown().await.unwrap();
 }
 
@@ -151,9 +170,42 @@ async fn hub_sync_082_relation_to_missing_entity() {
 
 /// HUB_SYNC-091: Malformed NDJSON mid-stream aborts without partial cursor advance.
 #[tokio::test]
-#[ignore = "gap: malformed NDJSON mid-stream handling not injectable via HttpTransport (HUB_SYNC-091)"]
 async fn hub_sync_091_malformed_ndjson_mid_stream() {
     let cluster = TestCluster::start().await.unwrap();
+
+    let mut a = cluster.spawn_a().await.unwrap();
+    bootstrap_project(&mut a).await.unwrap();
+    for i in 0..4 {
+        a.emit(|e| e.item_set_field("estimate", serde_json::json!(i + 1)))
+            .unwrap();
+    }
+    a.push().await.unwrap();
+
+    let mut b = cluster.spawn_b().await.unwrap();
+    bootstrap_node(&mut b).unwrap();
+    b.push().await.unwrap();
+
+    let before_fault = b.persisted_event_count();
+    b.transport().set_faults(FaultConfig {
+        pull: Some(PullFault::MalformedLineAfter(2)),
+        push: None,
+    });
+
+    assert!(
+        b.pull_page(10).await.is_err(),
+        "expected malformed pull line"
+    );
+
+    assert_eq!(
+        b.persisted_event_count(),
+        before_fault + 2,
+        "only records before malformed line may be persisted"
+    );
+
+    b.transport().clear_faults();
+    b.pull_until_idle(100).await.unwrap();
+    assert!(b.persisted_event_count() >= before_fault + 5);
+
     cluster.shutdown().await.unwrap();
 }
 
@@ -180,9 +232,42 @@ async fn hub_sync_094_foreign_workspace_rejected() {
 
 /// HUB_SYNC-096: Malformed NDJSON mid-push stream.
 #[tokio::test]
-#[ignore = "gap: malformed NDJSON mid-push not injectable via HttpTransport (HUB_SYNC-096)"]
 async fn hub_sync_096_malformed_ndjson_mid_push() {
     let cluster = TestCluster::start().await.unwrap();
+
+    let mut a = cluster.spawn_a().await.unwrap();
+    bootstrap_node(&mut a).unwrap();
+    a.push().await.unwrap();
+    let offset_before = cluster.max_hub_offset().await;
+
+    for i in 0..3 {
+        a.emit(|e| e.item_set_field("estimate", serde_json::json!(i + 1)))
+            .unwrap();
+    }
+
+    a.transport().set_faults(FaultConfig {
+        pull: None,
+        push: Some(PushFault::MalformedLineAfter(1)),
+    });
+    assert!(
+        a.push().await.is_err(),
+        "expected malformed push body failure"
+    );
+    assert_eq!(
+        cluster.max_hub_offset().await,
+        HubOffset(offset_before.as_u64() + 1),
+        "events before malformed line must remain durable on hub"
+    );
+    assert_eq!(
+        a.outbound_pending_count(),
+        3,
+        "client must retry unacknowledged events after malformed push"
+    );
+
+    a.transport().clear_faults();
+    a.push().await.unwrap();
+    assert_eq!(a.outbound_pending_count(), 0);
+
     cluster.shutdown().await.unwrap();
 }
 

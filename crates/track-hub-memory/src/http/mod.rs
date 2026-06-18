@@ -1,6 +1,7 @@
 //! Axum HTTP binding for the in-memory hub (ADR 0004 §Wire format).
 
 mod app_state;
+mod protocol_version;
 mod pull_handler;
 mod push_handler;
 mod router;

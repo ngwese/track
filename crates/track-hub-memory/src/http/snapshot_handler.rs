@@ -3,24 +3,34 @@
 use axum::{
     Json,
     extract::{Path, State},
-    http::StatusCode,
+    http::{HeaderMap, StatusCode},
     response::IntoResponse,
 };
 use track_id::TrackUlid;
 
 use super::app_state::AppState;
+use super::protocol_version::{ensure_supported_request_version, response_version_header};
 
 /// Returns the newest published snapshot for a project.
 pub async fn latest_project_snapshot(
     State(state): State<AppState>,
+    headers: HeaderMap,
     Path((workspace_uuid, project_uuid)): Path<(TrackUlid, TrackUlid)>,
 ) -> impl IntoResponse {
     if workspace_uuid != state.workspace_uuid {
         return StatusCode::NOT_FOUND.into_response();
     }
+    if ensure_supported_request_version(&headers).is_err() {
+        return StatusCode::NOT_ACCEPTABLE.into_response();
+    }
 
+    let (version_name, version_value) = response_version_header();
     match state.hub.latest_project_snapshot(project_uuid).await {
-        Some(snapshot) => (StatusCode::OK, Json(snapshot)).into_response(),
+        Some(snapshot) => {
+            let mut response = (StatusCode::OK, Json(snapshot)).into_response();
+            response.headers_mut().insert(version_name, version_value);
+            response
+        }
         None => StatusCode::NOT_FOUND.into_response(),
     }
 }
@@ -28,7 +38,8 @@ pub async fn latest_project_snapshot(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use track_hub_protocol::{HubOffset, snapshot::ProjectSnapshot};
+    use axum::http::HeaderMap;
+    use track_hub_protocol::{HubOffset, TRACK_PROTOCOL_VERSION_HEADER, snapshot::ProjectSnapshot};
     use track_id::TrackUlid;
 
     fn pad_ulid(short: &str) -> String {
@@ -45,9 +56,16 @@ mod tests {
             workspace_uuid: workspace,
         };
 
-        let response = latest_project_snapshot(State(state), Path((workspace, project)))
-            .await
-            .into_response();
+        let mut headers = HeaderMap::new();
+        headers.insert(
+            TRACK_PROTOCOL_VERSION_HEADER,
+            axum::http::HeaderValue::from_static("1"),
+        );
+
+        let response =
+            latest_project_snapshot(State(state), headers.clone(), Path((workspace, project)))
+                .await
+                .into_response();
 
         assert_eq!(response.status(), StatusCode::NOT_FOUND);
     }
@@ -83,7 +101,12 @@ mod tests {
             hub,
             workspace_uuid: workspace,
         };
-        let response = latest_project_snapshot(State(state), Path((workspace, project)))
+        let mut headers = HeaderMap::new();
+        headers.insert(
+            TRACK_PROTOCOL_VERSION_HEADER,
+            axum::http::HeaderValue::from_static("1"),
+        );
+        let response = latest_project_snapshot(State(state), headers, Path((workspace, project)))
             .await
             .into_response();
 
