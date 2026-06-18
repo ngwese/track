@@ -4,6 +4,7 @@
 
 mod assert_convergence;
 mod cluster;
+mod compaction;
 mod error;
 mod event_builder;
 mod fault_injection;

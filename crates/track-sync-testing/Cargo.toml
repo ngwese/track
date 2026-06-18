@@ -17,6 +17,7 @@ thiserror = { workspace = true }
 time = { workspace = true }
 tokio = { workspace = true }
 track-entity = { workspace = true }
+track-hub = { workspace = true }
 track-hub-memory = { workspace = true }
 track-hub-protocol = { workspace = true }
 track-id = { workspace = true }

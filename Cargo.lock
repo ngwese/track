@@ -1865,6 +1865,7 @@ dependencies = [
  "time",
  "tokio",
  "track-entity",
+ "track-hub",
  "track-hub-memory",
  "track-hub-protocol",
  "track-id",

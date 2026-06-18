@@ -31,4 +31,7 @@ pub trait HubLog: Send + Sync {
 
     /// Return the next hub offset to assign (one greater than the current max).
     async fn peek_next_offset(&self) -> HubOffset;
+
+    /// Remove durable records at or below `through_offset` (test hub compaction).
+    async fn compact_through(&mut self, through_offset: HubOffset) -> Result<usize, HubError>;
 }

@@ -53,6 +53,11 @@ impl InMemoryHubLog {
             .map(|stored| (stored.hub_offset, stored.event.clone()))
             .collect()
     }
+
+    /// Count of durable records currently retained.
+    pub fn record_count(&self) -> usize {
+        self.records.len()
+    }
 }
 
 #[async_trait]
@@ -126,5 +131,13 @@ impl HubLog for InMemoryHubLog {
 
     async fn peek_next_offset(&self) -> HubOffset {
         HubOffset(self.next_offset)
+    }
+
+    async fn compact_through(&mut self, through_offset: HubOffset) -> Result<usize, HubError> {
+        let before = self.records.len();
+        self.records
+            .retain(|stored| stored.hub_offset > through_offset);
+        self.by_uuid.retain(|_, offset| *offset > through_offset);
+        Ok(before - self.records.len())
     }
 }

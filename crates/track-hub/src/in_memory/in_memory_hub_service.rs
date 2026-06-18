@@ -3,10 +3,13 @@
 use async_trait::async_trait;
 use tokio::sync::Mutex;
 use track_hub_protocol::snapshot::ProjectSnapshot;
-use track_hub_protocol::{CursorSet, HubOffset, PullRequest, PulledEvent, PushResponse};
+use track_hub_protocol::{
+    CompactionWatermark, CursorSet, HubOffset, PullRequest, PulledEvent, PushResponse,
+};
 use track_id::{NodeUuid, TrackUlid};
 use track_replication::EventEnvelope;
 
+use crate::HubError;
 use crate::auth::{AllowAllAuthorizer, Authorizer};
 use crate::cursor_reports::CursorReports;
 use crate::hub_service::HubService;
@@ -100,6 +103,48 @@ impl InMemoryHubService {
         let log = self.hub_log.lock().await;
         let records = log.records_through(through_offset);
         boundary_cursors_from_records(&records, workspace_uuid, through_offset, Some(project_uuid))
+    }
+
+    /// Minimum safe compaction boundary from active replica cursor reports.
+    pub async fn compaction_watermark(&self, workspace_uuid: TrackUlid) -> CompactionWatermark {
+        let reports = self
+            .cursor_reports
+            .lock()
+            .await
+            .list_reports(workspace_uuid)
+            .await
+            .unwrap_or_default();
+        let log = self.hub_log.lock().await;
+        let max = log.max_assigned_offset();
+        let events = log.records_through(max);
+        crate::compaction::compute_watermark(&reports, &events)
+    }
+
+    /// Compact events at or below `through_offset` when watermark and snapshot allow.
+    pub async fn try_compact_through(
+        &self,
+        workspace_uuid: TrackUlid,
+        project_uuid: TrackUlid,
+        through_offset: HubOffset,
+    ) -> Result<usize, HubError> {
+        let watermark = self.compaction_watermark(workspace_uuid).await;
+        let snapshot = self
+            .snapshot_catalog
+            .lock()
+            .await
+            .latest_project_snapshot(project_uuid);
+        let snapshot_through = snapshot
+            .map(|s| s.boundary.through_hub_offset)
+            .unwrap_or(HubOffset::ZERO);
+
+        let mut log = self.hub_log.lock().await;
+        crate::compaction::compact_through(&mut *log, watermark, snapshot_through, through_offset)
+            .await
+    }
+
+    /// Count of durable records currently in the hub log.
+    pub async fn hub_record_count(&self) -> usize {
+        self.hub_log.lock().await.record_count()
     }
 }
 

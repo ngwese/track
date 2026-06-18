@@ -15,7 +15,6 @@ algorithm](../adr/0003-domain-model-and-replication-log.md),
 | HUB_SYNC-091 | `hub_sync_091_malformed_ndjson_mid_stream` | Malformed NDJSON mid-pull | ADR 0004 §Partial failure semantics | ignored |
 | HUB_SYNC-093 | `hub_sync_093_protocol_version_mismatch` | Protocol version negotiation | ADR 0004 §Protocol versioning | ignored |
 | HUB_SYNC-096 | `hub_sync_096_malformed_ndjson_mid_push` | Malformed NDJSON mid-push | ADR 0004 §Partial failure semantics | ignored |
-| HUB_SYNC-122 | `hub_sync_122_compaction_blocked_by_lagging_replica` | Compaction watermark safety | ADR 0004 §Compaction watermarks | ignored |
 | HUB_SYNC-130 | `hub_sync_130_unauthorized_actor_rejected` | IAM actor rejection | ADR 0004 §Push guarantees | ignored |
 
 ## HUB_SYNC-077 — `item.allocate-number` (deferred)

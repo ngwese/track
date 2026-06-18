@@ -1,5 +1,6 @@
 //! Push then pull orchestration (ADR 0004 + ADR 0003 reduction).
 
+use track_hub_protocol::CursorSet;
 use track_id::{NodeUuid, TrackUlid};
 use track_store::LogStore;
 
@@ -89,6 +90,11 @@ where
             self.pull_projects.clone(),
         );
         session.run().await
+    }
+
+    /// Per-authoring-node cursors persisted for the next pull request.
+    pub async fn known_cursors(&self) -> Result<CursorSet, SyncError> {
+        Ok(self.cursor_store.load().await?.known_cursors)
     }
 
     /// Fetch the newest published snapshot and seed local cursors at the boundary.

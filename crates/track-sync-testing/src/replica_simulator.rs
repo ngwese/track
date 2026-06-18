@@ -206,6 +206,11 @@ impl ReplicaSimulator {
         Ok(())
     }
 
+    /// Per-authoring-node pull cursors for hub watermark reports.
+    pub async fn known_pull_cursors(&self) -> Result<track_hub_protocol::CursorSet, ClusterError> {
+        self.sync.known_cursors().await.map_err(ClusterError::Sync)
+    }
+
     /// Bootstrap node registration on the hub.
     pub fn bootstrap_register(&mut self) -> Result<(), ClusterError> {
         let event = self.events.node_register();

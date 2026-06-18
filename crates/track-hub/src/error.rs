@@ -37,6 +37,17 @@ pub enum HubError {
     /// Storage or internal failure.
     #[error("{0}")]
     Internal(String),
+    /// Compaction cannot proceed because a replica watermark lags the requested boundary.
+    #[error("compaction blocked: replica watermark {watermark} < requested {requested}")]
+    CompactionBlocked {
+        /// Minimum reported replica cursor offset.
+        watermark: u64,
+        /// Requested compaction boundary.
+        requested: u64,
+    },
+    /// Compaction requires a published snapshot through the boundary.
+    #[error("compaction blocked: no snapshot through offset {0}")]
+    CompactionNoSnapshot(u64),
 }
 
 impl HubError {
