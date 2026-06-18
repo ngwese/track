@@ -1,4 +1,7 @@
 //! HUB_SYNC group F — recovery and retry.
+//!
+//! Hub restart durability is covered by [ADR 0005](../../../docs/adr/0005-hub-implementation-conformance.md)
+//! (`HUB-CONF-001` in `track-hub-conformance-testing`), not this file.
 
 use track_sync_testing::{
     FaultConfig, PullFault, PushFault, TestCluster, bootstrap_node, bootstrap_project, priority_of,
@@ -145,13 +148,5 @@ async fn hub_sync_055_session_continues_cursors() {
         .unwrap();
     assert_eq!(priority_of(&b, &entity), Some("low".into()));
 
-    cluster.shutdown().await.unwrap();
-}
-
-/// HUB_SYNC-053: Hub restart loses in-memory state (documented limitation).
-#[tokio::test]
-#[ignore = "gap: persistent hub required for restart recovery (HUB_SYNC-053)"]
-async fn hub_sync_053_hub_restart() {
-    let cluster = TestCluster::start().await.unwrap();
     cluster.shutdown().await.unwrap();
 }

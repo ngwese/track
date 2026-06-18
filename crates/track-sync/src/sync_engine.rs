@@ -63,6 +63,11 @@ where
         &mut self.integrator
     }
 
+    /// Returns mutable access to the hub transport.
+    pub fn transport_mut(&mut self) -> &mut T {
+        &mut self.transport
+    }
+
     /// Push outbound queue until all events durable or fatal error.
     pub async fn push_outbound(&mut self) -> Result<PushSummary, SyncError> {
         let mut session = PushSession::new(

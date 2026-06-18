@@ -1,0 +1,24 @@
+[package]
+name = "track-hub-conformance-testing"
+version = "0.1.0"
+description = "Generic hub implementation conformance suite (ADR 0005)"
+publish = false
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+async-trait = { workspace = true }
+serde_json = { workspace = true }
+tempfile = "3"
+thiserror = { workspace = true }
+tokio = { workspace = true }
+track-entity = { workspace = true }
+track-hub-protocol = { workspace = true }
+track-id = { workspace = true }
+track-reduce = { workspace = true }
+track-replication = { workspace = true }
+track-store = { workspace = true }
+track-sync = { workspace = true }
+track-sync-testing = { workspace = true }
+url = { workspace = true }

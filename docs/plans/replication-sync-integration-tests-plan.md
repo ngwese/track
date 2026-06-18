@@ -243,7 +243,6 @@ Each scenario gets:
 | HUB_SYNC-050 | Pull interrupted after 2 of 5 events; retry | 2 | 5 events, no dup rows |
 | HUB_SYNC-051 | Push interrupted mid-NDJSON; retry same UUIDs | 2 | idempotent hub |
 | HUB_SYNC-052 | Push timeout (no response); retry | 2 | no double append |
-| HUB_SYNC-053 | Hub restart (new `TestHubHandle`) — *persistent hub gap* | 2 | document in-memory limitation |
 | HUB_SYNC-054 | Node offline 30 simulated days; cursor stale; full catch-up | 2 | converges |
 | HUB_SYNC-055 | New sync session (new `SyncEngine`) same cursor file | 2 | continues not resets |
 
@@ -444,7 +443,8 @@ These scenarios are **expected to fail** on first implementation:
 3. **Conflict rows** for strict validation after concurrent schema change.
 4. **`FaultInjectingTransport`** not yet in `track-sync`.
 5. **Snapshot-assisted catch-up** (HUB_SYNC-042) — snapshot publish/pull incomplete.
-6. **Persistent hub** across restart (HUB_SYNC-053) — in-memory hub only.
+6. **Hub restart durability** — [ADR 0005](../adr/0005-hub-implementation-conformance.md)
+   (`HUB-CONF-001`); requires persistent hub crate.
 7. **Protocol version** negotiation (HUB_SYNC-093) — unspecified in ADR 0004.
 8. **HLC timezone normalization** (HUB_SYNC-011) — may need ADR 0004 HLC follow-on.
 9. **`accepted` vs `durable`** split (HUB_SYNC-100) — in-memory hub may only emit

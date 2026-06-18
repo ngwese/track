@@ -10,6 +10,7 @@ members = [
     "crates/track-materialize-yaml",
     "crates/track-hub-protocol",
     "crates/track-hub",
+    "crates/track-hub-conformance-testing",
     "crates/track-hub-memory",
     "crates/track-sync",
     "crates/track-sync-testing",
@@ -31,6 +32,7 @@ track-materialize-yaml = { path = "crates/track-materialize-yaml" }
 track-hub-protocol = { path = "crates/track-hub-protocol" }
 track-hub = { path = "crates/track-hub" }
 track-hub-memory = { path = "crates/track-hub-memory" }
+track-hub-conformance-testing = { path = "crates/track-hub-conformance-testing" }
 track-sync = { path = "crates/track-sync" }
 track-sync-testing = { path = "crates/track-sync-testing" }
 

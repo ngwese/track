@@ -518,7 +518,8 @@ at zero.
 Embeddable in-memory test hubs (loopback HTTP without durable storage) are
 permitted for integration tests but **do not** satisfy restart-recovery
 requirements. Production hubs must durably retain the log across process
-restart (`HUB_SYNC-053`).
+restart; see [ADR 0005: Hub implementation conformance](0005-hub-implementation-conformance.md)
+(`HUB-CONF-001`).
 
 ## Snapshot protocol
 

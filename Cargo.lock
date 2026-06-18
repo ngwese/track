@@ -1701,6 +1701,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "track-hub-conformance-testing"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "serde_json",
+ "tempfile",
+ "thiserror 2.0.18",
+ "tokio",
+ "track-entity",
+ "track-hub-protocol",
+ "track-id",
+ "track-reduce",
+ "track-replication",
+ "track-store",
+ "track-sync",
+ "track-sync-testing",
+ "url",
+]
+
+[[package]]
 name = "track-hub-memory"
 version = "0.1.0"
 dependencies = [

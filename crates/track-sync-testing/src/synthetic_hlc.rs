@@ -18,6 +18,7 @@ pub struct SyntheticHlc {
     base: OffsetDateTime,
 }
 
+#[allow(dead_code)] // `new`, `next_at`, `format_with_offset` support HUB_SYNC clock integration tests
 impl SyntheticHlc {
     /// Creates an HLC factory for `node_uuid` with optional signed skew in seconds.
     pub fn new(node_uuid: TrackUlid, skew_secs: i64) -> Self {

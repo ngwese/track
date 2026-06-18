@@ -46,6 +46,11 @@ impl HttpTransport {
         self.protocol_version
     }
 
+    /// Retargets the transport after a hub process restart on a new loopback port.
+    pub fn set_base_url(&mut self, base_url: Url) {
+        self.base_url = base_url;
+    }
+
     fn push_url(&self, workspace_uuid: TrackUlid, node_uuid: NodeUuid) -> Result<Url, SyncError> {
         self.base_url
             .join(&format!(
