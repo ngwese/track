@@ -131,4 +131,14 @@ impl HubTransport for FaultInjectingTransport {
 
         Ok(stream)
     }
+
+    async fn fetch_latest_project_snapshot(
+        &self,
+        workspace_uuid: TrackUlid,
+        project_uuid: TrackUlid,
+    ) -> Result<Option<track_hub_protocol::snapshot::ProjectSnapshot>, SyncError> {
+        self.inner
+            .fetch_latest_project_snapshot(workspace_uuid, project_uuid)
+            .await
+    }
 }

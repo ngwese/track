@@ -77,4 +77,18 @@ where
         );
         session.run().await
     }
+
+    /// Fetch the newest published snapshot and seed local cursors at the boundary.
+    pub async fn bootstrap_from_latest_snapshot(
+        &mut self,
+        project_uuid: TrackUlid,
+    ) -> Result<track_hub_protocol::snapshot::ProjectSnapshot, SyncError> {
+        crate::bootstrap_from_latest_snapshot(
+            &self.transport,
+            &self.cursor_store,
+            self.workspace_uuid,
+            project_uuid,
+        )
+        .await
+    }
 }

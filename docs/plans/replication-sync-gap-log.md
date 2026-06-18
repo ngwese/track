@@ -9,7 +9,6 @@ algorithm](../adr/0003-domain-model-and-replication-log.md),
 
 | HUB_SYNC ID | Test | Gap type | ADR / PR | Status |
 | --- | --- | --- | --- | --- |
-| HUB_SYNC-042 | `hub_sync_042_snapshot_bootstrap` | Snapshot pull in sync client | ADR 0004 §Snapshot-assisted sync | ignored |
 | HUB_SYNC-053 | `hub_sync_053_hub_restart` | Persistent hub | ADR 0004 §Test hub vs production hub | ignored |
 | HUB_SYNC-071 | `hub_sync_071_pn_counter_estimate` | PN-counter merge shape | ADR 0003 §Merge and conflict rules | ignored |
 | HUB_SYNC-073 | `hub_sync_073_scalar_clear_field` | `item.clear-field` reducer | ADR 0003 §Reducer coverage | ignored |

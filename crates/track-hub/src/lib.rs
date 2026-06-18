@@ -14,6 +14,7 @@ mod idempotency;
 mod node_registry;
 mod pull_service;
 mod push_service;
+mod snapshot_boundary;
 mod snapshot_catalog;
 mod stream_validation;
 
@@ -27,4 +28,5 @@ pub use hub_log::HubLog;
 pub use hub_service::HubService;
 pub use in_memory::InMemoryHubService;
 pub use node_registry::NodeRegistry;
+pub use snapshot_boundary::cursors_at_boundary;
 pub use snapshot_catalog::SnapshotCatalog;

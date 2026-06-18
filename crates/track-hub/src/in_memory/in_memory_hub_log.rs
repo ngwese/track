@@ -35,6 +35,24 @@ impl InMemoryHubLog {
             ..Self::default()
         }
     }
+
+    /// Highest hub offset currently assigned, or [`HubOffset::ZERO`] when empty.
+    pub fn max_assigned_offset(&self) -> HubOffset {
+        if self.records.is_empty() {
+            HubOffset::ZERO
+        } else {
+            HubOffset(self.next_offset.saturating_sub(1))
+        }
+    }
+
+    /// All durable records through `through_offset` inclusive.
+    pub fn records_through(&self, through_offset: HubOffset) -> Vec<(HubOffset, EventEnvelope)> {
+        self.records
+            .iter()
+            .filter(|stored| stored.hub_offset <= through_offset)
+            .map(|stored| (stored.hub_offset, stored.event.clone()))
+            .collect()
+    }
 }
 
 #[async_trait]

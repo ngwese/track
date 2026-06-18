@@ -75,9 +75,45 @@ async fn hub_sync_041_simultaneous_priority_conflict() {
 
 /// HUB_SYNC-042: Snapshot-assisted cold bootstrap.
 #[tokio::test]
-#[ignore = "gap: snapshot pull path not implemented in sync client (HUB_SYNC-042)"]
 async fn hub_sync_042_snapshot_bootstrap() {
     let cluster = TestCluster::start().await.unwrap();
-    let _entity = cluster.ids.entity;
+    let entity = cluster.ids.entity;
+    let project = cluster.ids.project;
+
+    let mut a = cluster.spawn_a().await.unwrap();
+    bootstrap_project(&mut a).await.unwrap();
+    a.push().await.unwrap();
+
+    let mut b = cluster.spawn_b().await.unwrap();
+    bootstrap_node(&mut b).unwrap();
+    b.pull_until_idle(100).await.unwrap();
+
+    let boundary = cluster.max_hub_offset().await;
+    cluster
+        .publish_snapshot_from_replica(&a, boundary)
+        .await
+        .unwrap();
+
+    a.emit(|e| e.item_set_field("priority", serde_json::json!("high")))
+        .unwrap();
+    b.emit(|e| e.item_add_label("post-snapshot")).unwrap();
+    TestCluster::sync_all(&mut [&mut a, &mut b]).await.unwrap();
+
+    let mut c = cluster.spawn_c().await.unwrap();
+    c.bootstrap_register().unwrap();
+    c.bootstrap_from_snapshot(project).await.unwrap();
+    c.pull_until_idle(100).await.unwrap();
+
+    pull_and_assert_converged(&cluster, &mut [&mut a, &mut b, &mut c])
+        .await
+        .unwrap();
+    assert_all_converged(&[&a, &b, &c], &entity).unwrap();
+
+    assert_eq!(priority_of(&c, &entity), Some("high".into()));
+    assert!(
+        c.persisted_event_count() < a.persisted_event_count(),
+        "snapshot bootstrap should avoid replaying full hub history"
+    );
+
     cluster.shutdown().await.unwrap();
 }

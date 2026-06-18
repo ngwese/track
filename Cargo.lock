@@ -1779,6 +1779,7 @@ dependencies = [
  "thiserror 2.0.18",
  "time",
  "track-entity",
+ "track-hub-protocol",
  "track-id",
  "track-materialize-yaml",
  "track-replication",

@@ -9,7 +9,7 @@ use axum::{
 use track_hub::InMemoryHubService;
 use track_id::TrackUlid;
 
-use super::{app_state::AppState, pull_handler, push_handler};
+use super::{app_state::AppState, pull_handler, push_handler, snapshot_handler};
 
 /// Builds the v1 hub router for `workspace_uuid`.
 pub fn build_router(workspace_uuid: TrackUlid, hub: Arc<InMemoryHubService>) -> Router {
@@ -25,6 +25,10 @@ pub fn build_router(workspace_uuid: TrackUlid, hub: Arc<InMemoryHubService>) -> 
         .route(
             "/workspaces/{workspace_uuid}/events",
             get(pull_handler::pull_events),
+        )
+        .route(
+            "/workspaces/{workspace_uuid}/projects/{project_uuid}/snapshots/latest",
+            get(snapshot_handler::latest_project_snapshot),
         )
         .with_state(state)
 }

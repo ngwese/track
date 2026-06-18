@@ -12,6 +12,7 @@ mod replica_simulator;
 mod scenario;
 mod schema_fixtures;
 mod shared_log_store;
+mod snapshot;
 mod synthetic_hlc;
 
 pub use assert_convergence::{

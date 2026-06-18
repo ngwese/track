@@ -20,6 +20,7 @@ mod reduction_engine;
 mod register_merge;
 mod relation_reducer;
 mod schema_reducer;
+mod snapshot_project;
 
 pub use blob_reducer::BlobReducer;
 pub use comment_reducer::CommentReducer;
@@ -36,3 +37,6 @@ pub use reduction_engine::ReductionEngine;
 pub use register_merge::RegisterMerge;
 pub use relation_reducer::RelationReducer;
 pub use schema_reducer::SchemaReducer;
+pub use snapshot_project::{
+    build_project_snapshot, export_project_snapshot_body, hydrate_project_snapshot_body,
+};

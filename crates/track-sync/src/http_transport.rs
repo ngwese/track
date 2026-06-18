@@ -138,4 +138,41 @@ impl HubTransport for HttpTransport {
 
         Ok(Box::pin(stream::iter(events)))
     }
+
+    async fn fetch_latest_project_snapshot(
+        &self,
+        workspace_uuid: TrackUlid,
+        project_uuid: TrackUlid,
+    ) -> Result<Option<track_hub_protocol::snapshot::ProjectSnapshot>, SyncError> {
+        let url = self
+            .base_url
+            .join(&format!(
+                "workspaces/{workspace_uuid}/projects/{project_uuid}/snapshots/latest"
+            ))
+            .map_err(|err| SyncError::Config(err.to_string()))?;
+
+        let response = self
+            .client
+            .get(url)
+            .header("accept", "application/json")
+            .send()
+            .await
+            .map_err(|err| SyncError::Transport(err.to_string()))?;
+
+        if response.status() == StatusCode::NOT_FOUND {
+            return Ok(None);
+        }
+        if !response.status().is_success() {
+            return Err(SyncError::Hub(format!(
+                "snapshot fetch failed: {}",
+                response.status()
+            )));
+        }
+
+        let snapshot = response
+            .json()
+            .await
+            .map_err(|err| SyncError::Transport(err.to_string()))?;
+        Ok(Some(snapshot))
+    }
 }

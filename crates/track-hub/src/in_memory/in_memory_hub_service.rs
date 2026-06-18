@@ -2,7 +2,8 @@
 
 use async_trait::async_trait;
 use tokio::sync::Mutex;
-use track_hub_protocol::{CursorSet, PullRequest, PulledEvent, PushResponse};
+use track_hub_protocol::snapshot::ProjectSnapshot;
+use track_hub_protocol::{CursorSet, HubOffset, PullRequest, PulledEvent, PushResponse};
 use track_id::{NodeUuid, TrackUlid};
 use track_replication::EventEnvelope;
 
@@ -14,13 +15,15 @@ use crate::pull_service::pull_page;
 use crate::push_service::push_batch;
 use crate::stream_validation::StreamSeqIndex;
 
-use super::{InMemoryCursorReports, InMemoryHubLog, InMemoryNodeRegistry};
+use super::{InMemoryCursorReports, InMemoryHubLog, InMemoryNodeRegistry, InMemorySnapshotCatalog};
+use crate::snapshot_boundary::cursors_at_boundary as boundary_cursors_from_records;
 
 /// Composes in-memory stores into a test hub service.
 pub struct InMemoryHubService {
     hub_log: Mutex<InMemoryHubLog>,
     node_registry: Mutex<InMemoryNodeRegistry>,
     cursor_reports: Mutex<InMemoryCursorReports>,
+    snapshot_catalog: Mutex<InMemorySnapshotCatalog>,
     stream_index: Mutex<StreamSeqIndex>,
     authorizer: AllowAllAuthorizer,
 }
@@ -32,6 +35,7 @@ impl InMemoryHubService {
             hub_log: Mutex::new(InMemoryHubLog::new()),
             node_registry: Mutex::new(InMemoryNodeRegistry::new()),
             cursor_reports: Mutex::new(InMemoryCursorReports::new()),
+            snapshot_catalog: Mutex::new(InMemorySnapshotCatalog::new()),
             stream_index: Mutex::new(StreamSeqIndex::new()),
             authorizer: AllowAllAuthorizer,
         }
@@ -48,6 +52,46 @@ impl InMemoryHubService {
             .await
             .register_node(workspace_uuid, node_uuid)
             .await
+    }
+
+    /// Highest durable hub offset currently assigned.
+    pub async fn max_hub_offset(&self) -> HubOffset {
+        self.hub_log.lock().await.max_assigned_offset()
+    }
+
+    /// Publish a project snapshot in the catalog.
+    pub async fn publish_project_snapshot(
+        &self,
+        snapshot: ProjectSnapshot,
+    ) -> Result<(), crate::HubError> {
+        self.snapshot_catalog
+            .lock()
+            .await
+            .put_project_snapshot(snapshot);
+        Ok(())
+    }
+
+    /// Fetch the newest published snapshot for a project.
+    pub async fn latest_project_snapshot(
+        &self,
+        project_uuid: TrackUlid,
+    ) -> Option<ProjectSnapshot> {
+        self.snapshot_catalog
+            .lock()
+            .await
+            .latest_project_snapshot(project_uuid)
+    }
+
+    /// Build cursors and through-event metadata at `through_offset`.
+    pub async fn cursors_at_boundary(
+        &self,
+        workspace_uuid: TrackUlid,
+        project_uuid: TrackUlid,
+        through_offset: HubOffset,
+    ) -> (CursorSet, Option<TrackUlid>) {
+        let log = self.hub_log.lock().await;
+        let records = log.records_through(through_offset);
+        boundary_cursors_from_records(&records, workspace_uuid, through_offset, Some(project_uuid))
     }
 }
 

@@ -10,6 +10,7 @@ mod local_integration;
 mod outbound_queue;
 mod pull_session;
 mod push_session;
+mod snapshot_bootstrap;
 mod sync_engine;
 mod sync_state;
 
@@ -21,5 +22,6 @@ pub use local_integration::{IntegrateCallback, LocalIntegrator};
 pub use outbound_queue::OutboundQueue;
 pub use pull_session::{PullSession, PullSummary};
 pub use push_session::{PushSession, PushSummary};
+pub use snapshot_bootstrap::{apply_project_snapshot, bootstrap_from_latest_snapshot};
 pub use sync_engine::SyncEngine;
 pub use sync_state::SyncState;

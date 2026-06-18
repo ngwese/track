@@ -186,6 +186,33 @@ impl ReplicaSimulator {
         self.emit_local(event)
     }
 
+    /// Export materialized project state for snapshot publication.
+    pub fn export_project_snapshot_body(
+        &self,
+        project_uuid: TrackUlid,
+    ) -> Result<track_hub_protocol::snapshot::ProjectSnapshotBody, track_reduce::ReduceError> {
+        self.reducer
+            .lock()
+            .expect("reducer lock")
+            .export_project_snapshot_body(&project_uuid)
+    }
+
+    /// Hydrate from the newest published snapshot and seed pull cursors.
+    pub async fn bootstrap_from_snapshot(
+        &mut self,
+        project_uuid: TrackUlid,
+    ) -> Result<(), ClusterError> {
+        let snapshot = self
+            .sync
+            .bootstrap_from_latest_snapshot(project_uuid)
+            .await?;
+        self.reducer
+            .lock()
+            .expect("reducer lock")
+            .hydrate_project_snapshot(&project_uuid, &snapshot.body)?;
+        Ok(())
+    }
+
     /// Reduced item for `entity_uuid`, if present.
     pub fn reduced_item(
         &self,

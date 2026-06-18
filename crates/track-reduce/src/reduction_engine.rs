@@ -11,7 +11,10 @@ use track_replication::{
 use track_store::{
     ConflictRecord, ConflictStore, EntityStore, LogStore, QuarantineRecord, QuarantineStore,
     ReplicaProgress, ReplicaProgressStore, SchemaStore, SnapshotStore,
-    memory::{MemoryBlobStore, MemoryReplicaProgressStore, MemorySnapshotStore},
+    memory::{
+        MemoryBlobStore, MemoryEntityStore, MemoryReplicaProgressStore, MemorySchemaStore,
+        MemorySnapshotStore,
+    },
 };
 
 use crate::{
@@ -236,6 +239,44 @@ where
     /// Borrow the entity store for materialization or inspection.
     pub fn entity_store(&self) -> &E {
         &self.entity_store
+    }
+}
+
+impl<L, Q, C> ReductionEngine<L, MemorySchemaStore, MemoryEntityStore, Q, C>
+where
+    L: LogStore,
+    Q: QuarantineStore,
+    C: ConflictStore,
+{
+    /// Export materialized project state for snapshot publication.
+    pub fn export_project_snapshot_body(
+        &self,
+        project_uuid: &TrackUlid,
+    ) -> Result<track_hub_protocol::snapshot::ProjectSnapshotBody, ReduceError> {
+        let nodes: Vec<_> = self.registered_nodes.iter().copied().collect();
+        crate::snapshot_project::export_project_snapshot_body(
+            project_uuid,
+            &self.schema_store,
+            &self.entity_store,
+            &nodes,
+        )
+    }
+
+    /// Hydrate materialized stores from a published snapshot body.
+    pub fn hydrate_project_snapshot(
+        &mut self,
+        project_uuid: &TrackUlid,
+        body: &track_hub_protocol::snapshot::ProjectSnapshotBody,
+    ) -> Result<(), ReduceError> {
+        crate::snapshot_project::hydrate_project_snapshot_body(
+            project_uuid,
+            body,
+            &mut self.schema_store,
+            &mut self.entity_store,
+            &mut self.registered_nodes,
+        )?;
+        self.current_schema = self.schema_store.latest(project_uuid)?;
+        Ok(())
     }
 }
 

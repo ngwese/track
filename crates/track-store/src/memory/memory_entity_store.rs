@@ -40,6 +40,135 @@ impl MemoryEntityStore {
             Err(StoreError::NotFound(entity_uuid.to_string()))
         }
     }
+
+    /// Entity UUIDs belonging to `project_uuid`.
+    pub fn list_entities_for_project(
+        &self,
+        project_uuid: &TrackUlid,
+    ) -> Result<Vec<TrackUlid>, StoreError> {
+        Ok(self
+            .headers
+            .values()
+            .filter(|header| header.project_uuid == *project_uuid)
+            .map(|header| header.entity_uuid)
+            .collect())
+    }
+
+    /// Relations touching entities in `project_uuid`.
+    pub fn list_relations_for_project(
+        &self,
+        project_uuid: &TrackUlid,
+    ) -> Result<Vec<Relation>, StoreError> {
+        Ok(self
+            .relations
+            .values()
+            .filter(|relation| {
+                !relation.deleted
+                    && (self
+                        .headers
+                        .get(&relation.from_entity_uuid)
+                        .is_some_and(|header| header.project_uuid == *project_uuid)
+                        || self
+                            .headers
+                            .get(&relation.to_entity_uuid)
+                            .is_some_and(|header| header.project_uuid == *project_uuid))
+            })
+            .cloned()
+            .collect())
+    }
+
+    /// Replace all materialized rows for `project_uuid`.
+    pub fn clear_project(&mut self, project_uuid: &TrackUlid) -> Result<(), StoreError> {
+        let entity_uuids = self.list_entities_for_project(project_uuid)?;
+        for entity_uuid in &entity_uuids {
+            self.headers.remove(entity_uuid);
+            self.comments.remove(entity_uuid);
+            self.claims.remove(entity_uuid);
+        }
+
+        self.scalar_fields
+            .retain(|(entity_uuid, _), _| !entity_uuids.contains(entity_uuid));
+        self.field_provenance
+            .retain(|(entity_uuid, _), _| !entity_uuids.contains(entity_uuid));
+        self.set_members
+            .retain(|(entity_uuid, _), _| !entity_uuids.contains(entity_uuid));
+
+        self.relations.retain(|_, relation| {
+            !entity_uuids.contains(&relation.from_entity_uuid)
+                && !entity_uuids.contains(&relation.to_entity_uuid)
+        });
+
+        Ok(())
+    }
+
+    /// Load a reduced item into the store.
+    pub fn apply_reduced_item(&mut self, item: &ReducedItem) -> Result<(), StoreError> {
+        let entity_uuid = item.header.entity_uuid;
+        self.upsert_header(&item.header)?;
+
+        for (name, value) in &item.fields {
+            let provenance = item.field_provenance.get(name).cloned().ok_or_else(|| {
+                StoreError::Other(format!("missing provenance for field `{name}`"))
+            })?;
+            self.set_scalar_field(&entity_uuid, name, Some(value), provenance)?;
+        }
+
+        for label in &item.labels {
+            self.apply_set_add(SetAddOp {
+                entity_uuid,
+                set_name: "labels".into(),
+                member: label.clone(),
+                event_uuid: item
+                    .field_provenance
+                    .values()
+                    .next()
+                    .map(|prov| prov.event_uuid)
+                    .unwrap_or_else(TrackUlid::generate),
+                hlc_wire: item.header.updated_hlc.clone(),
+                node_uuid: item
+                    .field_provenance
+                    .values()
+                    .next()
+                    .map(|prov| prov.node_uuid)
+                    .unwrap_or_else(TrackUlid::generate),
+                stream_seq: item
+                    .field_provenance
+                    .values()
+                    .next()
+                    .map(|prov| prov.stream_seq)
+                    .unwrap_or(0),
+            })?;
+        }
+
+        for assignee in &item.assignees {
+            self.apply_set_add(SetAddOp {
+                entity_uuid,
+                set_name: "assignees".into(),
+                member: assignee.to_string(),
+                event_uuid: item
+                    .field_provenance
+                    .values()
+                    .next()
+                    .map(|prov| prov.event_uuid)
+                    .unwrap_or_else(TrackUlid::generate),
+                hlc_wire: item.header.updated_hlc.clone(),
+                node_uuid: item
+                    .field_provenance
+                    .values()
+                    .next()
+                    .map(|prov| prov.node_uuid)
+                    .unwrap_or_else(TrackUlid::generate),
+                stream_seq: item
+                    .field_provenance
+                    .values()
+                    .next()
+                    .map(|prov| prov.stream_seq)
+                    .unwrap_or(0),
+            })?;
+        }
+
+        Ok(())
+    }
 }
 
 impl EntityStore for MemoryEntityStore {
