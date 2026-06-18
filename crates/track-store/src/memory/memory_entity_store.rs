@@ -197,7 +197,7 @@ impl EntityStore for MemoryEntityStore {
             }
             None => {
                 self.scalar_fields.remove(&key);
-                self.field_provenance.remove(&key);
+                self.field_provenance.insert(key, provenance);
             }
         }
         Ok(())

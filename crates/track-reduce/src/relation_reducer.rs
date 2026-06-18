@@ -20,6 +20,12 @@ struct RelationDeletePayload {
     relation_uuid: TrackUlid,
 }
 
+#[derive(Debug, Deserialize)]
+struct RelationSetAttrPayload {
+    relation_uuid: TrackUlid,
+    attrs: serde_json::Value,
+}
+
 impl RelationReducer {
     fn apply_create(
         &self,
@@ -68,6 +74,40 @@ impl RelationReducer {
         ctx.entity_store.upsert_relation(&relation)?;
         Ok(())
     }
+
+    fn apply_set_attr(
+        &self,
+        event: &EventEnvelope,
+        payload: RelationSetAttrPayload,
+        ctx: &mut ReduceContext<'_>,
+    ) -> Result<(), ReduceError> {
+        let Some(mut relation) = ctx.entity_store.get_relation(&payload.relation_uuid)? else {
+            return Err(ReduceError::Failed(format!(
+                "relation `{}` not found",
+                payload.relation_uuid
+            )));
+        };
+
+        if compare_to_hlc(event, &relation.created_hlc, relation.relation_uuid) != Ordering::Greater
+        {
+            return Ok(());
+        }
+
+        let mut attrs = relation
+            .attrs
+            .take()
+            .and_then(|value| value.as_object().cloned())
+            .unwrap_or_default();
+        if let Some(incoming) = payload.attrs.as_object() {
+            for (key, value) in incoming {
+                attrs.insert(key.clone(), value.clone());
+            }
+        }
+        relation.attrs = Some(serde_json::Value::Object(attrs));
+        relation.created_hlc = event.hlc.format();
+        ctx.entity_store.upsert_relation(&relation)?;
+        Ok(())
+    }
 }
 
 impl EventReducer for RelationReducer {
@@ -85,6 +125,11 @@ impl EventReducer for RelationReducer {
                 let payload: RelationDeletePayload = serde_json::from_value(event.payload.clone())
                     .map_err(|e| ReduceError::Parse(e.to_string()))?;
                 self.apply_delete(event, payload, ctx)?;
+            }
+            EventKind::RelationSetAttr => {
+                let payload: RelationSetAttrPayload = serde_json::from_value(event.payload.clone())
+                    .map_err(|e| ReduceError::Parse(e.to_string()))?;
+                self.apply_set_attr(event, payload, ctx)?;
             }
             other => return Err(ReduceError::UnknownKind(other.to_string())),
         }

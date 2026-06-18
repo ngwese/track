@@ -370,11 +370,15 @@ fn reduce_work(
         | EventKind::ItemAddLabel
         | EventKind::ItemRemoveLabel
         | EventKind::ItemAssignUser
-        | EventKind::ItemSetState => item_reducer.reduce(event, ctx),
+        | EventKind::ItemUnassignUser
+        | EventKind::ItemSetState
+        | EventKind::ItemClearField
+        | EventKind::ItemArchive
+        | EventKind::ItemRestore => item_reducer.reduce(event, ctx),
         EventKind::CommentAdd | EventKind::CommentEdit | EventKind::CommentDelete => {
             comment_reducer.reduce(event, ctx)
         }
-        EventKind::RelationCreate | EventKind::RelationDelete => {
+        EventKind::RelationCreate | EventKind::RelationDelete | EventKind::RelationSetAttr => {
             relation_reducer.reduce(event, ctx)
         }
         EventKind::ExecutionClaim => execution_reducer.reduce(event, ctx),
@@ -392,7 +396,11 @@ fn affected_entity_uuid(event: &EventEnvelope) -> Option<TrackUlid> {
         | EventKind::ItemAddLabel
         | EventKind::ItemRemoveLabel
         | EventKind::ItemAssignUser
+        | EventKind::ItemUnassignUser
         | EventKind::ItemSetState
+        | EventKind::ItemClearField
+        | EventKind::ItemArchive
+        | EventKind::ItemRestore
         | EventKind::CommentAdd
         | EventKind::CommentEdit
         | EventKind::CommentDelete

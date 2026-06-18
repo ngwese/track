@@ -11,10 +11,6 @@ algorithm](../adr/0003-domain-model-and-replication-log.md),
 | --- | --- | --- | --- | --- |
 | HUB_SYNC-053 | `hub_sync_053_hub_restart` | Persistent hub | ADR 0004 §Test hub vs production hub | ignored |
 | HUB_SYNC-071 | `hub_sync_071_pn_counter_estimate` | PN-counter merge shape | ADR 0003 §Merge and conflict rules | ignored |
-| HUB_SYNC-073 | `hub_sync_073_scalar_clear_field` | `item.clear-field` reducer | ADR 0003 §Reducer coverage | ignored |
-| HUB_SYNC-074 | `hub_sync_074_unassign_user_or_set` | `item.unassign-user` reducer | ADR 0003 §Reducer coverage | ignored |
-| HUB_SYNC-075 | `hub_sync_075_relation_set_attr` | `relation.set-attr` reducer | ADR 0003 §Reducer coverage | ignored |
-| HUB_SYNC-076 | `hub_sync_076_archive_restore_lifecycle` | `item.archive` / `item.restore` reducers | ADR 0003 §Reducer coverage | ignored |
 | HUB_SYNC-077 | `hub_sync_077_allocate_number_convergence` | `item.allocate-number` hub sync | ADR 0003 §Work events | ignored |
 | HUB_SYNC-080 | `hub_sync_080_strict_enum_conflict` | Conflict rows via hub sync | ADR 0003 §Conflict emission | ignored |
 | HUB_SYNC-081 | `hub_sync_081_missing_required_field_conflict` | Required-field conflict via sync | ADR 0003 §Semantic conflicts | ignored |

@@ -42,6 +42,23 @@ struct ItemSetStatePayload {
     state_key: String,
 }
 
+#[derive(Debug, Deserialize)]
+struct ItemClearFieldPayload {
+    entity_uuid: TrackUlid,
+    field: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct ItemUnassignUserPayload {
+    entity_uuid: TrackUlid,
+    user: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct ItemLifecyclePayload {
+    entity_uuid: TrackUlid,
+}
+
 impl ItemReducer {
     fn apply_create(
         &self,
@@ -110,14 +127,15 @@ impl ItemReducer {
         let field_def = field_def_for(ctx, &header, &payload.field);
         let incoming_value = json_to_field_value(&payload.value, field_def)?;
 
-        let mut register = LwwRegister::new();
-        if let (Some(existing), Some(prov)) = (
-            ctx.entity_store
-                .get_scalar_field(&payload.entity_uuid, &payload.field)?,
-            ctx.entity_store
-                .get_field_provenance(&payload.entity_uuid, &payload.field)?,
-        ) && let Ok(hlc) = track_replication::Hlc::parse(&prov.hlc_wire)
+        let mut register = LwwRegister::<Option<FieldValue>>::new();
+        if let Some(prov) = ctx
+            .entity_store
+            .get_field_provenance(&payload.entity_uuid, &payload.field)?
+            && let Ok(hlc) = track_replication::Hlc::parse(&prov.hlc_wire)
         {
+            let existing = ctx
+                .entity_store
+                .get_scalar_field(&payload.entity_uuid, &payload.field)?;
             register.merge(
                 existing,
                 hlc,
@@ -128,7 +146,7 @@ impl ItemReducer {
         }
 
         register.merge(
-            incoming_value.clone(),
+            Some(incoming_value.clone()),
             event.hlc,
             event.event_uuid,
             event.node_uuid,
@@ -145,7 +163,7 @@ impl ItemReducer {
             ctx.entity_store.set_scalar_field(
                 &payload.entity_uuid,
                 &payload.field,
-                Some(&incoming_value),
+                register.value().and_then(|v| v.as_ref()),
                 provenance,
             )?;
 
@@ -241,6 +259,120 @@ impl ItemReducer {
         }
         Ok(())
     }
+
+    fn apply_clear_field(
+        &self,
+        event: &EventEnvelope,
+        payload: ItemClearFieldPayload,
+        ctx: &mut ReduceContext<'_>,
+    ) -> Result<(), ReduceError> {
+        let header = ctx
+            .entity_store
+            .get_header(&payload.entity_uuid)?
+            .ok_or_else(|| {
+                ReduceError::Failed(format!("entity `{}` not found", payload.entity_uuid))
+            })?;
+
+        let mut register = LwwRegister::<Option<FieldValue>>::new();
+        if let (Some(existing), Some(prov)) = (
+            ctx.entity_store
+                .get_scalar_field(&payload.entity_uuid, &payload.field)?,
+            ctx.entity_store
+                .get_field_provenance(&payload.entity_uuid, &payload.field)?,
+        ) && let Ok(hlc) = track_replication::Hlc::parse(&prov.hlc_wire)
+        {
+            register.merge(
+                Some(existing),
+                hlc,
+                prov.event_uuid,
+                prov.node_uuid,
+                prov.stream_seq,
+            );
+        }
+
+        register.merge(
+            None,
+            event.hlc,
+            event.event_uuid,
+            event.node_uuid,
+            event.stream_seq,
+        );
+
+        if register.winning_event_uuid() == Some(event.event_uuid) {
+            let provenance = FieldProvenance {
+                event_uuid: event.event_uuid,
+                hlc_wire: event.hlc.format(),
+                node_uuid: event.node_uuid,
+                stream_seq: event.stream_seq,
+            };
+            ctx.entity_store.set_scalar_field(
+                &payload.entity_uuid,
+                &payload.field,
+                None,
+                provenance,
+            )?;
+
+            let mut updated = header;
+            updated.updated_hlc = event.hlc.format();
+            if let Some(schema) = &ctx.schema {
+                updated.schema_version_applied = schema.version;
+            }
+            ctx.entity_store.upsert_header(&updated)?;
+        }
+        Ok(())
+    }
+
+    fn apply_unassign_user(
+        &self,
+        event: &EventEnvelope,
+        payload: ItemUnassignUserPayload,
+        ctx: &mut ReduceContext<'_>,
+    ) -> Result<(), ReduceError> {
+        ctx.entity_store.apply_set_remove(set_remove_op(
+            event,
+            payload.entity_uuid,
+            "assignees",
+            payload.user,
+        ))?;
+        Ok(())
+    }
+
+    fn apply_lifecycle(
+        &self,
+        event: &EventEnvelope,
+        payload: ItemLifecyclePayload,
+        archived: bool,
+        ctx: &mut ReduceContext<'_>,
+    ) -> Result<(), ReduceError> {
+        let mut header = ctx
+            .entity_store
+            .get_header(&payload.entity_uuid)?
+            .ok_or_else(|| {
+                ReduceError::Failed(format!("entity `{}` not found", payload.entity_uuid))
+            })?;
+
+        let mut register = LwwRegister::new();
+        if let Ok(hlc) = track_replication::Hlc::parse(&header.updated_hlc) {
+            register.merge(header.archived, hlc, event.event_uuid, hlc.node_uuid, 0);
+        }
+        register.merge(
+            archived,
+            event.hlc,
+            event.event_uuid,
+            event.node_uuid,
+            event.stream_seq,
+        );
+
+        if register.winning_event_uuid() == Some(event.event_uuid) {
+            header.archived = archived;
+            header.updated_hlc = event.hlc.format();
+            if let Some(schema) = &ctx.schema {
+                header.schema_version_applied = schema.version;
+            }
+            ctx.entity_store.upsert_header(&header)?;
+        }
+        Ok(())
+    }
 }
 
 impl EventReducer for ItemReducer {
@@ -277,6 +409,29 @@ impl EventReducer for ItemReducer {
                 let payload: ItemSetStatePayload = serde_json::from_value(event.payload.clone())
                     .map_err(|e| ReduceError::Parse(e.to_string()))?;
                 self.apply_set_state(event, payload, ctx)?;
+            }
+            EventKind::ItemClearField => {
+                let payload: ItemClearFieldPayload = serde_json::from_value(event.payload.clone())
+                    .map_err(|e| ReduceError::Parse(e.to_string()))?;
+                self.apply_clear_field(event, payload, ctx)?;
+            }
+            EventKind::ItemUnassignUser => {
+                let payload: ItemUnassignUserPayload =
+                    serde_json::from_value(event.payload.clone())
+                        .map_err(|e| ReduceError::Parse(e.to_string()))?;
+                self.apply_unassign_user(event, payload, ctx)?;
+            }
+            EventKind::ItemArchive => {
+                let payload: ItemLifecyclePayload =
+                    serde_json::from_value(event.payload.clone())
+                        .map_err(|e| ReduceError::Parse(e.to_string()))?;
+                self.apply_lifecycle(event, payload, true, ctx)?;
+            }
+            EventKind::ItemRestore => {
+                let payload: ItemLifecyclePayload =
+                    serde_json::from_value(event.payload.clone())
+                        .map_err(|e| ReduceError::Parse(e.to_string()))?;
+                self.apply_lifecycle(event, payload, false, ctx)?;
             }
             other => return Err(ReduceError::UnknownKind(other.to_string())),
         }

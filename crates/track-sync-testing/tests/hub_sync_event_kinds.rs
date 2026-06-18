@@ -7,7 +7,6 @@ use track_sync_testing::{
 
 /// HUB_SYNC-073: Scalar clear (`item.clear-field`) LWW / tombstone.
 #[tokio::test]
-#[ignore = "gap: item.clear-field reducer not wired in reduce_work (HUB_SYNC-073)"]
 async fn hub_sync_073_scalar_clear_field() {
     let cluster = TestCluster::start().await.unwrap();
     let entity = cluster.ids.entity;
@@ -33,7 +32,6 @@ async fn hub_sync_073_scalar_clear_field() {
 
 /// HUB_SYNC-074: OR-set remove via `item.unassign-user`.
 #[tokio::test]
-#[ignore = "gap: item.unassign-user reducer not wired in reduce_work (HUB_SYNC-074)"]
 async fn hub_sync_074_unassign_user_or_set() {
     let cluster = TestCluster::start().await.unwrap();
     let entity = cluster.ids.entity;
@@ -62,7 +60,6 @@ async fn hub_sync_074_unassign_user_or_set() {
 
 /// HUB_SYNC-075: OR-map `relation.set-attr` merge.
 #[tokio::test]
-#[ignore = "gap: relation.set-attr reducer not wired in reduce_work (HUB_SYNC-075)"]
 async fn hub_sync_075_relation_set_attr() {
     let cluster = TestCluster::start().await.unwrap();
     let rel = track_sync_testing::TestIds::pad("01J0REF00000000000005");
@@ -86,7 +83,6 @@ async fn hub_sync_075_relation_set_attr() {
 
 /// HUB_SYNC-076: `item.archive` / `item.restore` lifecycle.
 #[tokio::test]
-#[ignore = "gap: item.archive/restore reducers not wired in reduce_work (HUB_SYNC-076)"]
 async fn hub_sync_076_archive_restore_lifecycle() {
     let cluster = TestCluster::start().await.unwrap();
     let entity = cluster.ids.entity;
