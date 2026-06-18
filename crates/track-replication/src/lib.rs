@@ -20,7 +20,8 @@ pub use event_ord::compare_events;
 pub use event_payload::{EventPayload, PayloadError};
 pub use hlc::{Hlc, HlcError};
 pub use payload::{
-    CommentAddPayload, ExecutionClaimPayload, ItemCreatePayload, ItemSetFieldPayload,
+    CommentAddPayload, ExecutionClaimPayload, ItemAdjustFieldPayload, ItemCreatePayload,
+    ItemSetFieldPayload,
     NodeRegisterPayload, RelationCreatePayload, SchemaAddFieldPayload, SchemaInitPayload,
     SchemaSnapshotPayload,
 };

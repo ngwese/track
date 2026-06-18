@@ -63,6 +63,10 @@ pub enum EventKind {
     #[strum(serialize = "item.set-field")]
     #[serde(rename = "item.set-field")]
     ItemSetField,
+    /// `item.adjust-field`
+    #[strum(serialize = "item.adjust-field")]
+    #[serde(rename = "item.adjust-field")]
+    ItemAdjustField,
     /// `item.clear-field`
     #[strum(serialize = "item.clear-field")]
     #[serde(rename = "item.clear-field")]

@@ -7,9 +7,10 @@ use track_entity::EntityKind;
 use track_entity::{FieldDefinition, FieldKind, FieldProvenance, FieldValue, ItemHeader};
 use track_id::TrackUlid;
 use track_replication::{
-    EventEnvelope, EventKind, EventPayload, ItemCreatePayload, ItemSetFieldPayload,
+    EventEnvelope, EventKind, EventPayload, ItemAdjustFieldPayload, ItemCreatePayload,
+    ItemSetFieldPayload,
 };
-use track_store::{SetAddOp, SetRemoveOp};
+use track_store::{CounterAdjustOp, SetAddOp, SetRemoveOp};
 
 use crate::merge::LwwRegister;
 use crate::{EventReducer, ReduceContext, ReduceError, ReduceOutcome};
@@ -174,6 +175,47 @@ impl ItemReducer {
             }
             ctx.entity_store.upsert_header(&updated)?;
         }
+        Ok(())
+    }
+
+    fn apply_adjust_field(
+        &self,
+        event: &EventEnvelope,
+        payload: ItemAdjustFieldPayload,
+        ctx: &mut ReduceContext<'_>,
+    ) -> Result<(), ReduceError> {
+        let header = ctx
+            .entity_store
+            .get_header(&payload.entity_uuid)?
+            .ok_or_else(|| {
+                ReduceError::Failed(format!("entity `{}` not found", payload.entity_uuid))
+            })?;
+
+        let field_def = field_def_for(ctx, &header, &payload.field)
+            .ok_or_else(|| ReduceError::Failed(format!("unknown field `{}`", payload.field)))?;
+        if field_def.kind != FieldKind::Counter {
+            return Err(ReduceError::Failed(format!(
+                "field `{}` is not a counter",
+                payload.field
+            )));
+        }
+
+        ctx.entity_store.apply_counter_adjust(CounterAdjustOp {
+            entity_uuid: payload.entity_uuid,
+            field: payload.field,
+            delta: payload.delta,
+            event_uuid: event.event_uuid,
+            hlc_wire: event.hlc.format(),
+            node_uuid: event.node_uuid,
+            stream_seq: event.stream_seq,
+        })?;
+
+        let mut updated = header;
+        updated.updated_hlc = event.hlc.format();
+        if let Some(schema) = &ctx.schema {
+            updated.schema_version_applied = schema.version;
+        }
+        ctx.entity_store.upsert_header(&updated)?;
         Ok(())
     }
 
@@ -390,6 +432,10 @@ impl EventReducer for ItemReducer {
                 let payload = ItemSetFieldPayload::from_value(&event.payload)?;
                 self.apply_set_field(event, payload, ctx)?;
             }
+            EventKind::ItemAdjustField => {
+                let payload = ItemAdjustFieldPayload::from_value(&event.payload)?;
+                self.apply_adjust_field(event, payload, ctx)?;
+            }
             EventKind::ItemAddLabel => {
                 let payload: ItemAddLabelPayload = serde_json::from_value(event.payload.clone())
                     .map_err(|e| ReduceError::Parse(e.to_string()))?;
@@ -489,6 +535,9 @@ fn typed_json_to_field(
                 .ok_or_else(|| ReduceError::Parse("expected integer field value".into()))?;
             Ok(FieldValue::Integer(n))
         }
+        FieldKind::Counter => Err(ReduceError::Failed(
+            "counter fields use item.adjust-field, not scalar set".into(),
+        )),
         FieldKind::Decimal => {
             let n = value
                 .as_f64()

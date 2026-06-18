@@ -41,6 +41,7 @@ impl EventClassifier for DefaultEventClassifier {
             kind,
             EventKind::ItemCreate
                 | EventKind::ItemSetField
+                | EventKind::ItemAdjustField
                 | EventKind::ItemClearField
                 | EventKind::ItemAddLabel
                 | EventKind::ItemRemoveLabel

@@ -130,8 +130,10 @@ fn check_field_kind(kind: FieldKind, value: &FieldValue) -> Result<(), String> {
         (
             FieldKind::Text | FieldKind::Url | FieldKind::Email,
             FieldValue::String(_)
-        ) | (FieldKind::Number, FieldValue::Integer(_))
-            | (FieldKind::Decimal, FieldValue::Decimal(_))
+        ) | (
+            FieldKind::Number | FieldKind::Counter,
+            FieldValue::Integer(_)
+        ) | (FieldKind::Decimal, FieldValue::Decimal(_))
             | (FieldKind::Boolean, FieldValue::Boolean(_))
             | (FieldKind::Date, FieldValue::Date(_))
             | (FieldKind::DateTime, FieldValue::DateTime(_))

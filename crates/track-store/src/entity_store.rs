@@ -45,6 +45,25 @@ pub struct SetRemoveOp {
     pub stream_seq: u64,
 }
 
+/// PN-counter adjustment applied once per `event_uuid`.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct CounterAdjustOp {
+    /// Target entity UUID.
+    pub entity_uuid: TrackUlid,
+    /// Counter field name.
+    pub field: String,
+    /// Signed delta for this adjustment.
+    pub delta: i64,
+    /// Log record that performed the adjustment.
+    pub event_uuid: TrackUlid,
+    /// Wire HLC of the adjustment.
+    pub hlc_wire: String,
+    /// Authoring node for header updates.
+    pub node_uuid: TrackUlid,
+    /// Stream sequence for provenance.
+    pub stream_seq: u64,
+}
+
 /// Materialized entity rows — maps to SQLite or in-memory maps in tests.
 pub trait EntityStore {
     /// Upsert the shared item header row.
@@ -81,6 +100,9 @@ pub trait EntityStore {
 
     /// Apply an observed-remove set remove.
     fn apply_set_remove(&mut self, op: SetRemoveOp) -> Result<(), StoreError>;
+
+    /// Apply a PN-counter adjustment idempotently by `event_uuid`.
+    fn apply_counter_adjust(&mut self, op: CounterAdjustOp) -> Result<(), StoreError>;
 
     /// List active members of a named set on an entity.
     fn get_set_members(

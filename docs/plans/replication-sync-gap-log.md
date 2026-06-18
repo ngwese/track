@@ -10,7 +10,6 @@ algorithm](../adr/0003-domain-model-and-replication-log.md),
 | HUB_SYNC ID | Test | Gap type | ADR / PR | Status |
 | --- | --- | --- | --- | --- |
 | HUB_SYNC-053 | `hub_sync_053_hub_restart` | Persistent hub | ADR 0004 §Test hub vs production hub | ignored |
-| HUB_SYNC-071 | `hub_sync_071_pn_counter_estimate` | PN-counter merge shape | ADR 0003 §Merge and conflict rules | ignored |
 | HUB_SYNC-077 | `hub_sync_077_allocate_number_convergence` | `item.allocate-number` reducer + hub sequence authority | ADR 0003 §Hub-assigned issue numbers; ADR 0004 §Hub-authored allocation | deferred |
 
 ## HUB_SYNC-077 — `item.allocate-number` (deferred)

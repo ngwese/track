@@ -7,7 +7,7 @@ use track_entity::{
 };
 use track_id::{Actor, TrackUlid};
 use track_replication::Hlc;
-use track_store::{EntityStore, SetAddOp, SetRemoveOp, StoreError};
+use track_store::{CounterAdjustOp, EntityStore, SetAddOp, SetRemoveOp, StoreError};
 
 use crate::error::map_rusqlite_error;
 use crate::row_mapping::{optional_text_to_ulid, row_get, text_to_ulid, ulid_to_text};
@@ -184,6 +184,67 @@ impl EntityStore for TrackSqliteStore {
                     ulid_to_text(&op.entity_uuid),
                     op.set_name,
                     op.member,
+                    ulid_to_text(&op.event_uuid),
+                    op.hlc_wire,
+                ],
+            )
+            .map_err(map_rusqlite_error)?;
+        Ok(())
+    }
+
+    fn apply_counter_adjust(&mut self, op: CounterAdjustOp) -> Result<(), StoreError> {
+        let inserted = self
+            .conn
+            .execute(
+                "INSERT OR IGNORE INTO entity_counter_adjustments (
+                    event_uuid, entity_uuid, field_name, delta,
+                    applied_hlc, node_uuid, stream_seq
+                ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+                params![
+                    ulid_to_text(&op.event_uuid),
+                    ulid_to_text(&op.entity_uuid),
+                    op.field,
+                    op.delta,
+                    op.hlc_wire,
+                    ulid_to_text(&op.node_uuid),
+                    op.stream_seq as i64,
+                ],
+            )
+            .map_err(map_rusqlite_error)?;
+        if inserted == 0 {
+            return Ok(());
+        }
+
+        let sum: i64 = self
+            .conn
+            .query_row(
+                "SELECT COALESCE(SUM(delta), 0)
+                 FROM entity_counter_adjustments
+                 WHERE entity_uuid = ?1 AND field_name = ?2",
+                params![ulid_to_text(&op.entity_uuid), op.field],
+                |row| row.get(0),
+            )
+            .map_err(map_rusqlite_error)?;
+
+        let value = FieldValue::Integer(sum);
+        let value_json = field_value_inner_json(&value)?;
+        let value_type = field_value_type(&value);
+        self.conn
+            .execute(
+                "INSERT INTO entity_fields (
+                    entity_uuid, field_name, value_json, value_type,
+                    updated_by_event_uuid, updated_hlc
+                ) VALUES (?1, ?2, ?3, ?4, ?5, ?6)
+                ON CONFLICT(entity_uuid, field_name) DO UPDATE SET
+                    value_json = excluded.value_json,
+                    value_type = excluded.value_type,
+                    updated_by_event_uuid = excluded.updated_by_event_uuid,
+                    updated_hlc = excluded.updated_hlc",
+                params![
+                    ulid_to_text(&op.entity_uuid),
+                    op.field,
+                    value_json,
+                    value_type,
                     ulid_to_text(&op.event_uuid),
                     op.hlc_wire,
                 ],

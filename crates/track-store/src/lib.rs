@@ -20,7 +20,7 @@ mod snapshot_store;
 
 pub use blob_store::{BlobLinkOp, BlobStore};
 pub use conflict_store::{ConflictRecord, ConflictStore};
-pub use entity_store::{EntityStore, SetAddOp, SetRemoveOp};
+pub use entity_store::{CounterAdjustOp, EntityStore, SetAddOp, SetRemoveOp};
 pub use error::StoreError;
 pub use file_projector::{FileIssueBundle, FileProjector, ProjectError};
 pub use log_store::LogStore;

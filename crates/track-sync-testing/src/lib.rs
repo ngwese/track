@@ -29,5 +29,5 @@ pub use scenario::{
     bootstrap_node, bootstrap_project, emit_item, emit_schema, priority_of,
     pull_and_assert_converged,
 };
-pub use schema_fixtures::merge_matrix_schema;
+pub use schema_fixtures::{counter_merge_matrix_schema, merge_matrix_schema};
 pub use synthetic_hlc::SyntheticHlc;

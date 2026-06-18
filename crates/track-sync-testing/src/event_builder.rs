@@ -160,6 +160,21 @@ impl EventBuilder {
         )
     }
 
+    /// `item.adjust-field` on a counter-shaped column.
+    pub fn item_adjust_field(&mut self, field: &str, delta: i64) -> EventEnvelope {
+        self.item_stream_seq += 1;
+        self.envelope(
+            StreamId::Item(self.ids.entity),
+            self.item_stream_seq,
+            EventKind::ItemAdjustField,
+            serde_json::json!({
+                "entity_uuid": self.ids.entity.to_string(),
+                "field": field,
+                "delta": delta,
+            }),
+        )
+    }
+
     /// `item.add-label`.
     pub fn item_add_label(&mut self, label: &str) -> EventEnvelope {
         self.item_stream_seq += 1;

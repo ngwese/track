@@ -8,7 +8,7 @@ use track_entity::{
 };
 use track_id::{Actor, TrackUlid};
 
-use crate::{EntityStore, SetAddOp, SetRemoveOp, StoreError};
+use crate::{CounterAdjustOp, EntityStore, SetAddOp, SetRemoveOp, StoreError};
 
 use super::or_set_cell::{OrSetMember, merge_set_add, merge_set_remove};
 
@@ -21,6 +21,7 @@ pub struct MemoryEntityStore {
     headers: HashMap<TrackUlid, ItemHeader>,
     scalar_fields: HashMap<FieldKey, FieldValue>,
     field_provenance: HashMap<FieldKey, FieldProvenance>,
+    counter_adjustments: HashMap<FieldKey, HashMap<TrackUlid, i64>>,
     set_members: HashMap<SetKey, BTreeMap<String, OrSetMember>>,
     comments: HashMap<TrackUlid, Vec<Comment>>,
     relations: HashMap<TrackUlid, Relation>,
@@ -89,6 +90,8 @@ impl MemoryEntityStore {
         self.scalar_fields
             .retain(|(entity_uuid, _), _| !entity_uuids.contains(entity_uuid));
         self.field_provenance
+            .retain(|(entity_uuid, _), _| !entity_uuids.contains(entity_uuid));
+        self.counter_adjustments
             .retain(|(entity_uuid, _), _| !entity_uuids.contains(entity_uuid));
         self.set_members
             .retain(|(entity_uuid, _), _| !entity_uuids.contains(entity_uuid));
@@ -248,6 +251,28 @@ impl EntityStore for MemoryEntityStore {
             .entry(op.member.clone())
             .or_default();
         merge_set_remove(cell, &op);
+        Ok(())
+    }
+
+    fn apply_counter_adjust(&mut self, op: CounterAdjustOp) -> Result<(), StoreError> {
+        self.ensure_entity(&op.entity_uuid)?;
+        let key = (op.entity_uuid, op.field.clone());
+        let adjustments = self.counter_adjustments.entry(key.clone()).or_default();
+        if adjustments.contains_key(&op.event_uuid) {
+            return Ok(());
+        }
+        adjustments.insert(op.event_uuid, op.delta);
+        let sum: i64 = adjustments.values().sum();
+
+        let provenance = FieldProvenance {
+            event_uuid: op.event_uuid,
+            hlc_wire: op.hlc_wire.clone(),
+            node_uuid: op.node_uuid,
+            stream_seq: op.stream_seq,
+        };
+        self.scalar_fields
+            .insert(key.clone(), FieldValue::Integer(sum));
+        self.field_provenance.insert(key, provenance);
         Ok(())
     }
 

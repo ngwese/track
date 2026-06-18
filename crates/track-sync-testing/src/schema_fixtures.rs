@@ -81,3 +81,14 @@ pub fn merge_matrix_schema() -> CanonicalSchema {
         compatibility: CompatibilityPolicy::Strict,
     }
 }
+
+/// Merge-matrix schema with `estimate` as a PN-counter field (HUB_SYNC-071).
+pub fn counter_merge_matrix_schema() -> CanonicalSchema {
+    let mut schema = merge_matrix_schema();
+    if let Some(item_type) = schema.item_types.get_mut("bug")
+        && let Some(field) = item_type.fields.get_mut("estimate")
+    {
+        field.kind = FieldKind::Counter;
+    }
+    schema
+}

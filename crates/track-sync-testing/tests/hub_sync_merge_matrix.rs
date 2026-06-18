@@ -4,7 +4,7 @@ use track_entity::Comment;
 use track_id::{Actor, TrackUlid};
 use track_sync_testing::{
     TestCluster, assert_all_converged, assert_comments_match, bootstrap_node, bootstrap_project,
-    field_string, pull_and_assert_converged,
+    emit_item, field_string, pull_and_assert_converged,
 };
 
 /// HUB_SYNC-060: Scalar text (title) LWW.
@@ -296,9 +296,38 @@ async fn hub_sync_068_comment_delete_tombstone() {
 
 /// HUB_SYNC-071: PN-counter estimate points (optional shape).
 #[tokio::test]
-#[ignore = "gap: PN-counter merge shape not implemented (HUB_SYNC-071)"]
 async fn hub_sync_071_pn_counter_estimate() {
+    use track_entity::FieldValue;
+    use track_sync_testing::counter_merge_matrix_schema;
+
     let cluster = TestCluster::start().await.unwrap();
+    let entity = cluster.ids.entity;
+
+    let mut a = cluster.spawn_a().await.unwrap();
+    bootstrap_node(&mut a).unwrap();
+    let schema = counter_merge_matrix_schema();
+    let event = a.events().schema_init(&schema);
+    a.emit_local(event).unwrap();
+    emit_item(&mut a).unwrap();
+    a.push().await.unwrap();
+
+    let mut b = cluster.spawn_b().await.unwrap();
+    bootstrap_node(&mut b).unwrap();
+    b.pull_until_idle(100).await.unwrap();
+
+    a.emit(|e| e.item_adjust_field("estimate", 5)).unwrap();
+    b.emit(|e| e.item_adjust_field("estimate", 3)).unwrap();
+    TestCluster::sync_all(&mut [&mut a, &mut b]).await.unwrap();
+
+    for replica in [&a, &b] {
+        let item = replica.reduced_item(&entity).unwrap().unwrap();
+        let estimate = item.fields.get("estimate");
+        assert!(
+            matches!(estimate, Some(FieldValue::Integer(8))),
+            "expected additive counter convergence, got {estimate:?}"
+        );
+    }
+
     cluster.shutdown().await.unwrap();
 }
 

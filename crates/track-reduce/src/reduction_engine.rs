@@ -379,6 +379,7 @@ fn reduce_work(
     match event.kind {
         EventKind::ItemCreate
         | EventKind::ItemSetField
+        | EventKind::ItemAdjustField
         | EventKind::ItemAddLabel
         | EventKind::ItemRemoveLabel
         | EventKind::ItemAssignUser
@@ -405,6 +406,7 @@ fn affected_entity_uuid(event: &EventEnvelope) -> Option<TrackUlid> {
     match event.kind {
         EventKind::ItemCreate
         | EventKind::ItemSetField
+        | EventKind::ItemAdjustField
         | EventKind::ItemAddLabel
         | EventKind::ItemRemoveLabel
         | EventKind::ItemAssignUser

@@ -29,7 +29,7 @@ pub use error::ReduceError;
 pub use event_reducer::EventReducer;
 pub use execution_reducer::ExecutionReducer;
 pub use item_reducer::ItemReducer;
-pub use merge::{LwwRegister, OrMap, OrSet};
+pub use merge::{LwwRegister, OrMap, OrSet, PnCounter};
 pub use or_set_merge::OrSetMerge;
 pub use quarantine_policy::QuarantinePolicy;
 pub use reduce_context::ReduceContext;

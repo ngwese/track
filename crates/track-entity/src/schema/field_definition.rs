@@ -10,6 +10,8 @@ pub enum FieldKind {
     Text,
     /// Integral number (SRD `number`).
     Number,
+    /// PN-counter for additive estimate/metric fields (ADR 0003 §Merge and conflict rules).
+    Counter,
     /// Decimal number (SRD `decimal`).
     Decimal,
     /// Calendar date (SRD `date`).
