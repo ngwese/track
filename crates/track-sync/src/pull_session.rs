@@ -28,6 +28,7 @@ where
     integrator: &'a mut LocalIntegrator<L>,
     workspace_uuid: TrackUlid,
     limit: u32,
+    projects: Option<Vec<TrackUlid>>,
 }
 
 impl<'a, T, C, L> PullSession<'a, T, C, L>
@@ -43,6 +44,7 @@ where
         integrator: &'a mut LocalIntegrator<L>,
         workspace_uuid: TrackUlid,
         limit: u32,
+        projects: Option<Vec<TrackUlid>>,
     ) -> Self {
         Self {
             transport,
@@ -50,6 +52,7 @@ where
             integrator,
             workspace_uuid,
             limit,
+            projects,
         }
     }
 
@@ -60,7 +63,7 @@ where
             workspace_uuid: self.workspace_uuid,
             known_cursors: state.known_cursors.clone(),
             limit: self.limit,
-            projects: None,
+            projects: self.projects.clone(),
         };
 
         let mut stream = self.transport.pull_events(&request).await?;

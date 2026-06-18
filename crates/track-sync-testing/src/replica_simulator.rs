@@ -161,10 +161,26 @@ impl ReplicaSimulator {
         Ok(())
     }
 
+    /// Restrict subsequent pulls to `projects` (`None` = all projects in workspace).
+    pub fn set_pull_projects(&mut self, projects: Option<Vec<TrackUlid>>) {
+        self.sync.set_pull_projects(projects);
+    }
+
     /// Pull one page from the hub (events are reduced via integrator callback).
     pub async fn pull_page(&mut self, limit: u32) -> Result<u32, ClusterError> {
         let summary = self.sync.pull_and_integrate(limit).await?;
         Ok(summary.fetched_count)
+    }
+
+    /// Pull one page and return the full summary (including `has_more`).
+    pub async fn pull_page_summary(
+        &mut self,
+        limit: u32,
+    ) -> Result<track_sync::PullSummary, ClusterError> {
+        self.sync
+            .pull_and_integrate(limit)
+            .await
+            .map_err(Into::into)
     }
 
     /// Pull until a partial page is returned.

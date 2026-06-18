@@ -19,6 +19,7 @@ where
     integrator: LocalIntegrator<L>,
     workspace_uuid: TrackUlid,
     node_uuid: NodeUuid,
+    pull_projects: Option<Vec<TrackUlid>>,
 }
 
 impl<T, C, L> SyncEngine<T, C, L>
@@ -42,7 +43,13 @@ where
             integrator: LocalIntegrator::new(log),
             workspace_uuid,
             node_uuid,
+            pull_projects: None,
         }
+    }
+
+    /// Restrict subsequent pulls to the given project UUIDs (`None` = all projects).
+    pub fn set_pull_projects(&mut self, projects: Option<Vec<TrackUlid>>) {
+        self.pull_projects = projects;
     }
 
     /// Returns mutable access to the outbound queue.
@@ -79,6 +86,7 @@ where
             &mut self.integrator,
             self.workspace_uuid,
             limit,
+            self.pull_projects.clone(),
         );
         session.run().await
     }
