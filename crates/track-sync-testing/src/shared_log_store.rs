@@ -20,6 +20,17 @@ impl SharedMemoryLogStore {
     pub fn len(&self) -> usize {
         self.0.lock().expect("shared log lock").len()
     }
+
+    /// Returns true when `event_uuid` is present in the local log.
+    pub fn contains(&self, event_uuid: &track_id::TrackUlid) -> bool {
+        self.0
+            .lock()
+            .expect("shared log lock")
+            .get(event_uuid)
+            .ok()
+            .flatten()
+            .is_some()
+    }
 }
 
 impl LogStore for SharedMemoryLogStore {

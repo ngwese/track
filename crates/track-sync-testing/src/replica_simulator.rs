@@ -130,6 +130,16 @@ impl ReplicaSimulator {
         self.log.len()
     }
 
+    /// Events still queued for push awaiting durable hub ack.
+    pub fn outbound_pending_count(&self) -> usize {
+        self.sync.outbound_pending_count()
+    }
+
+    /// Returns true when `event_uuid` is in the local intake log.
+    pub fn has_persisted_event(&self, event_uuid: &TrackUlid) -> bool {
+        self.log.contains(event_uuid)
+    }
+
     /// Enqueue locally, reduce optimistically, without pushing.
     pub fn emit_local(&mut self, event: EventEnvelope) -> Result<(), ClusterError> {
         self.sync.outbound_mut().enqueue(event.clone());

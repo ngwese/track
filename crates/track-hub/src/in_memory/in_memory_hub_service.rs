@@ -16,6 +16,7 @@ use crate::push_service::push_batch;
 use crate::stream_validation::StreamSeqIndex;
 
 use super::{InMemoryCursorReports, InMemoryHubLog, InMemoryNodeRegistry, InMemorySnapshotCatalog};
+use crate::push_test_hooks::PushTestHooks;
 use crate::snapshot_boundary::cursors_at_boundary as boundary_cursors_from_records;
 
 /// Composes in-memory stores into a test hub service.
@@ -25,6 +26,7 @@ pub struct InMemoryHubService {
     cursor_reports: Mutex<InMemoryCursorReports>,
     snapshot_catalog: Mutex<InMemorySnapshotCatalog>,
     stream_index: Mutex<StreamSeqIndex>,
+    push_test_hooks: Mutex<PushTestHooks>,
     authorizer: AllowAllAuthorizer,
 }
 
@@ -37,8 +39,14 @@ impl InMemoryHubService {
             cursor_reports: Mutex::new(InMemoryCursorReports::new()),
             snapshot_catalog: Mutex::new(InMemorySnapshotCatalog::new()),
             stream_index: Mutex::new(StreamSeqIndex::new()),
+            push_test_hooks: Mutex::new(PushTestHooks::new()),
             authorizer: AllowAllAuthorizer,
         }
+    }
+
+    /// Mutable access to push test hooks (embeddable test hub only).
+    pub fn push_test_hooks(&self) -> &Mutex<PushTestHooks> {
+        &self.push_test_hooks
     }
 
     /// Register a node for `workspace_uuid`.
@@ -112,6 +120,7 @@ impl HubService for InMemoryHubService {
         let mut log = self.hub_log.lock().await;
         let registry = self.node_registry.lock().await;
         let mut streams = self.stream_index.lock().await;
+        let mut hooks = self.push_test_hooks.lock().await;
 
         push_batch(
             &mut *log,
@@ -121,6 +130,7 @@ impl HubService for InMemoryHubService {
             workspace_uuid,
             authoring_node_uuid,
             events,
+            Some(&mut *hooks),
         )
         .await
     }

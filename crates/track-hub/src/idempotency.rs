@@ -23,6 +23,16 @@ pub fn durable_result(event_uuid: TrackUlid, hub_offset: HubOffset) -> PushResul
     }
 }
 
+/// Build an `accepted` push result before durable commit (test / deferred ack).
+pub fn accepted_result(event_uuid: TrackUlid) -> PushResult {
+    PushResult {
+        event_uuid,
+        status: AckLevel::Accepted,
+        duplicate: false,
+        hub_offset: HubOffset(0),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

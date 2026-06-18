@@ -7,11 +7,13 @@ use track_replication::EventEnvelope;
 use crate::HubError;
 use crate::auth::Authorizer;
 use crate::hub_log::HubLog;
-use crate::idempotency::{duplicate_result, durable_result};
+use crate::idempotency::{accepted_result, duplicate_result, durable_result};
 use crate::node_registry::NodeRegistry;
+use crate::push_test_hooks::PushTestHooks;
 use crate::stream_validation::StreamSeqIndex;
 
 /// Validate and durably append a push batch.
+#[allow(clippy::too_many_arguments)]
 pub async fn push_batch<L, N, A>(
     hub_log: &mut L,
     node_registry: &N,
@@ -20,6 +22,7 @@ pub async fn push_batch<L, N, A>(
     workspace_uuid: TrackUlid,
     authoring_node_uuid: NodeUuid,
     events: Vec<EventEnvelope>,
+    mut hooks: Option<&mut PushTestHooks>,
 ) -> Result<PushResponse, HubError>
 where
     L: HubLog,
@@ -46,8 +49,10 @@ where
     }
 
     let mut results = Vec::with_capacity(events.len());
+    let mut durable_committed = 0usize;
+    let total = events.len();
 
-    for event in events {
+    for (index, event) in events.into_iter().enumerate() {
         validate_event(&event, workspace_uuid, authoring_node_uuid)?;
 
         if let Some(existing) = hub_log.get_by_event_uuid(&event.event_uuid).await? {
@@ -57,13 +62,48 @@ where
             continue;
         }
 
+        if let Some(hooks) = hooks.as_mut()
+            && hooks.defer_to_accepted
+        {
+            if hooks.is_pending(&event.event_uuid) {
+                let pending = hooks
+                    .take_pending(&event.event_uuid)
+                    .expect("pending event");
+                stream_index.validate(&pending)?;
+                let (offset, duplicate) = hub_log.append_durable(pending.clone()).await?;
+                if duplicate {
+                    results.push(duplicate_result(pending.event_uuid, offset));
+                } else {
+                    stream_index.record(&pending);
+                    results.push(durable_result(pending.event_uuid, offset));
+                }
+                continue;
+            }
+
+            stream_index.validate(&event)?;
+            hooks.store_pending(event.clone());
+            results.push(accepted_result(event.event_uuid));
+            continue;
+        }
+
         stream_index.validate(&event)?;
         let (offset, duplicate) = hub_log.append_durable(event.clone()).await?;
         if duplicate {
             results.push(duplicate_result(event.event_uuid, offset));
         } else {
             stream_index.record(&event);
+            durable_committed += 1;
             results.push(durable_result(event.event_uuid, offset));
+        }
+
+        if let Some(hooks) = hooks.as_mut()
+            && hooks
+                .abort_after_durable_count
+                .is_some_and(|limit| durable_committed >= limit && index + 1 < total)
+        {
+            return Err(HubError::Internal(
+                "push stream aborted after partial durable commit".into(),
+            ));
         }
     }
 
@@ -148,6 +188,7 @@ mod tests {
             workspace,
             node,
             vec![event.clone()],
+            None,
         )
         .await
         .unwrap();
@@ -161,6 +202,7 @@ mod tests {
             workspace,
             node,
             vec![event],
+            None,
         )
         .await
         .unwrap();

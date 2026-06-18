@@ -124,6 +124,7 @@ mod tests {
             workspace,
             node_a,
             vec![events[0].clone(), events[2].clone()],
+            None,
         )
         .await
         .unwrap();
@@ -135,6 +136,7 @@ mod tests {
             workspace,
             node_b,
             vec![events[1].clone()],
+            None,
         )
         .await
         .unwrap();

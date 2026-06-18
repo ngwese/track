@@ -66,6 +66,11 @@ where
         session.run().await
     }
 
+    /// Number of events still awaiting durable hub acknowledgement.
+    pub fn outbound_pending_count(&self) -> usize {
+        self.outbound.pending().len()
+    }
+
     /// Pull until `limit` reached; persist each record before advancing cursors.
     pub async fn pull_and_integrate(&mut self, limit: u32) -> Result<PullSummary, SyncError> {
         let mut session = PullSession::new(

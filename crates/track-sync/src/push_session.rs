@@ -1,6 +1,6 @@
 //! Push retry and idempotency session (ADR 0004 §Push guarantees).
 
-use track_hub_protocol::PushResponse;
+use track_hub_protocol::{AckLevel, PushResponse};
 use track_id::{NodeUuid, TrackUlid};
 use track_replication::EventEnvelope;
 
@@ -11,6 +11,8 @@ use crate::{HubTransport, OutboundQueue, SyncError};
 pub struct PushSummary {
     /// Number of events acknowledged durable.
     pub durable_count: u32,
+    /// Number of events acknowledged accepted but not yet durable.
+    pub accepted_count: u32,
     /// Number of duplicate acknowledgements.
     pub duplicate_count: u32,
 }
@@ -59,10 +61,18 @@ impl<'a, T: HubTransport + ?Sized> PushSession<'a, T> {
         for result in response.results {
             if result.duplicate {
                 summary.duplicate_count += 1;
-            } else {
-                summary.durable_count += 1;
+                acked.push(result.event_uuid);
+                continue;
             }
-            acked.push(result.event_uuid);
+            match result.status {
+                AckLevel::Durable => {
+                    summary.durable_count += 1;
+                    acked.push(result.event_uuid);
+                }
+                AckLevel::Accepted => {
+                    summary.accepted_count += 1;
+                }
+            }
         }
         self.queue.ack_durable(&acked);
         Ok(summary)

@@ -15,8 +15,6 @@ algorithm](../adr/0003-domain-model-and-replication-log.md),
 | HUB_SYNC-091 | `hub_sync_091_malformed_ndjson_mid_stream` | Malformed NDJSON mid-pull | ADR 0004 §Partial failure semantics | ignored |
 | HUB_SYNC-093 | `hub_sync_093_protocol_version_mismatch` | Protocol version negotiation | ADR 0004 §Protocol versioning | ignored |
 | HUB_SYNC-096 | `hub_sync_096_malformed_ndjson_mid_push` | Malformed NDJSON mid-push | ADR 0004 §Partial failure semantics | ignored |
-| HUB_SYNC-100 | `hub_sync_100_accepted_not_pull_visible` | `accepted` vs `durable` ack split | ADR 0004 §Acknowledgement levels | ignored |
-| HUB_SYNC-102 | `hub_sync_102_push_stream_abort_partial_ack` | Mid-push stream abort | ADR 0004 §Partial failure semantics | ignored |
 | HUB_SYNC-112 | `hub_sync_112_project_filter_on_pull` | Pull `projects` filter in sync client | ADR 0004 §Pull protocol | ignored |
 | HUB_SYNC-120 | `hub_sync_120_inactive_replica_snapshot_bootstrap` | Compaction + snapshot bootstrap | ADR 0004 §Compaction and retention | ignored |
 | HUB_SYNC-121 | `hub_sync_121_or_set_tombstones_after_compaction` | Tombstones after compaction | ADR 0004 §Tombstones | ignored |
