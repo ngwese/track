@@ -175,3 +175,256 @@ fn parse_entity_kind(s: &str) -> Result<EntityKind, ReduceError> {
     s.parse::<EntityKind>()
         .map_err(|_| ReduceError::Parse(format!("unknown entity kind `{s}`")))
 }
+
+#[cfg(test)]
+mod tests {
+    use std::collections::HashSet;
+
+    use super::*;
+    use indexmap::IndexMap;
+    use track_entity::{
+        CompatibilityPolicy, FieldDefinition, FieldKind, ItemTypeDefinition,
+    };
+    use track_id::{Actor, SchemaVersion, StreamId, TrackUlid};
+    use track_replication::Hlc;
+    use track_store::SchemaStore;
+    use track_store_memory::{
+        MemoryBlobStore, MemoryConflictStore, MemoryEntityStore, MemoryQuarantineStore,
+        MemoryReplicaProgressStore, MemorySchemaStore, MemorySnapshotStore,
+    };
+
+    fn project_uuid() -> TrackUlid {
+        TrackUlid::parse("01JHM8X9K2Q4P0000000000000").unwrap()
+    }
+
+    fn node_uuid() -> TrackUlid {
+        TrackUlid::parse("01JHM8X9K2Q4N0000000000000").unwrap()
+    }
+
+    fn schema_init_event(schema: &CanonicalSchema) -> EventEnvelope {
+        EventEnvelope {
+            event_uuid: TrackUlid::parse("01J0G7YB4YBXJX1V9M1V3Q6Y10").unwrap(),
+            workspace_uuid: TrackUlid::parse("01JHM8X9K2Q4W0000000000000").unwrap(),
+            project_uuid: project_uuid(),
+            node_uuid: node_uuid(),
+            actor: Actor::try_new("user:greg".to_string()).unwrap(),
+            stream_id: StreamId::Schema,
+            stream_seq: 1,
+            hlc: Hlc::parse("2026-06-14T17:30:00.000Z/01JHM8X9K2Q4N0000000000000/0001").unwrap(),
+            deps: Vec::new(),
+            schema_version: SchemaVersion::new(1),
+            kind: EventKind::SchemaInit,
+            payload: serde_json::json!({
+                "compatibility": "strict",
+                "schema": schema,
+            }),
+        }
+    }
+
+    fn schema_add_field_event(field: &str, definition: serde_json::Value) -> EventEnvelope {
+        EventEnvelope {
+            event_uuid: TrackUlid::parse("01J0G7YB4YBXJX1V9M1V3Q6Y11").unwrap(),
+            workspace_uuid: TrackUlid::parse("01JHM8X9K2Q4W0000000000000").unwrap(),
+            project_uuid: project_uuid(),
+            node_uuid: node_uuid(),
+            actor: Actor::try_new("user:greg".to_string()).unwrap(),
+            stream_id: StreamId::Schema,
+            stream_seq: 2,
+            hlc: Hlc::parse("2026-06-14T17:36:10.050Z/01JHM8X9K2Q4N0000000000000/0007").unwrap(),
+            deps: Vec::new(),
+            schema_version: SchemaVersion::new(1),
+            kind: EventKind::SchemaAddField,
+            payload: serde_json::json!({
+                "entity_type": "issue",
+                "field": field,
+                "definition": definition,
+            }),
+        }
+    }
+
+    fn sample_schema() -> CanonicalSchema {
+        let mut fields = IndexMap::new();
+        fields.insert(
+            "title".into(),
+            FieldDefinition {
+                kind: FieldKind::Text,
+                enum_name: None,
+                required: true,
+                default: None,
+            },
+        );
+        let mut item_types = IndexMap::new();
+        item_types.insert(
+            "bug".into(),
+            ItemTypeDefinition {
+                entity_kind: EntityKind::Issue,
+                description: None,
+                workflow: None,
+                is_container: false,
+                fields,
+            },
+        );
+        CanonicalSchema {
+            version: SchemaVersion::new(1),
+            item_types,
+            enums: IndexMap::new(),
+            relation_kinds: IndexMap::new(),
+            compatibility: CompatibilityPolicy::Strict,
+        }
+    }
+
+    struct TestStores {
+        schema: MemorySchemaStore,
+        entity: MemoryEntityStore,
+        quarantine: MemoryQuarantineStore,
+        conflict: MemoryConflictStore,
+        progress: MemoryReplicaProgressStore,
+        blob: MemoryBlobStore,
+        snapshot: MemorySnapshotStore,
+        nodes: HashSet<TrackUlid>,
+    }
+
+    impl Default for TestStores {
+        fn default() -> Self {
+            Self {
+                schema: MemorySchemaStore::default(),
+                entity: MemoryEntityStore::default(),
+                quarantine: MemoryQuarantineStore::default(),
+                conflict: MemoryConflictStore::default(),
+                progress: MemoryReplicaProgressStore::default(),
+                blob: MemoryBlobStore::default(),
+                snapshot: MemorySnapshotStore::default(),
+                nodes: HashSet::new(),
+            }
+        }
+    }
+
+    fn reduce_schema_event(stores: &mut TestStores, event: &EventEnvelope) -> CanonicalSchema {
+        let mut reducer = SchemaReducer;
+        let schema = stores
+            .schema
+            .latest(&project_uuid())
+            .ok()
+            .flatten();
+        let mut ctx = ReduceContext {
+            schema_store: &mut stores.schema,
+            entity_store: &mut stores.entity,
+            quarantine_store: &mut stores.quarantine,
+            conflict_store: &mut stores.conflict,
+            progress_store: &mut stores.progress,
+            blob_store: &mut stores.blob,
+            snapshot_store: &mut stores.snapshot,
+            schema,
+            registered_nodes: &mut stores.nodes,
+        };
+        let outcome = reducer.reduce(event, &mut ctx).unwrap();
+        assert_eq!(outcome, ReduceOutcome::SchemaUpdated);
+        ctx.schema.unwrap()
+    }
+
+    #[test]
+    fn apply_add_field_extends_existing_item_type() {
+        let mut stores = TestStores::default();
+        let init = sample_schema();
+        reduce_schema_event(&mut stores, &schema_init_event(&init));
+
+        let updated = reduce_schema_event(
+            &mut stores,
+            &schema_add_field_event(
+                "priority",
+                serde_json::json!({
+                    "type": "enum",
+                    "enum_name": "priority",
+                    "required": false,
+                }),
+            ),
+        );
+
+        assert_eq!(updated.version, SchemaVersion::new(2));
+        let bug = updated.item_types.get("bug").unwrap();
+        assert!(bug.fields.contains_key("priority"));
+        assert!(bug.fields.contains_key("title"));
+    }
+
+    #[test]
+    fn apply_add_field_bootstraps_default_item_type() {
+        let mut stores = TestStores::default();
+        let empty = CanonicalSchema {
+            version: SchemaVersion::new(1),
+            item_types: IndexMap::new(),
+            enums: IndexMap::new(),
+            relation_kinds: IndexMap::new(),
+            compatibility: CompatibilityPolicy::Strict,
+        };
+        reduce_schema_event(&mut stores, &schema_init_event(&empty));
+
+        let updated = reduce_schema_event(
+            &mut stores,
+            &schema_add_field_event(
+                "estimate",
+                serde_json::json!({
+                    "type": "number",
+                    "required": false,
+                }),
+            ),
+        );
+
+        assert_eq!(updated.version, SchemaVersion::new(2));
+        let bug = updated.item_types.get("bug").unwrap();
+        assert_eq!(bug.entity_kind, EntityKind::Issue);
+        assert!(bug.fields.contains_key("estimate"));
+    }
+
+    #[test]
+    fn apply_add_field_before_init_fails() {
+        let mut stores = TestStores::default();
+        let mut reducer = SchemaReducer;
+        let event = schema_add_field_event(
+            "priority",
+            serde_json::json!({ "type": "text", "required": false }),
+        );
+        let mut ctx = ReduceContext {
+            schema_store: &mut stores.schema,
+            entity_store: &mut stores.entity,
+            quarantine_store: &mut stores.quarantine,
+            conflict_store: &mut stores.conflict,
+            progress_store: &mut stores.progress,
+            blob_store: &mut stores.blob,
+            snapshot_store: &mut stores.snapshot,
+            schema: None,
+            registered_nodes: &mut stores.nodes,
+        };
+        let err = reducer.reduce(&event, &mut ctx).unwrap_err();
+        assert!(matches!(err, ReduceError::Failed(_)));
+    }
+
+    #[test]
+    fn apply_add_field_rejects_unknown_entity_kind() {
+        let mut stores = TestStores::default();
+        reduce_schema_event(&mut stores, &schema_init_event(&sample_schema()));
+        let mut event = schema_add_field_event(
+            "extra",
+            serde_json::json!({ "type": "text", "required": false }),
+        );
+        event.payload["entity_type"] = serde_json::json!("not-a-kind");
+        let active_schema = stores
+            .schema
+            .latest(&project_uuid())
+            .ok()
+            .flatten();
+        let mut reducer = SchemaReducer;
+        let mut ctx = ReduceContext {
+            schema_store: &mut stores.schema,
+            entity_store: &mut stores.entity,
+            quarantine_store: &mut stores.quarantine,
+            conflict_store: &mut stores.conflict,
+            progress_store: &mut stores.progress,
+            blob_store: &mut stores.blob,
+            snapshot_store: &mut stores.snapshot,
+            schema: active_schema,
+            registered_nodes: &mut stores.nodes,
+        };
+        let err = reducer.reduce(&event, &mut ctx).unwrap_err();
+        assert!(matches!(err, ReduceError::Parse(_)));
+    }
+}
