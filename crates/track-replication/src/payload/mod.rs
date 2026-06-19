@@ -21,3 +21,6 @@ pub use relation_create::RelationCreatePayload;
 pub use schema_add_field::SchemaAddFieldPayload;
 pub use schema_init::SchemaInitPayload;
 pub use schema_snapshot::SchemaSnapshotPayload;
+
+#[cfg(test)]
+mod api_tests;

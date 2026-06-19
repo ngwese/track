@@ -99,4 +99,12 @@ mod tests {
         let payload = NodeRegisterPayload::from_value(&envelope.payload).unwrap();
         assert_eq!(payload.node_uuid, envelope.node_uuid);
     }
+
+    #[test]
+    fn parse_json_deserializes_fixture_value() {
+        let json = include_str!("../tests/fixtures/item_create.json");
+        let value: serde_json::Value = serde_json::from_str(json).unwrap();
+        let envelope = EventEnvelope::parse_json(&value).unwrap();
+        assert_eq!(envelope.kind, EventKind::ItemCreate);
+    }
 }
