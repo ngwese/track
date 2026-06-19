@@ -28,3 +28,6 @@ spec/tla/*_TTrace*.json
 spec/tla/*.dot
 spec/tla/*.out
 spec/tla/.toolbox/
+
+# cargo-llvm-cov / cargo-crap (see docs/plans/cargo-crap-integration-plan.md)
+lcov.info

@@ -63,6 +63,96 @@ jobs:
       - name: Test
         run: cargo test --workspace
 
+  change-risk:
+    name: Change risk (CRAP)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Detect Rust-related changes
+        uses: dorny/paths-filter@v4
+        id: changes
+        with:
+          filters: |
+            rust:
+              - 'crates/**'
+              - 'Cargo.toml'
+              - 'Cargo.lock'
+              - 'rust-toolchain.toml'
+              - '.cargo-crap.toml'
+              - 'crap_baseline.json'
+              - '.github/workflows/ci.yml'
+
+      - name: Install Rust toolchain
+        if: steps.changes.outputs.rust == 'true'
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: 1.96.0
+
+      - name: Cache cargo
+        if: steps.changes.outputs.rust == 'true'
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install cargo-llvm-cov
+        if: steps.changes.outputs.rust == 'true'
+        uses: taiki-e/install-action@cargo-llvm-cov
+        with:
+          tool: cargo-llvm-cov@0.8.7
+
+      - name: Install cargo-crap
+        if: steps.changes.outputs.rust == 'true'
+        run: cargo install cargo-crap --locked --version 0.2.2
+
+      - name: Generate LCOV
+        if: steps.changes.outputs.rust == 'true'
+        run: cargo llvm-cov --workspace --lcov --output-path lcov.info
+
+      - name: CRAP summary
+        if: steps.changes.outputs.rust == 'true'
+        run: cargo crap --workspace --lcov lcov.info --summary
+
+      - name: Generate PR comment
+        if: steps.changes.outputs.rust == 'true' && github.event_name == 'pull_request'
+        run: |
+          cargo crap --workspace --lcov lcov.info \
+            --baseline crap_baseline.json \
+            --format pr-comment --output crap-comment.md
+
+      - name: Post or update PR comment
+        if: steps.changes.outputs.rust == 'true' && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const body = fs.readFileSync('crap-comment.md', 'utf8');
+            const marker = '<!-- cargo-crap-report -->';
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find((c) => c.body?.startsWith(marker));
+            const args = {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body,
+            };
+            if (existing) {
+              await github.rest.issues.updateComment({
+                ...args,
+                comment_id: existing.id,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                ...args,
+                issue_number: context.issue.number,
+              });
+            }
+
   tlc-hub-sync:
     name: TLC hub sync
     runs-on: ubuntu-latest

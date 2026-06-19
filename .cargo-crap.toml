@@ -1,0 +1,18 @@
+# Change-risk policy for Track — see docs/plans/cargo-crap-integration-plan.md.
+# cargo-crap discovers this file by walking up from CWD; CLI flags override.
+
+threshold = 30.0
+missing = "pessimistic"
+epsilon = 0.01
+jobs = 4
+
+# Phase 1: report-only. Enable in Phase 2 (see integration plan).
+# fail-regression = true
+
+# Production crates only — test harness crates are not deployable logic.
+# `allow` path globs hide functions (cargo-crap 0.2.2 `--exclude` is unreliable
+# in `--workspace` mode).
+allow = [
+  "crates/track-sync-testing/**",
+  "crates/track-hub-conformance-testing/**",
+]
