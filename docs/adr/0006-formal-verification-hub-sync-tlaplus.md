@@ -1,6 +1,6 @@
 # ADR 0006: Formal verification of hub sync protocol (TLA+)
 
-> **Status:** Proposed (amended 2026-06-19)\
+> **Status:** Accepted (amended 2026-06-19)\
 > **Amendments:** Integration test baseline — parameterized `HUB_SYNC` suite
 > largely green; TLA phases reprioritized to catch up with Rust coverage\
 > **Related:** [ADR 0004](0004-hub-sync-protocol-and-compaction.md),
@@ -9,7 +9,7 @@
 
 **Date:** 2026-06-18\
 **Amended:** 2026-06-19
-**Deciders:** Track maintainers (draft for review)
+**Deciders:** Track maintainers
 
 ## Context
 
@@ -113,9 +113,8 @@ long retry sequences; less common for explicit distributed protocol specs.
 Machine-checked proofs of protocol correctness.
 
 **Pros:** Highest assurance; proofs can be exhaustive.
-**Cons:** High expertise and maintenance cost; poor fit for an early-stage
-protocol still marked Proposed in ADR 0004; slow iteration during amendment
-cycles.
+**Cons:** High expertise and maintenance cost; maintenance burden as the
+protocol evolves; slow iteration during amendment cycles.
 
 ### Option D — TLA+ with TLC model checking (chosen)
 
@@ -340,17 +339,20 @@ Subsequent work should specify:
 
 ## Status rationale
 
-This ADR is **Proposed**. ADR 0004 remains **Proposed**.
+This ADR is **Accepted**. [ADR 0004](0004-hub-sync-protocol-and-compaction.md) is
+**Accepted**.
 
-**Phase 0 TLA milestone (delivered 2026-06-18):** `spec/tla/` exists; TLC passes
-five safety invariants on default `HubSync.cfg` (~108k states, ~2s locally).
+**TLA programme (2026-06-19):** Phases 0–4 are delivered under `spec/tla/`; TLC
+passes 16 safety invariants plus bounded `Live_InactiveBootstrap` on default
+`HubSync.cfg` (~132k distinct states, ~40s locally). The `tlc-hub-sync` CI job
+gates changes to the model and protocol ADRs.
 
 **Integration programme (2026-06-19):** 66/67 `HUB_SYNC-*` scenarios pass on
 `MemoryHubFixture`; hub restart durability is covered separately by ADR 0005.
-The TLA model still abstracts per-authoring-node cursors, network faults,
-snapshots, and compaction — areas now exercised by integration tests but not
-yet formally modeled.
+The TLA model complements integration tests for unbounded interleaving; known
+simplifications are documented in [spec/tla/README.md](../../spec/tla/README.md).
 
-**Next milestone:** Phase 1 TLA (per-authoring-node cursors + pagination
-invariants) and CI `tlc-hub-sync` job — see
+**Follow-on (non-blocking):** optional nightly large-bounds TLC, refinement
+mapping to `track-hub-protocol` types, and TLC trace replay in
+`track-sync-testing` — see [Follow-on decisions](#follow-on-decisions) and the
 [implementation plan](../plans/adr-0006-formal-verification-implementation-plan.md).

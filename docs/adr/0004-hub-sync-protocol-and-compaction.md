@@ -1,13 +1,13 @@
 # ADR 0004: Hub sync protocol, cursors, acknowledgements, and compaction
 
-> **Status:** Proposed (amended 2026-06-15)\
+> **Status:** Accepted (amended 2026-06-15)\
 > **Amendments:** [Integration test gaps](../plans/replication-sync-gap-log.md)
 > — protocol versioning, NDJSON errors, sync loop, snapshot pull, deferred
 > hub-assigned issue numbers
 
 **Date:** 2026-06-14\
 **Amended:** 2026-06-15
-**Deciders:** Track maintainers (draft for review)
+**Deciders:** Track maintainers
 
 ## Context
 
@@ -730,10 +730,11 @@ Subsequent ADRs or SRD updates should specify:
 
 ## Status rationale
 
-This ADR is **Proposed** and has been **reconciled** with the SRD (2026-06-14).
-It supersedes SRD Appendix D and defines the authoritative hub wire protocol.
-Acceptance is pending transport binding and cursor persistence in
-`.track/state.json`.
+This ADR is **Accepted**. It supersedes SRD Appendix D and defines the
+authoritative hub wire protocol. Implementation and the `HUB_SYNC-*` integration
+programme exercise the protocol end-to-end; remaining open items in
+[Follow-on decisions](#follow-on-decisions) are follow-on transport and policy
+defaults, not blockers for the core sync and compaction model.
 
 ## Footnotes
 
