@@ -333,4 +333,78 @@ mod tests {
                 .any(|c| c.conflict_type == ConflictType::UnknownField)
         );
     }
+
+    fn schema_with_field(kind: FieldKind, name: &str) -> CanonicalSchema {
+        let mut fields = IndexMap::new();
+        fields.insert(
+            name.into(),
+            FieldDefinition {
+                kind,
+                enum_name: None,
+                required: false,
+                default: None,
+            },
+        );
+        let mut item_types = IndexMap::new();
+        item_types.insert(
+            "bug".into(),
+            ItemTypeDefinition {
+                entity_kind: EntityKind::Issue,
+                description: None,
+                workflow: None,
+                is_container: false,
+                fields,
+            },
+        );
+        CanonicalSchema {
+            version: SchemaVersion::new(1),
+            item_types,
+            enums: IndexMap::new(),
+            relation_kinds: IndexMap::new(),
+            compatibility: CompatibilityPolicy::Strict,
+        }
+    }
+
+    fn mismatch_item(value: FieldValue) -> ReducedItem {
+        let mut item = sample_item();
+        item.fields.insert("kind_probe".into(), value);
+        item
+    }
+
+    #[test]
+    fn rejects_field_type_mismatch_for_each_value_kind_label() {
+        let cases = [
+            (FieldKind::Text, FieldValue::Integer(1)),
+            (FieldKind::Number, FieldValue::String("1".into())),
+            (FieldKind::Decimal, FieldValue::Boolean(true)),
+            (FieldKind::Boolean, FieldValue::Decimal(1.0)),
+            (FieldKind::Date, FieldValue::Json(serde_json::json!({}))),
+            (
+                FieldKind::DateTime,
+                FieldValue::Date("2026-01-01".into()),
+            ),
+            (
+                FieldKind::Member,
+                FieldValue::String("user:greg".into()),
+            ),
+            (
+                FieldKind::EntityRef,
+                FieldValue::String("track:issue:01JHM8X9K2Q4Z0000000000000".into()),
+            ),
+        ];
+
+        for (kind, bad_value) in cases {
+            let schema = schema_with_field(kind, "kind_probe");
+            let item = mismatch_item(bad_value);
+            let err = DefaultEntityValidator
+                .validate_item(&schema, &item)
+                .unwrap_err();
+            let conflict = err
+                .conflicts
+                .iter()
+                .find(|c| c.conflict_type == ConflictType::FieldTypeMismatch)
+                .unwrap_or_else(|| panic!("expected mismatch for {kind:?}"));
+            assert!(conflict.message.contains("expected"));
+        }
+    }
 }
