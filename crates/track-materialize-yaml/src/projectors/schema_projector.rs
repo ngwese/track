@@ -42,3 +42,30 @@ pub fn project_schema(
 
     Ok(report)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use tempfile::tempdir;
+    use track_entity::{CanonicalSchema, CompatibilityPolicy};
+    use track_id::SchemaVersion;
+
+    #[test]
+    fn project_schema_writes_types_and_placeholder_files() {
+        let root = tempdir().unwrap();
+        let schema = CanonicalSchema {
+            version: SchemaVersion::new(3),
+            item_types: Default::default(),
+            enums: Default::default(),
+            relation_kinds: Default::default(),
+            compatibility: CompatibilityPolicy::Strict,
+        };
+
+        let report = project_schema(root.path(), &schema).unwrap();
+        assert!(report.paths_written.iter().any(|p| p.ends_with("types.yaml")));
+        assert!(root.path().join("schema/states.yaml").exists());
+        assert!(root.path().join("schema/workflows.yaml").exists());
+        let types = std::fs::read_to_string(root.path().join("schema/types.yaml")).unwrap();
+        assert!(types.contains("version: 3"));
+    }
+}
