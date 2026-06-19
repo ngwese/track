@@ -132,3 +132,37 @@ impl IntoResponse for PullHttpError {
         (status, message).into_response()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use axum::response::IntoResponse;
+
+    fn status_for(err: PullHttpError) -> StatusCode {
+        err.into_response().status()
+    }
+
+    #[test]
+    fn into_response_maps_error_variants() {
+        assert_eq!(
+            status_for(PullHttpError::WorkspaceMismatch),
+            StatusCode::NOT_FOUND
+        );
+        assert_eq!(
+            status_for(PullHttpError::UnsupportedProtocolVersion),
+            StatusCode::NOT_ACCEPTABLE
+        );
+        assert_eq!(
+            status_for(PullHttpError::Decode("bad".into())),
+            StatusCode::BAD_REQUEST
+        );
+        assert_eq!(
+            status_for(PullHttpError::Json(serde_json::from_str::<serde_json::Value>("x").unwrap_err())),
+            StatusCode::BAD_REQUEST
+        );
+        assert_eq!(
+            status_for(PullHttpError::Hub(track_hub::HubError::Internal("pull failed".into()))),
+            StatusCode::INTERNAL_SERVER_ERROR
+        );
+    }
+}
