@@ -17,7 +17,7 @@ It complements the Rust implementation plan for ADR 0004, the
 | --- | --- | --- |
 | **Rust integration** (`HUB_SYNC-*`) | 66/67 green on `MemoryHubFixture` | Deployable behaviour oracle |
 | **Hub conformance** (`HUB-CONF-*`) | ADR 0005 suite in `track-hub-conformance-testing` | Durable restart / admin persistence |
-| **TLA+ model** (`spec/tla/`) | Phase 2 green in CI (`tlc-hub-sync`) | Unbounded interleaving + compaction safety |
+| **TLA+ model** (`spec/tla/`) | Phases 0–4 green in CI (`tlc-hub-sync`) | Unbounded interleaving + compaction safety |
 
 The integration programme has **caught up with and surpassed** the TLA model.
 Formal verification work now **follows** green integration tests: each TLA phase
@@ -102,18 +102,16 @@ green integration tests as the behavioural spec for each extension.
 | **0.5** ✓ | CI + path filters | same as Phase 1 | `tlc-hub-sync` job |
 | **1** ✓ | extend `HubSync`, `Node` | `Inv_CursorMonotone`, `Inv_PaginationStable`, `Inv_HubOffsetOrder` | `pull_paging::110`–`112`, all multi-node |
 | **2** ✓ | `Network` | `Inv_PartialPush`, `Inv_PartialPull`, `Inv_MalformedLine` | `recovery::050`, `ack::102`, `protocol::091`, `096` |
-| **3** | `Snapshots` | `Live_InactiveBootstrap` (bounded) | `convergence::042`, `compaction::120` |
-| **4** | `Compaction` | `Inv_NoSilentLoss`, `Inv_CompactionSafe`, `Inv_TombstoneRetained` | `compaction::120`–`122` |
+| **3** ✓ | `Snapshots` | `Live_InactiveBootstrap` (bounded), `Inv_BootstrapCoverage` | `convergence::042`, `compaction::120` |
+| **4** ✓ | `Compaction` | `Inv_NoSilentLoss`, `Inv_CompactionSafe`, `Inv_TombstoneRetained` | `compaction::120`–`122` |
 
-Phase 0–2 are **complete**. Phases 3–4 are **integration-green, TLA-pending**.
+Phases 0–4 are **complete** (2026-06-19).
 
 ## Phase 0 model (delivered)
 
-See [spec/tla/README.md](../../spec/tla/README.md). Key abstractions still open:
-
-1. **Per-authoring-node cursors** — delivered in Phase 1.
-2. **Atomic push/pull** — replaced in Phase 2 by streaming push/pull with abort.
-3. **No snapshots or compaction** — Rust `HubAdmin` exercises both.
+See [spec/tla/README.md](../../spec/tla/README.md). All planned protocol
+abstractions through compaction are modeled; see README for remaining
+simplifications (transport drop/duplicate, multi-scope snapshots).
 
 ### Default TLC bounds (`HubSync.cfg`)
 
@@ -124,8 +122,9 @@ See [spec/tla/README.md](../../spec/tla/README.md). Key abstractions still open:
 | `MaxHubLen` | `3` | Matches event count; keeps state space small |
 | `PageLimit` | `2` | Exercises multi-event pull pages |
 | `MaxPushStream` | `2` | Exercises multi-event push batches |
+| `TombstoneEvents` | `{3}` | OR-set tombstone marker in compaction tests |
 
-**Measured runtime:** ~2s, ~4.3k distinct states (2026-06-19).
+**Measured runtime:** ~40s, ~132k distinct states (2026-06-19).
 
 ## Property registry
 
@@ -141,10 +140,11 @@ See [spec/tla/README.md](../../spec/tla/README.md). Key abstractions still open:
 | `Inv_PartialPush` | 2 | §Partial failure | `ack::hub_sync_102` | 102 | green | green |
 | `Inv_PartialPull` | 2 | §Partial failure | `recovery::hub_sync_050` | 050 | green | green |
 | `Inv_MalformedLine` | 2 | §Partial failure | `protocol::hub_sync_091`, `096` | 091, 096 | green | green |
-| `Live_InactiveBootstrap` | 3 | §Snapshot-assisted sync | `convergence::hub_sync_042` | 042 | — | green |
-| `Inv_NoSilentLoss` | 4 | §Compaction prerequisites | `compaction::hub_sync_120` | 120 | — | green |
-| `Inv_CompactionSafe` | 4 | §Compaction | `compaction::hub_sync_122` | 122 | — | green |
-| `Inv_TombstoneRetained` | 4 | §Tombstones | `compaction::hub_sync_121` | 121 | — | green |
+| `Live_InactiveBootstrap` | 3 | §Snapshot-assisted sync | `convergence::hub_sync_042` | 042 | green | green |
+| `Inv_BootstrapCoverage` | 3 | §Snapshot-assisted sync | `convergence::hub_sync_042` | 042 | green | green |
+| `Inv_NoSilentLoss` | 4 | §Compaction prerequisites | `compaction::hub_sync_120` | 120 | green | green |
+| `Inv_CompactionSafe` | 4 | §Compaction | `compaction::hub_sync_122` | 122 | green | green |
+| `Inv_TombstoneRetained` | 4 | §Tombstones | `compaction::hub_sync_121` | 121 | green | green |
 
 When adding a property:
 
@@ -275,12 +275,12 @@ resolution.
 
 - [x] Phase 1 property rows show **green** in both TLA and Rust columns
 - [x] Phase 2 property rows show **green** in both TLA and Rust columns
-- [ ] Phase 3–4 property rows show **green** in both TLA and Rust columns
-- [ ] `spec/tla/README.md` abstractions list is empty or explicitly deferred
+- [x] Phase 3–4 property rows show **green** in both TLA and Rust columns
+- [x] `spec/tla/README.md` abstractions list documents remaining simplifications
 - [ ] No ADR 0004 protocol amendment without corresponding TLA + case update
 
 ### Programme complete
 
-- [ ] All non-deferred `Inv_*` / bounded `Live_*` properties in `HubSync.cfg`
-- [ ] TLC runtime within CI budget (< 5 min default job)
+- [x] All non-deferred `Inv_*` / bounded `Live_*` properties in `HubSync.cfg`
+- [x] TLC runtime within CI budget (< 5 min default job)
 - [ ] Optional: `HubSync.large.cfg` nightly job with expanded bounds

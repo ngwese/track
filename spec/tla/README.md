@@ -8,40 +8,44 @@ hub sync protocol, verified with TLC per
 
 | File | Phase | Purpose |
 | --- | --- | --- |
-| `HubSync.tla` | 2 | Root spec: `Init`, `Next`, `Spec`, `Inv_*` |
-| `HubSync.cfg` | 2 | TLC constants, bounds, invariants |
+| `HubSync.tla` | 4 | Root spec: `Init`, `Next`, `Spec`, `Inv_*` |
+| `HubSync.cfg` | 4 | TLC constants, bounds, invariants, liveness |
 | `Common.tla` | 0 | Shared operators |
 | `Hub.tla` | 0 | Push accept and durable promotion |
-| `Node.tla` | 1 | Per-author pull window, persist-before-cursor helpers |
+| `Node.tla` | 1–4 | Pull window, absolute offsets, persist-before-cursor |
 | `Properties.tla` | 0 | Re-exports `Inv_*` from `HubSync.tla` for documentation |
 | `Network.tla` | 2 | Push/pull stream helpers; partial commit and abort |
-| `Snapshots.tla` | 2 | Snapshot bootstrap |
-| `Compaction.tla` | 2 | Retention watermarks |
+| `Snapshots.tla` | 3 | Published snapshot coverage and bootstrap cursors |
+| `Compaction.tla` | 4 | Watermarks, prefix compaction, tombstone guards |
 | `run-tlc.sh` | — | Local TLC or Docker wrapper |
 
-## Phase 2 scope (current)
+## Phase 4 scope (current)
 
-The model covers push, pull, per-authoring-node cursors, and **partial
-stream failure**:
+The model covers push, pull, cursors, partial streams, snapshots, and
+compaction:
 
-- **Per-authoring-node cursors** — `cursors[syncing][author]` matches ADR 0004
-  `known_cursors`.
-- **Persist advances cursor** — each `Persist` action updates the cursor for the
-  event's authoring node (ADR 0004 §Sync integration loop).
-- **Streaming push** — `StartPush` / `PushCommitNext` / `InterruptPush` /
-  `MalformedPush` model a bounded push batch with a durable prefix
-  (`pushDurableLen`) and re-queue on abort.
-- **Streaming pull** — `BeginPull` / `PullSendNext` / `InterruptPull` /
-  `MalformedPull` deliver a page incrementally; cursor advances only on
-  `Persist` (undelivered tail is discarded on abort).
-- **Numeric model values in CI** — `HubSync.cfg` uses `Nodes = {1, 2}` and
-  `Events = {1, 2, 3}`; authorship is the `Author` operator in `HubSync.tla`.
+- **Per-authoring-node cursors** — `cursors[syncing][author]` with absolute hub
+  offsets (`compactedThrough` + tail index).
+- **Streaming push/pull** — bounded batches with mid-stream abort (Phase 2).
+- **Published snapshots** — `PublishSnapshot` records `snapshotCoverage`,
+  `snapshotThrough`, and per-author `snapshotCursors`; republish only when the hub
+  grows past the prior snapshot boundary.
+- **Snapshot bootstrap** — `BootstrapFromSnapshot` hydrates `localLog` and
+  cursors from coverage; `ColdResetNode` models an inactive replica.
+- **Compaction** — `ReportWatermark` + `CompactPrefix` below snapshot boundary
+  when active replicas have caught up; archived events keep absolute offsets in
+  `archivedOffsets`.
+- **Tombstones** — `TombstoneEvents` (event `3` in CI) must remain in snapshot
+  or tail after compaction.
+- **Active replicas only** — sync actions require `nodeActive[node]`.
 
 Remaining abstractions:
 
-- **No snapshots or compaction** — stub modules only; Phases 3–4.
+- No transport-level drop/duplicate (streaming abort only).
+- Single workspace/project snapshot (no multi-scope snapshots).
+- Hub admin actions are atomic (`PublishSnapshot`, `CompactPrefix`).
 
-### Properties checked in CI (Phase 2)
+### Properties checked in CI (Phase 4)
 
 | Property | ADR 0006 ID |
 | --- | --- |
@@ -55,18 +59,28 @@ Remaining abstractions:
 | `Inv_CursorMonotone` | cursor values are valid hub offsets |
 | `Inv_PartialPush` | durable push prefix only |
 | `Inv_PartialPull` | pull buffer ahead of cursor |
-| `Inv_MalformedLine` | partial push/pull safety (combines above) |
+| `Inv_MalformedLine` | partial push/pull safety |
+| `Inv_NoSilentLoss` | active replicas retain compacted history |
+| `Inv_CompactionSafe` | archived prefix covered by snapshot |
+| `Inv_TombstoneRetained` | tombstones survive compaction |
+| `Inv_BootstrapCoverage` | snapshot bootstrap hydration |
+| `Live_InactiveBootstrap` | bounded inactive-replica bootstrap liveness |
 
-Default CI bounds (`HubSync.cfg`) complete in < 3s (~4.3k distinct states on a
-modern laptop, 2026-06-19). Re-benchmark after adding Phase 3–4 modules.
+Default CI bounds (`HubSync.cfg`) complete in ~40s (~132k distinct states on a
+modern laptop, 2026-06-19).
+
+## Phase 2 scope (superseded)
+
+Phase 2 added streaming push/pull without snapshots or compaction. Superseded by
+Phase 4 above.
 
 ## Phase 1 scope (superseded)
 
-Phase 1 used atomic push/pull. Superseded by Phase 2 streaming above.
+Phase 1 used atomic push/pull. Superseded by Phase 2 streaming.
 
 ## Phase 0 scope (superseded)
 
-Phase 0 used a single cursor per syncing node. Superseded by Phase 1 above.
+Phase 0 used a single cursor per syncing node. Superseded by Phase 1.
 
 ## Prerequisites
 
@@ -100,7 +114,8 @@ java -cp "$TLA_TOOLS_JAR" tlc2.TLC -config HubSync.cfg HubSync.tla
 
 1. Change [ADR 0004](../../docs/adr/0004-hub-sync-protocol-and-compaction.md) or
    this model in the same PR when behaviour changes.
-2. Run `./run-tlc.sh` until all `INVARIANT` entries in `HubSync.cfg` pass.
+2. Run `./run-tlc.sh` until all `INVARIANT` and `PROPERTY` entries in
+   `HubSync.cfg` pass.
 3. If TLC emits a counterexample trace, add a minimal `HUB_SYNC-*` integration
    test when the trace maps to deployable Rust behaviour.
 

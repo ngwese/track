@@ -3,46 +3,68 @@
   Replica-side transitions: pull delivery, local persist, cursor advance.
 
   Phase 1: per-authoring-node cursors (ADR 0004 §Cursor model).
+  Phase 3–4: absolute hub offsets with compacted prefix (ADR 0004 §Compaction).
  ***************************************************************************)
-EXTENDS Common
+EXTENDS Common, Snapshots
 
-RECURSIVE CollectPullPage(_, _, _, _, _, _)
+RECURSIVE CollectPullPage(_, _, _, _, _, _, _)
 
-CollectPullPage(hubLog, cursorsNode, pageLimit, authorOf, nextIdx, acc) ==
-  IF Len(acc) >= pageLimit \/ nextIdx > HubLen(hubLog)
-  THEN acc
-  ELSE IF nextIdx > cursorsNode[authorOf[hubLog[nextIdx]]]
-       THEN CollectPullPage(hubLog, cursorsNode, pageLimit, authorOf, nextIdx + 1,
-                            Append(acc, hubLog[nextIdx]))
-       ELSE CollectPullPage(hubLog, cursorsNode, pageLimit, authorOf, nextIdx + 1, acc)
+CollectPullPage(hubLog, cursorsNode, pageLimit, authorOf, compactedThrough,
+                nextAbsIdx, acc) ==
+  LET absMax == HubLenAbsolute(hubLog, compactedThrough)
+  IN IF Len(acc) >= pageLimit \/ nextAbsIdx > absMax
+     THEN acc
+     ELSE LET event == EventAtOffset(hubLog, compactedThrough, nextAbsIdx)
+              author == authorOf[event]
+          IN IF nextAbsIdx > cursorsNode[author]
+             THEN CollectPullPage(hubLog, cursorsNode, pageLimit, authorOf,
+                                  compactedThrough, nextAbsIdx + 1,
+                                  Append(acc, event))
+             ELSE CollectPullPage(hubLog, cursorsNode, pageLimit, authorOf,
+                                  compactedThrough, nextAbsIdx + 1, acc)
 
-PullWindow(hubLog, cursorsNode, pageLimit, authorOf) ==
-  CollectPullPage(hubLog, cursorsNode, pageLimit, authorOf, 1, <<>>)
+PullWindow(hubLog, cursorsNode, pageLimit, authorOf, compactedThrough) ==
+  IF compactedThrough >= HubLenAbsolute(hubLog, compactedThrough)
+  THEN <<>>
+  ELSE CollectPullPage(hubLog, cursorsNode, pageLimit, authorOf, compactedThrough,
+                       compactedThrough + 1, <<>>)
 
-NextOffsetForAuthor(hubLog, author, cursor, authorOf) ==
-  IF \E i \in DOMAIN hubLog : authorOf[hubLog[i]] = author /\ i > cursor
-  THEN CHOOSE i \in DOMAIN hubLog :
-         /\ authorOf[hubLog[i]] = author
-         /\ i > cursor
-         /\ \A j \in DOMAIN hubLog :
-              (authorOf[hubLog[j]] = author /\ j < i /\ j > cursor) => FALSE
-  ELSE 0
+HubOffsetOfEvent(hubLog, event, compactedThrough) ==
+  compactedThrough +
+    (CHOOSE i \in DOMAIN hubLog : hubLog[i] = event)
 
-PersistBeforeCursorOK(hubLog, localEvents, cursorsNode, authorOf) ==
-  \A author \in DOMAIN cursorsNode :
-    \A i \in DOMAIN hubLog :
-      (authorOf[hubLog[i]] = author /\ i <= cursorsNode[author])
-        => hubLog[i] \in localEvents
+PersistBeforeCursorOK(hubLog, localEvents, cursorsNode, authorOf,
+                      compactedThrough, archivedEvents, archivedOffsets) ==
+  LET absMax == HubLenAbsolute(hubLog, compactedThrough)
+  IN /\ IF compactedThrough >= absMax
+        THEN TRUE
+        ELSE \A author \in DOMAIN cursorsNode :
+               \A absIdx \in (compactedThrough + 1)..absMax :
+                 (authorOf[EventAtOffset(hubLog, compactedThrough, absIdx)] = author
+                  /\ absIdx <= cursorsNode[author])
+                   => EventAtOffset(hubLog, compactedThrough, absIdx) \in localEvents
+     /\ \A author \in DOMAIN cursorsNode :
+          \A e \in archivedEvents :
+            (authorOf[e] = author
+             /\ archivedOffsets[e] <= cursorsNode[author])
+              => e \in localEvents
 
-MinUnseenOffset(hubLog, cursorsNode, authorOf) ==
-  IF \E i \in DOMAIN hubLog : i > cursorsNode[authorOf[hubLog[i]]]
-  THEN CHOOSE i \in DOMAIN hubLog :
-         /\ i > cursorsNode[authorOf[hubLog[i]]]
-         /\ \A j \in DOMAIN hubLog :
-              (j < i) => (j <= cursorsNode[authorOf[hubLog[j]]])
-  ELSE 0
-
-HubOffsetOfEvent(hubLog, event) ==
-  CHOOSE i \in DOMAIN hubLog : hubLog[i] = event
+MinUnseenOffset(hubLog, cursorsNode, authorOf, compactedThrough) ==
+  LET absMax == HubLenAbsolute(hubLog, compactedThrough)
+  IN IF compactedThrough >= absMax
+     THEN 0
+     ELSE IF \E absIdx \in (compactedThrough + 1)..absMax :
+              absIdx > cursorsNode[authorOf[EventAtOffset(hubLog, compactedThrough,
+                                                          absIdx)]]
+          THEN CHOOSE absIdx \in (compactedThrough + 1)..absMax :
+                 /\ absIdx > cursorsNode[authorOf[EventAtOffset(hubLog,
+                                                                 compactedThrough,
+                                                                 absIdx)]]
+                 /\ \A j \in (compactedThrough + 1)..absMax :
+                      (j < absIdx)
+                        => (j <= cursorsNode[authorOf[EventAtOffset(hubLog,
+                                                                      compactedThrough,
+                                                                      j)]])
+          ELSE 0
 
 ====
