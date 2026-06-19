@@ -1,10 +1,10 @@
-//! In-memory [`crate::ReplicaProgressStore`] implementation.
+//! In-memory [`track_store::ReplicaProgressStore`] implementation.
 
 use std::collections::HashMap;
 
 use track_id::TrackUlid;
 
-use crate::{ReplicaProgress, ReplicaProgressStore, StoreError};
+use track_store::{ReplicaProgress, ReplicaProgressStore, StoreError};
 
 /// HashMap-backed replication progress store.
 #[derive(Clone, Debug, Default)]

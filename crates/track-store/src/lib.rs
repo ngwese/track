@@ -1,8 +1,8 @@
 //! Storage traits for reducers and materializers (ADR 0003 §Local materialization).
 //!
 //! This crate defines persistence boundaries without choosing SQLite, YAML, or
-//! hub I/O. Concrete backends live in `track-store-sqlite` and the `memory`
-//! module provides in-memory implementations for unit tests.
+//! hub I/O. Concrete backends live in `track-store-memory`, `track-store-sqlite`,
+//! and future production crates.
 
 #![deny(missing_docs)]
 
@@ -12,7 +12,6 @@ mod entity_store;
 mod error;
 mod file_projector;
 mod log_store;
-pub mod memory;
 mod quarantine_store;
 mod replica_progress_store;
 mod schema_store;

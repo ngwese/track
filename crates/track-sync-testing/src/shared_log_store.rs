@@ -3,8 +3,8 @@
 use std::sync::{Arc, Mutex};
 
 use track_replication::EventEnvelope;
-use track_store::memory::MemoryLogStore;
 use track_store::{LogStore, StoreError};
+use track_store_memory::MemoryLogStore;
 
 /// Thread-safe wrapper so [`SyncEngine`] and [`ReductionEngine`] share one log.
 #[derive(Clone, Debug, Default)]

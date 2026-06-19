@@ -1,10 +1,10 @@
-//! In-memory [`crate::ConflictStore`] implementation.
+//! In-memory [`track_store::ConflictStore`] implementation.
 
 use std::collections::HashMap;
 
 use track_id::TrackUlid;
 
-use crate::{ConflictRecord, ConflictStore, StoreError};
+use track_store::{ConflictRecord, ConflictStore, StoreError};
 
 /// HashMap-backed conflict store keyed by conflict UUID.
 #[derive(Clone, Debug, Default)]

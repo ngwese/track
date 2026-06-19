@@ -1,10 +1,10 @@
-//! In-memory [`crate::QuarantineStore`] implementation.
+//! In-memory [`track_store::QuarantineStore`] implementation.
 
 use std::collections::HashMap;
 
 use track_id::TrackUlid;
 
-use crate::{QuarantineRecord, QuarantineStore, StoreError};
+use track_store::{QuarantineRecord, QuarantineStore, StoreError};
 
 /// HashMap-backed quarantine store.
 #[derive(Clone, Debug, Default)]

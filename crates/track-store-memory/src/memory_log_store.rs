@@ -1,11 +1,11 @@
-//! In-memory [`crate::LogStore`] implementation.
+//! In-memory [`track_store::LogStore`] implementation.
 
 use std::collections::{HashMap, HashSet};
 
 use track_id::TrackUlid;
 use track_replication::{EventEnvelope, compare_events};
 
-use crate::{LogStore, StoreError};
+use track_store::{LogStore, StoreError};
 
 /// HashMap-backed append-only log for unit tests.
 #[derive(Clone, Debug, Default)]

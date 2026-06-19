@@ -1,11 +1,11 @@
-//! In-memory [`crate::SchemaStore`] implementation.
+//! In-memory [`track_store::SchemaStore`] implementation.
 
 use std::collections::HashMap;
 
 use track_entity::CanonicalSchema;
 use track_id::{SchemaVersion, TrackUlid};
 
-use crate::{SchemaStore, SchemaVersionRow, StoreError};
+use track_store::{SchemaStore, SchemaVersionRow, StoreError};
 
 /// HashMap-backed schema version store for unit tests.
 #[derive(Clone, Debug, Default)]

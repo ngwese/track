@@ -29,4 +29,5 @@ urlencoding = { workspace = true }
 [dev-dependencies]
 track-hub-memory = { workspace = true }
 track-replication = { workspace = true }
+track-store-memory = { workspace = true }
 tokio = { workspace = true }

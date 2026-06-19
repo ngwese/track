@@ -1,4 +1,4 @@
-//! In-memory [`crate::EntityStore`] implementation.
+//! In-memory [`track_store::EntityStore`] implementation.
 
 use std::collections::{BTreeMap, HashMap};
 
@@ -8,7 +8,7 @@ use track_entity::{
 };
 use track_id::{Actor, TrackUlid};
 
-use crate::{CounterAdjustOp, EntityStore, SetAddOp, SetRemoveOp, StoreError};
+use track_store::{CounterAdjustOp, EntityStore, SetAddOp, SetRemoveOp, StoreError};
 
 use super::or_set_cell::{OrSetMember, merge_set_add, merge_set_remove};
 

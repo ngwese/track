@@ -19,6 +19,7 @@ track-id = { workspace = true }
 track-reduce = { workspace = true }
 track-replication = { workspace = true }
 track-store = { workspace = true }
+track-store-memory = { workspace = true }
 track-sync = { workspace = true }
 track-sync-testing = { workspace = true }
 url = { workspace = true }

@@ -9,7 +9,7 @@ use track_id::{Actor, SchemaVersion, StreamId, TrackUlid};
 use track_materialize_yaml::{DefaultProjector, MaterializeSelector};
 use track_reduce::{ReduceOutcome, ReductionEngine};
 use track_replication::EventEnvelope;
-use track_store::memory::{
+use track_store_memory::{
     MemoryConflictStore, MemoryEntityStore, MemoryLogStore, MemoryQuarantineStore,
     MemorySchemaStore,
 };

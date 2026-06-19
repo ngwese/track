@@ -1715,6 +1715,7 @@ dependencies = [
  "track-reduce",
  "track-replication",
  "track-store",
+ "track-store-memory",
  "track-sync",
  "track-sync-testing",
  "url",
@@ -1804,6 +1805,7 @@ dependencies = [
  "track-materialize-yaml",
  "track-replication",
  "track-store",
+ "track-store-memory",
 ]
 
 [[package]]
@@ -1832,6 +1834,37 @@ dependencies = [
 ]
 
 [[package]]
+name = "track-store-conformance-testing"
+version = "0.1.0"
+dependencies = [
+ "indexmap",
+ "serde_json",
+ "tempfile",
+ "thiserror 2.0.18",
+ "track-entity",
+ "track-id",
+ "track-replication",
+ "track-store",
+ "track-store-memory",
+ "track-store-sqlite",
+]
+
+[[package]]
+name = "track-store-memory"
+version = "0.1.0"
+dependencies = [
+ "indexmap",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.18",
+ "track-entity",
+ "track-id",
+ "track-replication",
+ "track-store",
+ "track-store-conformance-testing",
+]
+
+[[package]]
 name = "track-store-sqlite"
 version = "0.1.0"
 dependencies = [
@@ -1846,6 +1879,7 @@ dependencies = [
  "track-id",
  "track-replication",
  "track-store",
+ "track-store-conformance-testing",
 ]
 
 [[package]]
@@ -1868,6 +1902,7 @@ dependencies = [
  "track-reduce",
  "track-replication",
  "track-store",
+ "track-store-memory",
  "url",
  "urlencoding",
 ]
@@ -1893,6 +1928,7 @@ dependencies = [
  "track-reduce",
  "track-replication",
  "track-store",
+ "track-store-memory",
  "track-sync",
  "url",
 ]

@@ -9,7 +9,7 @@ use track_entity::{
 use track_id::{Actor, SchemaVersion, StreamId, TrackUlid};
 use track_reduce::{ReduceOutcome, ReductionEngine};
 use track_replication::{EventEnvelope, EventKind, Hlc};
-use track_store::memory::{
+use track_store_memory::{
     MemoryConflictStore, MemoryEntityStore, MemoryLogStore, MemoryQuarantineStore,
     MemorySchemaStore,
 };

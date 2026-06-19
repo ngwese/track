@@ -4,7 +4,7 @@ use track_hub_memory::TestHubHandle;
 use track_id::TrackUlid;
 use track_reduce::{ReduceOutcome, ReductionEngine};
 use track_replication::EventEnvelope;
-use track_store::memory::{
+use track_store_memory::{
     MemoryConflictStore, MemoryEntityStore, MemoryLogStore, MemoryQuarantineStore,
     MemorySchemaStore,
 };

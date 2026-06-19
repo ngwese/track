@@ -7,10 +7,8 @@ use track_hub_protocol::snapshot::{
     PROJECT_SNAPSHOT_V1, ProjectSnapshot, ProjectSnapshotBody, ProjectSnapshotComment,
 };
 use track_id::TrackUlid;
-use track_store::{
-    EntityStore, SchemaStore, SchemaVersionRow,
-    memory::{MemoryEntityStore, MemorySchemaStore},
-};
+use track_store::{EntityStore, SchemaStore, SchemaVersionRow};
+use track_store_memory::{MemoryEntityStore, MemorySchemaStore};
 
 use crate::ReduceError;
 

@@ -11,10 +11,10 @@ use track_replication::{
 use track_store::{
     ConflictStore, EntityStore, LogStore, QuarantineRecord, QuarantineStore, ReplicaProgress,
     ReplicaProgressStore, SchemaStore, SnapshotStore,
-    memory::{
-        MemoryBlobStore, MemoryEntityStore, MemoryReplicaProgressStore, MemorySchemaStore,
-        MemorySnapshotStore,
-    },
+};
+use track_store_memory::{
+    MemoryBlobStore, MemoryEntityStore, MemoryReplicaProgressStore, MemorySchemaStore,
+    MemorySnapshotStore,
 };
 
 use crate::{

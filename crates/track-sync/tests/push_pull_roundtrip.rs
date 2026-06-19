@@ -3,7 +3,7 @@
 use track_hub_memory::TestHubHandle;
 use track_id::TrackUlid;
 use track_replication::EventEnvelope;
-use track_store::memory::MemoryLogStore;
+use track_store_memory::MemoryLogStore;
 use track_sync::{HttpTransport, MemoryCursorStore, SyncEngine};
 
 const NODE_REGISTER: &str =

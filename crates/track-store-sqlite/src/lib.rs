@@ -4,6 +4,7 @@
 
 #![deny(missing_docs)]
 
+mod bundle;
 mod connection;
 mod error;
 mod row_mapping;
@@ -17,6 +18,7 @@ mod sqlite_schema_store;
 mod sqlite_snapshot_store;
 mod track_sqlite_store;
 
+pub use bundle::TempSqliteStoreBundle;
 pub use error::SqliteError;
 pub use row_mapping::{text_to_ulid, ulid_to_text};
 pub use track_sqlite_store::TrackSqliteStore;

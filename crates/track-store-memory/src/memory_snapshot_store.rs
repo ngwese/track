@@ -1,10 +1,10 @@
-//! In-memory [`crate::SnapshotStore`] implementation.
+//! In-memory [`track_store::SnapshotStore`] implementation.
 
 use std::collections::HashMap;
 
 use track_id::TrackUlid;
 
-use crate::{SnapshotStore, StoreError};
+use track_store::{SnapshotStore, StoreError};
 
 /// HashMap-backed compaction checkpoint store.
 #[derive(Clone, Debug, Default)]

@@ -6,7 +6,9 @@ members = [
     "crates/track-replication",
     "crates/track-reduce",
     "crates/track-store",
+    "crates/track-store-memory",
     "crates/track-store-sqlite",
+    "crates/track-store-conformance-testing",
     "crates/track-materialize-yaml",
     "crates/track-hub-protocol",
     "crates/track-hub",
@@ -27,7 +29,9 @@ track-entity = { path = "crates/track-entity" }
 track-replication = { path = "crates/track-replication" }
 track-reduce = { path = "crates/track-reduce" }
 track-store = { path = "crates/track-store" }
+track-store-memory = { path = "crates/track-store-memory" }
 track-store-sqlite = { path = "crates/track-store-sqlite" }
+track-store-conformance-testing = { path = "crates/track-store-conformance-testing" }
 track-materialize-yaml = { path = "crates/track-materialize-yaml" }
 track-hub-protocol = { path = "crates/track-hub-protocol" }
 track-hub = { path = "crates/track-hub" }

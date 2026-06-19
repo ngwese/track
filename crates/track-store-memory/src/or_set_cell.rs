@@ -5,7 +5,7 @@ use std::cmp::Ordering;
 use track_id::{Actor, SchemaVersion, TrackUlid};
 use track_replication::{EventEnvelope, EventKind, Hlc, compare_events};
 
-use crate::{SetAddOp, SetRemoveOp};
+use track_store::{SetAddOp, SetRemoveOp};
 
 /// Causality metadata for one OR-set member add or remove.
 #[derive(Clone, Debug, Eq, PartialEq)]

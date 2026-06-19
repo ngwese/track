@@ -8,7 +8,7 @@ use track_id::TrackUlid;
 use track_reduce::ReductionEngine;
 use track_replication::EventEnvelope;
 use track_store::EntityStore;
-use track_store::memory::{
+use track_store_memory::{
     MemoryConflictStore, MemoryEntityStore, MemoryQuarantineStore, MemorySchemaStore,
 };
 use track_sync::{MemoryCursorStore, SyncEngine, SyncError};

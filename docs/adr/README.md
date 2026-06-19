@@ -25,3 +25,4 @@ later ADR references what it replaces.
 | [0004](0004-hub-sync-protocol-and-compaction.md) | Hub sync protocol, cursors, acknowledgements, and compaction | Accepted |
 | [0005](0005-hub-implementation-conformance.md) | Hub implementation conformance suite (restart durability) | Proposed |
 | [0006](0006-formal-verification-hub-sync-tlaplus.md) | Formal verification of hub sync protocol (TLA+) | Accepted |
+| [0007](0007-store-implementation-conformance.md) | Store implementation conformance suite | Proposed |

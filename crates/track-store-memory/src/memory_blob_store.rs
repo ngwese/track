@@ -1,11 +1,11 @@
-//! In-memory [`crate::BlobStore`] implementation.
+//! In-memory [`track_store::BlobStore`] implementation.
 
 use std::collections::HashMap;
 
 use track_entity::BlobMetadata;
 use track_id::TrackUlid;
 
-use crate::{BlobLinkOp, BlobStore, StoreError};
+use track_store::{BlobLinkOp, BlobStore, StoreError};
 
 /// HashMap-backed blob metadata store.
 #[derive(Clone, Debug, Default)]

@@ -1,5 +1,11 @@
-//! In-memory store implementations for reducer and YAML unit tests.
+//! In-memory store implementations for reducers and tests (ADR 0007).
+//!
+//! Reference ephemeral backend; pairs with [`track_store`] traits like
+//! `track-hub-memory` pairs with hub protocol tests.
 
+#![deny(missing_docs)]
+
+mod handles;
 mod memory_blob_store;
 mod memory_conflict_store;
 mod memory_entity_store;
