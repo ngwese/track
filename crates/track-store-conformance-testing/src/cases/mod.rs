@@ -15,7 +15,8 @@ pub use conflict::store_conf_006_conflict_insert_and_list;
 pub use durable::store_conf_010_durable_log_survives_reopen;
 pub use entity::{
     store_conf_004_entity_header_roundtrip, store_conf_011_or_set_rejects_weak_remove,
-    store_conf_012_scalar_clear_retains_provenance,
+    store_conf_012_scalar_clear_retains_provenance, store_conf_016_entity_mutation_requires_header,
+    store_conf_018_invalid_assignee_rejected, store_conf_019_header_update_preserves_created_hlc,
 };
 pub use log::{
     store_conf_001_log_insert_idempotent, store_conf_002_log_unreduced_lifecycle,

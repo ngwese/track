@@ -1,7 +1,7 @@
 //! [`EntityStore`] implementation for entity tables.
 
 use indexmap::{IndexMap, IndexSet};
-use rusqlite::params;
+use rusqlite::{OptionalExtension, params};
 use track_entity::{
     Claim, Comment, EntityKind, FieldProvenance, FieldValue, ItemHeader, ReducedItem, Relation,
 };
@@ -60,6 +60,7 @@ impl EntityStore for TrackSqliteStore {
         value: Option<&FieldValue>,
         provenance: FieldProvenance,
     ) -> Result<(), StoreError> {
+        ensure_entity(&self.conn, entity_uuid)?;
         match value {
             Some(v) => {
                 let value_json = field_value_inner_json(v)?;
@@ -166,14 +167,17 @@ impl EntityStore for TrackSqliteStore {
     }
 
     fn apply_set_add(&mut self, op: SetAddOp) -> Result<(), StoreError> {
+        ensure_entity(&self.conn, &op.entity_uuid)?;
         crate::or_set_sqlite::apply_or_set_add(&self.conn, &op)
     }
 
     fn apply_set_remove(&mut self, op: SetRemoveOp) -> Result<(), StoreError> {
+        ensure_entity(&self.conn, &op.entity_uuid)?;
         crate::or_set_sqlite::apply_or_set_remove(&self.conn, &op)
     }
 
     fn apply_counter_adjust(&mut self, op: CounterAdjustOp) -> Result<(), StoreError> {
+        ensure_entity(&self.conn, &op.entity_uuid)?;
         let inserted = self
             .conn
             .execute(
@@ -243,6 +247,7 @@ impl EntityStore for TrackSqliteStore {
     }
 
     fn upsert_comment(&mut self, comment: &Comment) -> Result<(), StoreError> {
+        ensure_entity(&self.conn, &comment.entity_uuid)?;
         self.conn
             .execute(
                 "INSERT INTO comments (
@@ -387,7 +392,8 @@ impl EntityStore for TrackSqliteStore {
         }))
     }
 
-    fn upsert_claim(&mut self, _claim: &Claim) -> Result<(), StoreError> {
+    fn upsert_claim(&mut self, claim: &Claim) -> Result<(), StoreError> {
+        ensure_entity(&self.conn, &claim.entity_uuid)?;
         Ok(())
     }
 
@@ -491,6 +497,12 @@ impl EntityStore for TrackSqliteStore {
         Ok(entity_uuids)
     }
 
+    /// Active relations where `relations.project_uuid` matches.
+    ///
+    /// **Backend divergence:** the memory store instead includes relations when either
+    /// endpoint entity's header belongs to `project_uuid`, even when `relation.project_uuid`
+    /// differs. Further investigation is needed to determine whether the memory behavior is
+    /// useful for testing.
     fn list_active_relations_for_project(
         &self,
         project_uuid: &TrackUlid,
@@ -693,6 +705,23 @@ fn field_provenance_from_parts(
         node_uuid: text_to_ulid(&node_text)?,
         stream_seq: stream_seq as u64,
     })
+}
+
+fn ensure_entity(conn: &rusqlite::Connection, entity_uuid: &TrackUlid) -> Result<(), StoreError> {
+    let exists = conn
+        .query_row(
+            "SELECT 1 FROM entities WHERE entity_uuid = ?1",
+            params![ulid_to_text(entity_uuid)],
+            |_| Ok(()),
+        )
+        .optional()
+        .map_err(map_rusqlite_error)?
+        .is_some();
+    if exists {
+        Ok(())
+    } else {
+        Err(StoreError::NotFound(entity_uuid.to_string()))
+    }
 }
 
 fn load_set_members(

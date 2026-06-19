@@ -56,7 +56,12 @@ impl MemoryEntityStore {
             .collect())
     }
 
-    /// Relations touching entities in `project_uuid`.
+    /// Active relations whose **from** or **to** entity header belongs to `project_uuid`.
+    ///
+    /// **Backend divergence:** SQLite `list_active_relations_for_project` filters on
+    /// `relations.project_uuid` instead. The two queries can disagree when a relation row's
+    /// stored `project_uuid` does not match an endpoint entity's header. Further investigation
+    /// is needed to determine whether this memory-side endpoint filter is useful for tests.
     pub fn list_relations_for_project(
         &self,
         project_uuid: &TrackUlid,
@@ -177,7 +182,13 @@ impl MemoryEntityStore {
 
 impl EntityStore for MemoryEntityStore {
     fn upsert_header(&mut self, header: &ItemHeader) -> Result<(), StoreError> {
-        self.headers.insert(header.entity_uuid, header.clone());
+        if let Some(existing) = self.headers.get(&header.entity_uuid) {
+            let mut updated = header.clone();
+            updated.created_hlc = existing.created_hlc.clone();
+            self.headers.insert(header.entity_uuid, updated);
+        } else {
+            self.headers.insert(header.entity_uuid, header.clone());
+        }
         Ok(())
     }
 
@@ -371,8 +382,11 @@ impl EntityStore for MemoryEntityStore {
         let assignees: indexmap::IndexSet<Actor> = self
             .get_set_members(entity_uuid, "assignees")?
             .into_iter()
-            .filter_map(|s| Actor::try_new(s).ok())
-            .collect();
+            .map(|s| {
+                s.parse()
+                    .map_err(|e: track_id::IdError| StoreError::Serialization(e.to_string()))
+            })
+            .collect::<Result<_, _>>()?;
 
         Ok(Some(ReducedItem {
             header,

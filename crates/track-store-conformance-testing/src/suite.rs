@@ -8,7 +8,8 @@ use crate::cases::{
     store_conf_009_blob_insert_and_link, store_conf_010_durable_log_survives_reopen,
     store_conf_011_or_set_rejects_weak_remove, store_conf_012_scalar_clear_retains_provenance,
     store_conf_013_schema_get_at_least_highest, store_conf_014_log_list_unreduced_order,
-    store_conf_015_log_is_reduced_missing_false,
+    store_conf_015_log_is_reduced_missing_false, store_conf_016_entity_mutation_requires_header,
+    store_conf_018_invalid_assignee_rejected, store_conf_019_header_update_preserves_created_hlc,
 };
 use crate::error::ConformanceError;
 use crate::fixture::{DurableStoreHandles, StoreConformanceFixture};
@@ -80,6 +81,18 @@ pub const CORE_CASES: &[ConformanceCase] = &[
         id: "STORE-CONF-015",
         summary: "LogStore is_reduced false for missing events",
     },
+    ConformanceCase {
+        id: "STORE-CONF-016",
+        summary: "EntityStore mutation without header returns NotFound",
+    },
+    ConformanceCase {
+        id: "STORE-CONF-018",
+        summary: "EntityStore invalid assignee fails get_reduced_item",
+    },
+    ConformanceCase {
+        id: "STORE-CONF-019",
+        summary: "EntityStore header update preserves created_hlc",
+    },
 ];
 
 /// Persistence cases for durable backends only.
@@ -104,6 +117,9 @@ pub fn run_core<F: StoreConformanceFixture>(fixture: &F) -> Result<(), Conforman
     store_conf_013_schema_get_at_least_highest(fixture)?;
     store_conf_014_log_list_unreduced_order(fixture)?;
     store_conf_015_log_is_reduced_missing_false(fixture)?;
+    store_conf_016_entity_mutation_requires_header(fixture)?;
+    store_conf_018_invalid_assignee_rejected(fixture)?;
+    store_conf_019_header_update_preserves_created_hlc(fixture)?;
     Ok(())
 }
 
