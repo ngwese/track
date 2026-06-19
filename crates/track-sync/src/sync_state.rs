@@ -39,3 +39,32 @@ impl SyncState {
         self.known_cursors.get(node)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use track_id::{Actor, SchemaVersion, StreamId};
+    use track_replication::{EventEnvelope, EventKind, Hlc};
+
+    #[test]
+    fn cursor_for_returns_inserted_cursor() {
+        let mut state = SyncState::new();
+        let node = TrackUlid::parse("01JHM8X9K2Q4N0000000000000").unwrap();
+        let event = EventEnvelope {
+            event_uuid: TrackUlid::parse("01J0G7YD7Q2Y8MGM7J6C2DM912").unwrap(),
+            workspace_uuid: TrackUlid::generate(),
+            project_uuid: TrackUlid::parse("01JHM8X9K2Q4P0000000000000").unwrap(),
+            node_uuid: node,
+            actor: Actor::try_new("user:greg".to_string()).unwrap(),
+            stream_id: StreamId::Schema,
+            stream_seq: 1,
+            hlc: Hlc::parse("2026-06-14T17:35:21.184Z/01JHM8X9K2Q4N0000000000000/0001").unwrap(),
+            deps: Vec::new(),
+            schema_version: SchemaVersion::new(1),
+            kind: EventKind::SchemaInit,
+            payload: serde_json::Value::Null,
+        };
+        state.advance_cursor(&event, HubOffset(1));
+        assert!(state.cursor_for(&node).is_some());
+    }
+}

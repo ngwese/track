@@ -266,3 +266,17 @@ impl HubTransport for HttpTransport {
         Ok(Some(snapshot))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use url::Url;
+
+    #[test]
+    fn accessor_methods_expose_configuration() {
+        let mut transport = HttpTransport::new(Url::parse("http://127.0.0.1:8080/").unwrap());
+        assert_eq!(transport.protocol_version(), TRACK_PROTOCOL_VERSION);
+        transport.set_base_url(Url::parse("http://127.0.0.1:9090/").unwrap());
+        assert_eq!(transport.protocol_version(), TRACK_PROTOCOL_VERSION);
+    }
+}

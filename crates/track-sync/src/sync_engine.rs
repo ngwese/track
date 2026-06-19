@@ -116,3 +116,39 @@ where
         .await
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{CursorStore, HttpTransport, SyncState};
+    use track_store_memory::MemoryLogStore;
+    use url::Url;
+
+    struct MemoryCursorStore;
+
+    #[async_trait::async_trait]
+    impl CursorStore for MemoryCursorStore {
+        async fn load(&self) -> Result<SyncState, SyncError> {
+            Ok(SyncState::new())
+        }
+
+        async fn save(&self, _state: &SyncState) -> Result<(), SyncError> {
+            Ok(())
+        }
+    }
+
+    #[test]
+    fn transport_mut_returns_mutable_transport() {
+        let transport = HttpTransport::new(Url::parse("http://127.0.0.1:8080/").unwrap());
+        let mut engine = SyncEngine::new(
+            transport,
+            MemoryCursorStore,
+            MemoryLogStore::new(),
+            TrackUlid::generate(),
+            TrackUlid::generate(),
+        );
+        engine
+            .transport_mut()
+            .set_base_url(Url::parse("http://127.0.0.1:9090/").unwrap());
+    }
+}

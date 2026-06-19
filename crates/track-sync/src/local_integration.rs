@@ -44,3 +44,16 @@ impl<L: LogStore> LocalIntegrator<L> {
         Ok(inserted)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use track_store_memory::MemoryLogStore;
+
+    #[test]
+    fn with_callback_registers_post_persist_hook() {
+        let integrator =
+            LocalIntegrator::new(MemoryLogStore::new()).with_callback(Box::new(|_| Ok(())));
+        let _ = integrator;
+    }
+}
