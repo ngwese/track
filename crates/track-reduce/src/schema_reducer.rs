@@ -182,9 +182,7 @@ mod tests {
 
     use super::*;
     use indexmap::IndexMap;
-    use track_entity::{
-        CompatibilityPolicy, FieldDefinition, FieldKind, ItemTypeDefinition,
-    };
+    use track_entity::{CompatibilityPolicy, FieldDefinition, FieldKind, ItemTypeDefinition};
     use track_id::{Actor, SchemaVersion, StreamId, TrackUlid};
     use track_replication::Hlc;
     use track_store::SchemaStore;
@@ -273,6 +271,7 @@ mod tests {
         }
     }
 
+    #[derive(Default)]
     struct TestStores {
         schema: MemorySchemaStore,
         entity: MemoryEntityStore,
@@ -284,28 +283,9 @@ mod tests {
         nodes: HashSet<TrackUlid>,
     }
 
-    impl Default for TestStores {
-        fn default() -> Self {
-            Self {
-                schema: MemorySchemaStore::default(),
-                entity: MemoryEntityStore::default(),
-                quarantine: MemoryQuarantineStore::default(),
-                conflict: MemoryConflictStore::default(),
-                progress: MemoryReplicaProgressStore::default(),
-                blob: MemoryBlobStore::default(),
-                snapshot: MemorySnapshotStore::default(),
-                nodes: HashSet::new(),
-            }
-        }
-    }
-
     fn reduce_schema_event(stores: &mut TestStores, event: &EventEnvelope) -> CanonicalSchema {
         let mut reducer = SchemaReducer;
-        let schema = stores
-            .schema
-            .latest(&project_uuid())
-            .ok()
-            .flatten();
+        let schema = stores.schema.latest(&project_uuid()).ok().flatten();
         let mut ctx = ReduceContext {
             schema_store: &mut stores.schema,
             entity_store: &mut stores.entity,
@@ -407,11 +387,7 @@ mod tests {
             serde_json::json!({ "type": "text", "required": false }),
         );
         event.payload["entity_type"] = serde_json::json!("not-a-kind");
-        let active_schema = stores
-            .schema
-            .latest(&project_uuid())
-            .ok()
-            .flatten();
+        let active_schema = stores.schema.latest(&project_uuid()).ok().flatten();
         let mut reducer = SchemaReducer;
         let mut ctx = ReduceContext {
             schema_store: &mut stores.schema,
