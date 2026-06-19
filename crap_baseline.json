@@ -3,24 +3,6 @@
   "version": "0.2.2",
   "entries": [
     {
-      "file": "/Users/greg/proj/track/crates/track-materialize-yaml/src/default_projector.rs",
-      "function": "DefaultProjector::write_issue_bundle",
-      "line": 24,
-      "cyclomatic": 16.0,
-      "coverage": 52.83018867924528,
-      "crap": 42.86781705703366,
-      "crate": "track-materialize-yaml"
-    },
-    {
-      "file": "/Users/greg/proj/track/crates/track-reduce/src/item_reducer.rs",
-      "function": "ItemReducer::reduce",
-      "line": 421,
-      "cyclomatic": 35.0,
-      "coverage": 97.61904761904762,
-      "crap": 35.01653439153439,
-      "crate": "track-reduce"
-    },
-    {
       "file": "/Users/greg/proj/track/crates/track-sync/src/http_transport.rs",
       "function": "HttpTransport::fetch_latest_project_snapshot",
       "line": 221,
@@ -59,7 +41,7 @@
     {
       "file": "/Users/greg/proj/track/crates/track-reduce/src/item_reducer.rs",
       "function": "typed_json_to_field",
-      "line": 520,
+      "line": 469,
       "cyclomatic": 21.0,
       "coverage": 100.0,
       "crap": 21.0,
@@ -127,6 +109,15 @@
       "coverage": 55.00000000000001,
       "crap": 16.381124999999997,
       "crate": "track-store-memory"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-materialize-yaml/src/default_projector.rs",
+      "function": "DefaultProjector::write_issue_bundle",
+      "line": 24,
+      "cyclomatic": 16.0,
+      "coverage": 96.22641509433963,
+      "crap": 16.0137563223332,
+      "crate": "track-materialize-yaml"
     },
     {
       "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_entity_store.rs",
@@ -221,7 +212,7 @@
     {
       "file": "/Users/greg/proj/track/crates/track-reduce/src/item_reducer.rs",
       "function": "ItemReducer::apply_set_field",
-      "line": 115,
+      "line": 75,
       "cyclomatic": 12.0,
       "coverage": 94.73684210526315,
       "crap": 12.020994314039948,
@@ -257,7 +248,7 @@
     {
       "file": "/Users/greg/proj/track/crates/track-reduce/src/item_reducer.rs",
       "function": "ItemReducer::apply_clear_field",
-      "line": 305,
+      "line": 265,
       "cyclomatic": 11.0,
       "coverage": 92.85714285714286,
       "crap": 11.044096209912537,
@@ -347,7 +338,7 @@
     {
       "file": "/Users/greg/proj/track/crates/track-reduce/src/item_reducer.rs",
       "function": "ItemReducer::apply_adjust_field",
-      "line": 181,
+      "line": 141,
       "cyclomatic": 8.0,
       "coverage": 83.78378378378379,
       "crap": 8.272915720687816,
@@ -374,7 +365,7 @@
     {
       "file": "/Users/greg/proj/track/crates/track-reduce/src/item_reducer.rs",
       "function": "ItemReducer::apply_set_state",
-      "line": 267,
+      "line": 227,
       "cyclomatic": 8.0,
       "coverage": 94.11764705882352,
       "crap": 8.013026663952779,
@@ -463,17 +454,8 @@
     },
     {
       "file": "/Users/greg/proj/track/crates/track-reduce/src/item_reducer.rs",
-      "function": "ItemReducer::apply_lifecycle",
-      "line": 382,
-      "cyclomatic": 7.0,
-      "coverage": 90.9090909090909,
-      "crap": 7.036814425244177,
-      "crate": "track-reduce"
-    },
-    {
-      "file": "/Users/greg/proj/track/crates/track-reduce/src/item_reducer.rs",
       "function": "ItemReducer::apply_create",
-      "line": 64,
+      "line": 24,
       "cyclomatic": 7.0,
       "coverage": 91.30434782608695,
       "crap": 7.032218295389168,
@@ -526,8 +508,17 @@
     },
     {
       "file": "/Users/greg/proj/track/crates/track-reduce/src/item_reducer.rs",
+      "function": "ItemReducer::apply_lifecycle",
+      "line": 342,
+      "cyclomatic": 7.0,
+      "coverage": 96.7741935483871,
+      "crap": 7.001644792051291,
+      "crate": "track-reduce"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-reduce/src/item_reducer.rs",
       "function": "json_to_field_value",
-      "line": 498,
+      "line": 447,
       "cyclomatic": 7.0,
       "coverage": 100.0,
       "crap": 7.0,
@@ -1103,7 +1094,7 @@
     {
       "file": "/Users/greg/proj/track/crates/track-reduce/src/item_reducer.rs",
       "function": "field_def_for",
-      "line": 488,
+      "line": 437,
       "cyclomatic": 3.0,
       "coverage": 100.0,
       "crap": 3.0,
@@ -1319,7 +1310,7 @@
     {
       "file": "/Users/greg/proj/track/crates/track-reduce/src/item_reducer.rs",
       "function": "ItemReducer::apply_add_label",
-      "line": 222,
+      "line": 182,
       "cyclomatic": 2.0,
       "coverage": 92.85714285714286,
       "crap": 2.001457725947522,
@@ -1328,7 +1319,7 @@
     {
       "file": "/Users/greg/proj/track/crates/track-reduce/src/item_reducer.rs",
       "function": "ItemReducer::apply_remove_label",
-      "line": 237,
+      "line": 197,
       "cyclomatic": 2.0,
       "coverage": 92.85714285714286,
       "crap": 2.001457725947522,
@@ -1337,7 +1328,7 @@
     {
       "file": "/Users/greg/proj/track/crates/track-reduce/src/item_reducer.rs",
       "function": "ItemReducer::apply_assign_user",
-      "line": 252,
+      "line": 212,
       "cyclomatic": 2.0,
       "coverage": 92.85714285714286,
       "crap": 2.001457725947522,
@@ -1346,7 +1337,7 @@
     {
       "file": "/Users/greg/proj/track/crates/track-reduce/src/item_reducer.rs",
       "function": "ItemReducer::apply_unassign_user",
-      "line": 367,
+      "line": 327,
       "cyclomatic": 2.0,
       "coverage": 92.85714285714286,
       "crap": 2.001457725947522,
@@ -1416,6 +1407,15 @@
       "crate": "track-replication"
     },
     {
+      "file": "/Users/greg/proj/track/crates/track-replication/src/payload/item_remove_label.rs",
+      "function": "ItemRemoveLabelPayload::from_value",
+      "line": 22,
+      "cyclomatic": 2.0,
+      "coverage": 100.0,
+      "crap": 2.0,
+      "crate": "track-replication"
+    },
+    {
       "file": "/Users/greg/proj/track/crates/track-replication/src/payload/comment_add.rs",
       "function": "CommentAddPayload::from_value",
       "line": 32,
@@ -1443,9 +1443,36 @@
       "crate": "track-replication"
     },
     {
+      "file": "/Users/greg/proj/track/crates/track-replication/src/payload/item_clear_field.rs",
+      "function": "ItemClearFieldPayload::from_value",
+      "line": 22,
+      "cyclomatic": 2.0,
+      "coverage": 100.0,
+      "crap": 2.0,
+      "crate": "track-replication"
+    },
+    {
       "file": "/Users/greg/proj/track/crates/track-replication/src/payload/execution_claim.rs",
       "function": "ExecutionClaimPayload::from_value",
       "line": 24,
+      "cyclomatic": 2.0,
+      "coverage": 100.0,
+      "crap": 2.0,
+      "crate": "track-replication"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-replication/src/payload/item_archive.rs",
+      "function": "ItemArchivePayload::from_value",
+      "line": 20,
+      "cyclomatic": 2.0,
+      "coverage": 100.0,
+      "crap": 2.0,
+      "crate": "track-replication"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-replication/src/payload/item_add_label.rs",
+      "function": "ItemAddLabelPayload::from_value",
+      "line": 22,
       "cyclomatic": 2.0,
       "coverage": 100.0,
       "crap": 2.0,
@@ -1479,9 +1506,45 @@
       "crate": "track-replication"
     },
     {
+      "file": "/Users/greg/proj/track/crates/track-replication/src/payload/item_assign_user.rs",
+      "function": "ItemAssignUserPayload::from_value",
+      "line": 22,
+      "cyclomatic": 2.0,
+      "coverage": 100.0,
+      "crap": 2.0,
+      "crate": "track-replication"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-replication/src/payload/item_set_state.rs",
+      "function": "ItemSetStatePayload::from_value",
+      "line": 22,
+      "cyclomatic": 2.0,
+      "coverage": 100.0,
+      "crap": 2.0,
+      "crate": "track-replication"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-replication/src/payload/item_restore.rs",
+      "function": "ItemRestorePayload::from_value",
+      "line": 20,
+      "cyclomatic": 2.0,
+      "coverage": 100.0,
+      "crap": 2.0,
+      "crate": "track-replication"
+    },
+    {
       "file": "/Users/greg/proj/track/crates/track-replication/src/payload/node_register.rs",
       "function": "NodeRegisterPayload::from_value",
       "line": 20,
+      "cyclomatic": 2.0,
+      "coverage": 100.0,
+      "crap": 2.0,
+      "crate": "track-replication"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-replication/src/payload/item_unassign_user.rs",
+      "function": "ItemUnassignUserPayload::from_value",
+      "line": 22,
       "cyclomatic": 2.0,
       "coverage": 100.0,
       "crap": 2.0,
@@ -2622,6 +2685,24 @@
       "crate": "track-replication"
     },
     {
+      "file": "/Users/greg/proj/track/crates/track-replication/src/payload/item_remove_label.rs",
+      "function": "ItemRemoveLabelPayload::kind",
+      "line": 18,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-replication"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-replication/src/payload/item_remove_label.rs",
+      "function": "ItemRemoveLabelPayload::into_value",
+      "line": 26,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-replication"
+    },
+    {
       "file": "/Users/greg/proj/track/crates/track-replication/src/payload/comment_add.rs",
       "function": "CommentAddPayload::kind",
       "line": 28,
@@ -2676,6 +2757,24 @@
       "crate": "track-replication"
     },
     {
+      "file": "/Users/greg/proj/track/crates/track-replication/src/payload/item_clear_field.rs",
+      "function": "ItemClearFieldPayload::kind",
+      "line": 18,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-replication"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-replication/src/payload/item_clear_field.rs",
+      "function": "ItemClearFieldPayload::into_value",
+      "line": 26,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-replication"
+    },
+    {
       "file": "/Users/greg/proj/track/crates/track-replication/src/payload/execution_claim.rs",
       "function": "ExecutionClaimPayload::kind",
       "line": 20,
@@ -2688,6 +2787,42 @@
       "file": "/Users/greg/proj/track/crates/track-replication/src/payload/execution_claim.rs",
       "function": "ExecutionClaimPayload::into_value",
       "line": 28,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-replication"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-replication/src/payload/item_archive.rs",
+      "function": "ItemArchivePayload::kind",
+      "line": 16,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-replication"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-replication/src/payload/item_archive.rs",
+      "function": "ItemArchivePayload::into_value",
+      "line": 24,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-replication"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-replication/src/payload/item_add_label.rs",
+      "function": "ItemAddLabelPayload::kind",
+      "line": 18,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-replication"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-replication/src/payload/item_add_label.rs",
+      "function": "ItemAddLabelPayload::into_value",
+      "line": 26,
       "cyclomatic": 1.0,
       "coverage": 100.0,
       "crap": 1.0,
@@ -2748,6 +2883,60 @@
       "crate": "track-replication"
     },
     {
+      "file": "/Users/greg/proj/track/crates/track-replication/src/payload/item_assign_user.rs",
+      "function": "ItemAssignUserPayload::kind",
+      "line": 18,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-replication"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-replication/src/payload/item_assign_user.rs",
+      "function": "ItemAssignUserPayload::into_value",
+      "line": 26,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-replication"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-replication/src/payload/item_set_state.rs",
+      "function": "ItemSetStatePayload::kind",
+      "line": 18,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-replication"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-replication/src/payload/item_set_state.rs",
+      "function": "ItemSetStatePayload::into_value",
+      "line": 26,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-replication"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-replication/src/payload/item_restore.rs",
+      "function": "ItemRestorePayload::kind",
+      "line": 16,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-replication"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-replication/src/payload/item_restore.rs",
+      "function": "ItemRestorePayload::into_value",
+      "line": 24,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-replication"
+    },
+    {
       "file": "/Users/greg/proj/track/crates/track-replication/src/payload/node_register.rs",
       "function": "NodeRegisterPayload::kind",
       "line": 16,
@@ -2760,6 +2949,24 @@
       "file": "/Users/greg/proj/track/crates/track-replication/src/payload/node_register.rs",
       "function": "NodeRegisterPayload::into_value",
       "line": 24,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-replication"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-replication/src/payload/item_unassign_user.rs",
+      "function": "ItemUnassignUserPayload::kind",
+      "line": 18,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-replication"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-replication/src/payload/item_unassign_user.rs",
+      "function": "ItemUnassignUserPayload::into_value",
+      "line": 26,
       "cyclomatic": 1.0,
       "coverage": 100.0,
       "crap": 1.0,
@@ -3056,7 +3263,7 @@
     {
       "file": "/Users/greg/proj/track/crates/track-reduce/src/item_reducer.rs",
       "function": "set_add_op",
-      "line": 586,
+      "line": 535,
       "cyclomatic": 1.0,
       "coverage": 100.0,
       "crap": 1.0,
@@ -3065,7 +3272,7 @@
     {
       "file": "/Users/greg/proj/track/crates/track-reduce/src/item_reducer.rs",
       "function": "set_remove_op",
-      "line": 603,
+      "line": 552,
       "cyclomatic": 1.0,
       "coverage": 100.0,
       "crap": 1.0,

@@ -375,6 +375,8 @@ impl ItemReducer {
     }
 }
 
+// Dispatch CC is high (11-arm match); cargo-crap allow until item.* events stabilize.
+// See docs/plans/cargo-crap-integration-plan.md §Known exceptions.
 impl EventReducer for ItemReducer {
     fn reduce(
         &mut self,

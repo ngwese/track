@@ -16,4 +16,7 @@ allow = [
   "crates/track-sync-testing/**",
   "crates/track-hub-conformance-testing/**",
   "crates/track-store-conformance-testing/**",
+  # Deferred: refactor ItemReducer::reduce dispatch (see cargo-crap integration plan).
+  # CC 35 from 11-arm EventKind match; ~97% coverage. Remove when hierarchical match lands.
+  "ItemReducer::reduce",
 ]

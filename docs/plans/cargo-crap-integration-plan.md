@@ -95,6 +95,12 @@ non-zero on regressions.
 2. New functions above threshold → same; prefer decomposition over `allow`.
 3. Baseline refresh → regenerate JSON, commit with explanation in PR body.
 
+### Known exceptions
+
+| Function | CRAP | Reason | Return-to |
+| --- | --- | --- | --- |
+| `ItemReducer::reduce` | ~35 | 11-arm `item.*` dispatch match; ~97% coverage | Hierarchical match (scalar / OR-set / lifecycle) after `item.*` events stabilize; remove `allow` entry |
+
 ## Phase 0 audit (2026-06-19)
 
 Workspace coverage run (`cargo llvm-cov --workspace`) on Rust 1.96.0.
