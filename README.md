@@ -1,5 +1,7 @@
 # Track
 
+[![CI](https://github.com/ngwese/track/actions/workflows/ci.yml/badge.svg)](https://github.com/ngwese/track/actions/workflows/ci.yml)
+
 Personal issue tracking for heterogeneous projects—software, hardware, home
 improvement, travel, and more—from one system. **Issue tracking as code**,
 **CLI-first**, **local-first**, with a **sync hub** that keeps humans, agents,
