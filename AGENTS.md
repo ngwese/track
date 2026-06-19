@@ -56,6 +56,21 @@ file must pass all of the following checks. Run from the repo root:
    cargo test --workspace
    ```
 
+5. **Change risk** — no CRAP regression vs the committed baseline (policy in
+   [`.cargo-crap.toml`](.cargo-crap.toml); see
+   [docs/plans/cargo-crap-integration-plan.md](docs/plans/cargo-crap-integration-plan.md)):
+
+   ```bash
+   cargo llvm-cov --workspace --lcov --output-path lcov.info
+   cargo crap --workspace --lcov lcov.info --baseline crap_baseline.json
+   ```
+
+   If scores improve repo-wide, refresh the baseline:
+
+   ```bash
+   cargo crap --workspace --lcov lcov.info --format json --output crap_baseline.json
+   ```
+
 Fix violations in the same change set; do not leave follow-up cleanup for later.
 
 ## Commits

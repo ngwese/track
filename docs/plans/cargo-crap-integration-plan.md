@@ -1,6 +1,6 @@
 # cargo-crap integration plan
 
-> **Status:** In progress (Phases 0–1 complete, 2026-06-19)\
+> **Status:** Phases 0–3 complete (2026-06-19)\
 > **Tool:** [cargo-crap](https://github.com/minikin/cargo-crap) — CRAP (Change Risk
 > Anti-Patterns) metric for Rust\
 > **Background:** [Finding Untested Complexity in AI-Generated Rust Code](https://minikin.me/blog/cargo-crap)
@@ -15,7 +15,7 @@ at the repo root; CI installs pinned tools and runs a fixed command sequence.
 | --- | --- |
 | **`.cargo-crap.toml`** | Threshold, exclusions, gate mode, epsilon |
 | **`crap_baseline.json`** | Committed snapshot for regression detection |
-| **`change-risk` CI job** | Coverage + CRAP report on PRs (Phase 1: report-only) |
+| **`change-risk` CI job** | Coverage + CRAP report on PRs; fails on baseline regression (Phase 2) |
 | **`AGENTS.md` gate** | Agent completion checklist (Phase 3) |
 
 ```text
@@ -141,8 +141,9 @@ Parallel job in `.github/workflows/ci.yml` (llvm-cov rebuilds the workspace).
 
 + Pin `cargo-llvm-cov@0.8.7` and `cargo-crap@0.2.2`.
 + Policy from `.cargo-crap.toml` only.
-+ Phase 1: generate report + PR comment; **no** `fail-regression` in config.
-+ Phase 2: uncomment `fail-regression = true` in `.cargo-crap.toml`.
++ Phase 1: generate report + PR comment.
++ Phase 2: `fail-regression = true` in `.cargo-crap.toml`; CI **Check CRAP
++ regression** step fails the job on baseline drift.
 
 Path filter: skip when only docs/spec/infra change (see workflow).
 
@@ -156,8 +157,8 @@ Path filter: skip when only docs/spec/infra change (see workflow).
 | --- | --- | --- | --- | --- |
 | **0 — Audit** | Done | Findings above; `.cargo-crap.toml` tuned | — | — |
 | **1 — Baseline** | Done | `crap_baseline.json`, `.gitignore`, report-only CI | Comment only | — |
-| **2 — Enforce** | Pending | `fail-regression = true` | Fails on regression | — |
-| **3 — Complete** | Pending | `AGENTS.md` step 5 | Unchanged | Required |
+| **2 — Enforce** | Done | `fail-regression = true`, CI regression step | Fails on regression | — |
+| **3 — Complete** | Done | `AGENTS.md` step 5 | Unchanged | Required |
 | **4 — Tighten** | Optional | `fail-above = true` | Absolute threshold | Same |
 
 ## Tool versions
@@ -173,8 +174,8 @@ Path filter: skip when only docs/spec/infra change (see workflow).
 + [x] `.cargo-crap.toml` at repo root; policy not duplicated in CI YAML
 + [x] `crap_baseline.json` committed
 + [x] `change-risk` CI job on PRs (report-only)
-+ [ ] PRs fail on CRAP regression (Phase 2)
-+ [ ] `AGENTS.md` lists CRAP as Rust step 5 (Phase 3)
++ [x] PRs fail on CRAP regression (Phase 2)
++ [x] `AGENTS.md` lists CRAP as Rust step 5 (Phase 3)
 
 ## References
 

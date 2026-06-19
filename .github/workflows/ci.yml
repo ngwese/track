@@ -115,6 +115,10 @@ jobs:
         if: steps.changes.outputs.rust == 'true'
         run: cargo crap --workspace --lcov lcov.info --summary
 
+      - name: Check CRAP regression
+        if: steps.changes.outputs.rust == 'true'
+        run: cargo crap --workspace --lcov lcov.info --baseline crap_baseline.json
+
       - name: Generate PR comment
         if: steps.changes.outputs.rust == 'true' && github.event_name == 'pull_request'
         run: |
