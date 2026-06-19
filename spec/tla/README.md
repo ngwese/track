@@ -84,12 +84,28 @@ Phase 0 used a single cursor per syncing node. Superseded by Phase 1.
 
 ## Prerequisites
 
-TLC requires Java 11+. Choose one:
+TLC requires Java 11+. The wrapper script downloads a pinned `tla2tools.jar`
+(v1.8.0, same as CI) on first run:
 
-1. **Docker** (no local Java): `ghcr.io/tlaplus/tlaplus:latest`
-2. **TLA+ Toolbox** or [tlaplus releases](https://github.com/tlaplus/tlaplus/releases):
-   set `TLA_TOOLS_JAR` to `tla2tools.jar`
-3. **VS Code TLA+ extension** with TLC installed
+```bash
+cd spec/tla
+chmod +x run-tlc.sh
+./run-tlc.sh
+```
+
+The jar is cached under `spec/tla/.cache/`. Override with `TLA_TOOLS_JAR` or
+`TLC_VERSION` if needed.
+
+TLC writes other transient files under `spec/tla/` (all gitignored): `states/`
+(metadata), `*_TTrace_*` (counterexample traces), and optional `*.dot` / `*.out`
+dump outputs.
+
+Alternatives:
+
+1. **TLA+ Toolbox** or [tlaplus releases](https://github.com/tlaplus/tlaplus/releases):
+   set `TLA_TOOLS_JAR` to `tla2tools.jar`, or install the `tlc` CLI
+2. **VS Code TLA+ extension** with TLC installed
+3. **Docker** (`ghcr.io/tlaplus/tlaplus:latest`) if the image is available locally
 
 Pin the TLC version used in CI in [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml)
 (`tlc-hub-sync` job, `tla2tools.jar` v1.8.0). The job runs only when these
@@ -99,11 +115,10 @@ paths change: `spec/tla/**`, ADR 0004, ADR 0006, or the workflow file itself.
 
 ```bash
 cd spec/tla
-chmod +x run-tlc.sh
 ./run-tlc.sh
 ```
 
-Or with explicit `tla2tools.jar`:
+Or with an explicit `tla2tools.jar`:
 
 ```bash
 export TLA_TOOLS_JAR=/path/to/tla2tools.jar
