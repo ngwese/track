@@ -220,6 +220,11 @@ mod tests {
         format!("{short:0<26}")
     }
 
+    #[test]
+    fn default_service_constructs() {
+        let _hub = InMemoryHubService::default();
+    }
+
     #[tokio::test]
     async fn push_and_pull_roundtrip() {
         let hub = InMemoryHubService::new();

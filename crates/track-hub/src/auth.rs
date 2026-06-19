@@ -139,3 +139,25 @@ impl Authorizer for SharedAuthorizer {
             .await
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn allowlist_authorizer_permits_pull_and_cursor_report() {
+        let auth = ActorAllowlistAuthorizer::new(["user:greg"]);
+        let workspace = TrackUlid::parse("01JHM8X9K2Q4W0000000000000").unwrap();
+        let node = TrackUlid::parse("01JHM8X9K2Q4N0000000000000").unwrap();
+        auth.authorize_pull(workspace).await.unwrap();
+        auth.authorize_cursor_report(workspace, node).await.unwrap();
+    }
+
+    #[tokio::test]
+    async fn shared_authorizer_delegates_cursor_report() {
+        let auth: SharedAuthorizer = Arc::new(AllowAllAuthorizer);
+        let workspace = TrackUlid::parse("01JHM8X9K2Q4W0000000000000").unwrap();
+        let node = TrackUlid::parse("01JHM8X9K2Q4N0000000000000").unwrap();
+        auth.authorize_cursor_report(workspace, node).await.unwrap();
+    }
+}

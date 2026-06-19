@@ -157,11 +157,15 @@ mod tests {
             StatusCode::BAD_REQUEST
         );
         assert_eq!(
-            status_for(PullHttpError::Json(serde_json::from_str::<serde_json::Value>("x").unwrap_err())),
+            status_for(PullHttpError::Json(
+                serde_json::from_str::<serde_json::Value>("x").unwrap_err()
+            )),
             StatusCode::BAD_REQUEST
         );
         assert_eq!(
-            status_for(PullHttpError::Hub(track_hub::HubError::Internal("pull failed".into()))),
+            status_for(PullHttpError::Hub(track_hub::HubError::Internal(
+                "pull failed".into()
+            ))),
             StatusCode::INTERNAL_SERVER_ERROR
         );
     }

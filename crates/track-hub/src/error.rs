@@ -59,3 +59,15 @@ impl HubError {
         matches!(self, Self::Internal(_) | Self::Unauthorized(_))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn is_retryable_for_transient_failures() {
+        assert!(HubError::Internal("timeout".into()).is_retryable());
+        assert!(HubError::Unauthorized("actor".into()).is_retryable());
+        assert!(!HubError::InvalidEvent("bad".into()).is_retryable());
+    }
+}

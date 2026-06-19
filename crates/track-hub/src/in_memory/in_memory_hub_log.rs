@@ -141,3 +141,14 @@ impl HubLog for InMemoryHubLog {
         Ok(before - self.records.len())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn peek_next_offset_starts_at_zero() {
+        let log = InMemoryHubLog::default();
+        assert_eq!(log.peek_next_offset().await, HubOffset(0));
+    }
+}
