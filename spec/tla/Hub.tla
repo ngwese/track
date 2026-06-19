@@ -20,4 +20,13 @@ PromoteAccepted(hubLog, hubAccepted) ==
            promoted |-> TRUE,
            event |-> event]
 
+\* Accept and durably promote one push-stream event (idempotent when duplicate).
+HubCommitEvent(hubLog, hubAccepted, event) ==
+  IF event \in AllDurableEvents(hubLog)
+  THEN [hubLogNew |-> hubLog, hubAcceptedNew |-> hubAccepted]
+  ELSE LET accept == PushAccept(hubLog, hubAccepted, event)
+           promote == PromoteAccepted(hubLog, accept.hubAcceptedNew)
+       IN [hubLogNew |-> promote.hubLogNew,
+           hubAcceptedNew |-> promote.hubAcceptedNew]
+
 ====

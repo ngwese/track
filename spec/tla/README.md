@@ -8,35 +8,40 @@ hub sync protocol, verified with TLC per
 
 | File | Phase | Purpose |
 | --- | --- | --- |
-| `HubSync.tla` | 1 | Root spec: `Init`, `Next`, `Spec`, `Inv_*` |
-| `HubSync.cfg` | 1 | TLC constants, bounds, invariants |
+| `HubSync.tla` | 2 | Root spec: `Init`, `Next`, `Spec`, `Inv_*` |
+| `HubSync.cfg` | 2 | TLC constants, bounds, invariants |
 | `Common.tla` | 0 | Shared operators |
 | `Hub.tla` | 0 | Push accept and durable promotion |
 | `Node.tla` | 1 | Per-author pull window, persist-before-cursor helpers |
 | `Properties.tla` | 0 | Re-exports `Inv_*` from `HubSync.tla` for documentation |
-| `Network.tla` | 2 | Message loss, duplication, abort |
+| `Network.tla` | 2 | Push/pull stream helpers; partial commit and abort |
 | `Snapshots.tla` | 2 | Snapshot bootstrap |
 | `Compaction.tla` | 2 | Retention watermarks |
 | `run-tlc.sh` | — | Local TLC or Docker wrapper |
 
-## Phase 1 scope (current)
+## Phase 2 scope (current)
 
-The model covers push, pull, and per-authoring-node cursor rules:
+The model covers push, pull, per-authoring-node cursors, and **partial
+stream failure**:
 
 - **Per-authoring-node cursors** — `cursors[syncing][author]` matches ADR 0004
   `known_cursors`.
 - **Persist advances cursor** — each `Persist` action updates the cursor for the
   event's authoring node (ADR 0004 §Sync integration loop).
+- **Streaming push** — `StartPush` / `PushCommitNext` / `InterruptPush` /
+  `MalformedPush` model a bounded push batch with a durable prefix
+  (`pushDurableLen`) and re-queue on abort.
+- **Streaming pull** — `BeginPull` / `PullSendNext` / `InterruptPull` /
+  `MalformedPull` deliver a page incrementally; cursor advances only on
+  `Persist` (undelivered tail is discarded on abort).
 - **Numeric model values in CI** — `HubSync.cfg` uses `Nodes = {1, 2}` and
   `Events = {1, 2, 3}`; authorship is the `Author` operator in `HubSync.tla`.
 
 Remaining abstractions:
 
-- **Atomic push/pull** — no `Network.tla` interleaving; partial failure comes in
-  Phase 2.
-- **No snapshots or compaction** — stub modules only.
+- **No snapshots or compaction** — stub modules only; Phases 3–4.
 
-### Properties checked in CI (Phase 1)
+### Properties checked in CI (Phase 2)
 
 | Property | ADR 0006 ID |
 | --- | --- |
@@ -48,9 +53,16 @@ Remaining abstractions:
 | `Inv_HubOffsetOrder` | pull page ordering |
 | `Inv_PaginationStable` | stable pagination from cursors |
 | `Inv_CursorMonotone` | cursor values are valid hub offsets |
+| `Inv_PartialPush` | durable push prefix only |
+| `Inv_PartialPull` | pull buffer ahead of cursor |
+| `Inv_MalformedLine` | partial push/pull safety (combines above) |
 
-Default CI bounds (`HubSync.cfg`) complete in < 1s (~9k distinct states on a
-modern laptop, 2026-06-19). Re-benchmark after adding Phase 2–4 modules.
+Default CI bounds (`HubSync.cfg`) complete in < 3s (~4.3k distinct states on a
+modern laptop, 2026-06-19). Re-benchmark after adding Phase 3–4 modules.
+
+## Phase 1 scope (superseded)
+
+Phase 1 used atomic push/pull. Superseded by Phase 2 streaming above.
 
 ## Phase 0 scope (superseded)
 

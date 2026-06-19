@@ -17,7 +17,7 @@ It complements the Rust implementation plan for ADR 0004, the
 | --- | --- | --- |
 | **Rust integration** (`HUB_SYNC-*`) | 66/67 green on `MemoryHubFixture` | Deployable behaviour oracle |
 | **Hub conformance** (`HUB-CONF-*`) | ADR 0005 suite in `track-hub-conformance-testing` | Durable restart / admin persistence |
-| **TLA+ model** (`spec/tla/`) | Phase 0 green locally; not in CI yet | Unbounded interleaving + compaction safety |
+| **TLA+ model** (`spec/tla/`) | Phase 2 green in CI (`tlc-hub-sync`) | Unbounded interleaving + compaction safety |
 
 The integration programme has **caught up with and surpassed** the TLA model.
 Formal verification work now **follows** green integration tests: each TLA phase
@@ -101,18 +101,18 @@ green integration tests as the behavioural spec for each extension.
 | **0** ✓ | `HubSync`, `Hub`, `Node` | `Inv_IdempotentAppend`, `Inv_DurableOnlyPull`, `Inv_PersistBeforeCursor`, `Inv_AcceptedNotPullable`, `Inv_CursorWithinHub` | `ack::100`, `recovery::051` |
 | **0.5** ✓ | CI + path filters | same as Phase 1 | `tlc-hub-sync` job |
 | **1** ✓ | extend `HubSync`, `Node` | `Inv_CursorMonotone`, `Inv_PaginationStable`, `Inv_HubOffsetOrder` | `pull_paging::110`–`112`, all multi-node |
-| **2** | `Network` | `Inv_PartialPush`, `Inv_PartialPull`, `Inv_MalformedLine` | `recovery::050`, `ack::102`, `protocol::091`, `096` |
+| **2** ✓ | `Network` | `Inv_PartialPush`, `Inv_PartialPull`, `Inv_MalformedLine` | `recovery::050`, `ack::102`, `protocol::091`, `096` |
 | **3** | `Snapshots` | `Live_InactiveBootstrap` (bounded) | `convergence::042`, `compaction::120` |
 | **4** | `Compaction` | `Inv_NoSilentLoss`, `Inv_CompactionSafe`, `Inv_TombstoneRetained` | `compaction::120`–`122` |
 
-Phase 0 is **complete**. Phases 1–4 are **integration-green, TLA-pending**.
+Phase 0–2 are **complete**. Phases 3–4 are **integration-green, TLA-pending**.
 
 ## Phase 0 model (delivered)
 
 See [spec/tla/README.md](../../spec/tla/README.md). Key abstractions still open:
 
-1. **One cursor per syncing node** — Rust uses per-authoring-node `CursorSet`.
-2. **Atomic push/pull** — Rust uses `FaultInjectingTransport` and NDJSON streams.
+1. **Per-authoring-node cursors** — delivered in Phase 1.
+2. **Atomic push/pull** — replaced in Phase 2 by streaming push/pull with abort.
 3. **No snapshots or compaction** — Rust `HubAdmin` exercises both.
 
 ### Default TLC bounds (`HubSync.cfg`)
@@ -123,8 +123,9 @@ See [spec/tla/README.md](../../spec/tla/README.md). Key abstractions still open:
 | `Events` | `{1, 2, 3}` | Push retry + second author |
 | `MaxHubLen` | `3` | Matches event count; keeps state space small |
 | `PageLimit` | `2` | Exercises multi-event pull pages |
+| `MaxPushStream` | `2` | Exercises multi-event push batches |
 
-**Measured runtime:** ~2s, ~108k distinct states (2026-06-18).
+**Measured runtime:** ~2s, ~4.3k distinct states (2026-06-19).
 
 ## Property registry
 
@@ -137,9 +138,9 @@ See [spec/tla/README.md](../../spec/tla/README.md). Key abstractions still open:
 | `Inv_HubOffsetOrder` | 1 | §Pull guarantees | `pull_paging::hub_sync_110` | 110 | green | green |
 | `Inv_PaginationStable` | 1 | §Pull guarantees | `pull_paging::hub_sync_111` | 111 | green | green |
 | `Inv_CursorMonotone` | 1 | §Cursor model | multi-node suite | 001–004 | green | green |
-| `Inv_PartialPush` | 2 | §Partial failure | `ack::hub_sync_102` | 102 | — | green |
-| `Inv_PartialPull` | 2 | §Partial failure | `recovery::hub_sync_050` | 050 | — | green |
-| `Inv_MalformedLine` | 2 | §Partial failure | `protocol::hub_sync_091`, `096` | 091, 096 | — | green |
+| `Inv_PartialPush` | 2 | §Partial failure | `ack::hub_sync_102` | 102 | green | green |
+| `Inv_PartialPull` | 2 | §Partial failure | `recovery::hub_sync_050` | 050 | green | green |
+| `Inv_MalformedLine` | 2 | §Partial failure | `protocol::hub_sync_091`, `096` | 091, 096 | green | green |
 | `Live_InactiveBootstrap` | 3 | §Snapshot-assisted sync | `convergence::hub_sync_042` | 042 | — | green |
 | `Inv_NoSilentLoss` | 4 | §Compaction prerequisites | `compaction::hub_sync_120` | 120 | — | green |
 | `Inv_CompactionSafe` | 4 | §Compaction | `compaction::hub_sync_122` | 122 | — | green |
@@ -273,7 +274,8 @@ resolution.
 ### Phases 1–4
 
 - [x] Phase 1 property rows show **green** in both TLA and Rust columns
-- [ ] Phase 2–4 property rows show **green** in both TLA and Rust columns
+- [x] Phase 2 property rows show **green** in both TLA and Rust columns
+- [ ] Phase 3–4 property rows show **green** in both TLA and Rust columns
 - [ ] `spec/tla/README.md` abstractions list is empty or explicitly deferred
 - [ ] No ADR 0004 protocol amendment without corresponding TLA + case update
 
