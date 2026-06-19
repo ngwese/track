@@ -174,13 +174,13 @@
       "crate": "track-reduce"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-hub-memory/src/http/push_handler.rs",
+      "file": "/Users/greg/proj/track/crates/track-hub-http/src/http/push_handler.rs",
       "function": "push_events",
-      "line": 23,
+      "line": 22,
       "cyclomatic": 13.0,
-      "coverage": 92.98245614035088,
-      "crap": 13.058403935353928,
-      "crate": "track-hub-memory"
+      "coverage": 92.5925925925926,
+      "crap": 13.068688716150993,
+      "crate": "track-hub-http"
     },
     {
       "file": "/Users/greg/proj/track/crates/track-reduce/src/reduction_engine.rs",
@@ -570,13 +570,13 @@
       "crate": "track-sync"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-hub-memory/src/http/pull_handler.rs",
+      "file": "/Users/greg/proj/track/crates/track-hub-http/src/http/pull_handler.rs",
       "function": "decode_json_param",
-      "line": 94,
+      "line": 93,
       "cyclomatic": 5.0,
       "coverage": 58.333333333333336,
       "crap": 6.8084490740740735,
-      "crate": "track-hub-memory"
+      "crate": "track-hub-http"
     },
     {
       "file": "/Users/greg/proj/track/crates/track-reduce/src/relation_reducer.rs",
@@ -597,13 +597,13 @@
       "crate": "track-id"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-hub-memory/src/http/push_handler.rs",
+      "file": "/Users/greg/proj/track/crates/track-hub-http/src/http/push_handler.rs",
       "function": "PushHttpError::into_response",
-      "line": 109,
+      "line": 104,
       "cyclomatic": 6.0,
       "coverage": 88.88888888888889,
       "crap": 6.049382716049383,
-      "crate": "track-hub-memory"
+      "crate": "track-hub-http"
     },
     {
       "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_schema_store.rs",
@@ -624,13 +624,13 @@
       "crate": "track-store-sqlite"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-hub-memory/src/http/pull_handler.rs",
+      "file": "/Users/greg/proj/track/crates/track-hub-http/src/http/pull_handler.rs",
       "function": "pull_events",
-      "line": 36,
+      "line": 35,
       "cyclomatic": 6.0,
       "coverage": 97.14285714285714,
       "crap": 6.000839650145773,
-      "crate": "track-hub-memory"
+      "crate": "track-hub-http"
     },
     {
       "file": "/Users/greg/proj/track/crates/track-materialize-yaml/src/default_projector.rs",
@@ -669,13 +669,13 @@
       "crate": "track-reduce"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-hub-memory/src/http/snapshot_handler.rs",
+      "file": "/Users/greg/proj/track/crates/track-hub-http/src/http/snapshot_handler.rs",
       "function": "latest_project_snapshot",
       "line": 15,
       "cyclomatic": 5.0,
       "coverage": 89.47368421052632,
       "crap": 5.029158769499927,
-      "crate": "track-hub-memory"
+      "crate": "track-hub-http"
     },
     {
       "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_log_store.rs",
@@ -777,13 +777,13 @@
       "crate": "track-sync"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-hub-memory/src/http/pull_handler.rs",
+      "file": "/Users/greg/proj/track/crates/track-hub-http/src/http/pull_handler.rs",
       "function": "PullHttpError::into_response",
-      "line": 123,
+      "line": 122,
       "cyclomatic": 5.0,
       "coverage": 100.0,
       "crap": 5.0,
-      "crate": "track-hub-memory"
+      "crate": "track-hub-http"
     },
     {
       "file": "/Users/greg/proj/track/crates/track-sync/src/http_transport.rs",
@@ -966,22 +966,13 @@
       "crate": "track-sync"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-hub-memory/src/test_hub_handle.rs",
-      "function": "TestHubHandle::start_with",
-      "line": 32,
+      "file": "/Users/greg/proj/track/crates/track-hub-http/src/server.rs",
+      "function": "HubHttpServer::shutdown",
+      "line": 98,
       "cyclomatic": 4.0,
       "coverage": 100.0,
       "crap": 4.0,
-      "crate": "track-hub-memory"
-    },
-    {
-      "file": "/Users/greg/proj/track/crates/track-hub-memory/src/test_hub_handle.rs",
-      "function": "TestHubHandle::shutdown",
-      "line": 66,
-      "cyclomatic": 4.0,
-      "coverage": 100.0,
-      "crap": 4.0,
-      "crate": "track-hub-memory"
+      "crate": "track-hub-http"
     },
     {
       "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_entity_store.rs",
@@ -1009,6 +1000,15 @@
       "coverage": 80.0,
       "crap": 3.072,
       "crate": "track-reduce"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-hub-memory/src/error.rs",
+      "function": "TestHubError::from",
+      "line": 20,
+      "cyclomatic": 3.0,
+      "coverage": 80.0,
+      "crap": 3.072,
+      "crate": "track-hub-memory"
     },
     {
       "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_log_store.rs",
@@ -1263,13 +1263,49 @@
       "crate": "track-sync"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-hub-memory/src/http/protocol_version.rs",
+      "file": "/Users/greg/proj/track/crates/track-hub-memory/src/test_hub_handle.rs",
+      "function": "TestHubHandle::start_with",
+      "line": 32,
+      "cyclomatic": 3.0,
+      "coverage": 100.0,
+      "crap": 3.0,
+      "crate": "track-hub-memory"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-hub-memory/src/in_memory_push_observer.rs",
+      "function": "InMemoryPushObserver::after_line_committed",
+      "line": 23,
+      "cyclomatic": 3.0,
+      "coverage": 100.0,
+      "crap": 3.0,
+      "crate": "track-hub-memory"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-hub-http/src/server.rs",
+      "function": "HubHttpServer::serve_with_observer",
+      "line": 59,
+      "cyclomatic": 3.0,
+      "coverage": 100.0,
+      "crap": 3.0,
+      "crate": "track-hub-http"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-hub-http/src/server.rs",
+      "function": "router_for",
+      "line": 109,
+      "cyclomatic": 3.0,
+      "coverage": 100.0,
+      "crap": 3.0,
+      "crate": "track-hub-http"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-hub-http/src/http/protocol_version.rs",
       "function": "ensure_supported_request_version",
       "line": 8,
       "cyclomatic": 2.0,
       "coverage": 72.72727272727273,
       "crap": 2.0811419984973702,
-      "crate": "track-hub-memory"
+      "crate": "track-hub-http"
     },
     {
       "file": "/Users/greg/proj/track/crates/track-hub/src/in_memory/in_memory_hub_log.rs",
@@ -2181,31 +2217,67 @@
       "crate": "track-hub-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-hub-memory/src/http/pull_handler.rs",
+      "file": "/Users/greg/proj/track/crates/track-hub-memory/src/test_hub_handle.rs",
+      "function": "TestHubHandle::shutdown",
+      "line": 58,
+      "cyclomatic": 2.0,
+      "coverage": 100.0,
+      "crap": 2.0,
+      "crate": "track-hub-memory"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-hub-http/src/server.rs",
+      "function": "HubHttpServer::bind_with_observer",
+      "line": 37,
+      "cyclomatic": 2.0,
+      "coverage": 100.0,
+      "crap": 2.0,
+      "crate": "track-hub-http"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-hub-http/src/server.rs",
+      "function": "HubHttpServer::serve",
+      "line": 50,
+      "cyclomatic": 1.0,
+      "coverage": 0.0,
+      "crap": 2.0,
+      "crate": "track-hub-http"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-hub-http/src/http/pull_handler.rs",
       "function": "decode_cursors",
-      "line": 78,
+      "line": 77,
       "cyclomatic": 2.0,
       "coverage": 100.0,
       "crap": 2.0,
-      "crate": "track-hub-memory"
+      "crate": "track-hub-http"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-hub-memory/src/http/pull_handler.rs",
+      "file": "/Users/greg/proj/track/crates/track-hub-http/src/http/pull_handler.rs",
       "function": "decode_projects",
-      "line": 86,
+      "line": 85,
       "cyclomatic": 2.0,
       "coverage": 100.0,
       "crap": 2.0,
-      "crate": "track-hub-memory"
+      "crate": "track-hub-http"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-hub-memory/src/http/push_handler.rs",
+      "file": "/Users/greg/proj/track/crates/track-hub-http/src/http/push_handler.rs",
       "function": "is_blank_line",
-      "line": 18,
+      "line": 17,
       "cyclomatic": 2.0,
       "coverage": 100.0,
       "crap": 2.0,
-      "crate": "track-hub-memory"
+      "crate": "track-hub-http"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-hub-http/src/push_observer.rs",
+      "function": "NoopPushStreamObserver::after_line_committed",
+      "line": 23,
+      "cyclomatic": 1.0,
+      "coverage": 0.0,
+      "crap": 2.0,
+      "crate": "track-hub-http"
     },
     {
       "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_entity_store.rs",
@@ -5088,22 +5160,94 @@
       "crate": "track-hub-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-hub-memory/src/http/protocol_version.rs",
-      "function": "response_version_header",
-      "line": 26,
+      "file": "/Users/greg/proj/track/crates/track-hub-memory/src/in_memory_push_observer.rs",
+      "function": "InMemoryPushObserver::new",
+      "line": 16,
       "cyclomatic": 1.0,
       "coverage": 100.0,
       "crap": 1.0,
       "crate": "track-hub-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-hub-memory/src/http/router.rs",
-      "function": "build_router",
-      "line": 15,
+      "file": "/Users/greg/proj/track/crates/track-hub-http/src/server.rs",
+      "function": "HubHttpServer::bind",
+      "line": 28,
       "cyclomatic": 1.0,
       "coverage": 100.0,
       "crap": 1.0,
-      "crate": "track-hub-memory"
+      "crate": "track-hub-http"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-hub-http/src/server.rs",
+      "function": "HubHttpServer::serve_listener",
+      "line": 73,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-hub-http"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-hub-http/src/in_memory.rs",
+      "function": "InMemoryHubService::latest_project_snapshot",
+      "line": 12,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-hub-http"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-hub-http/src/http/protocol_version.rs",
+      "function": "response_version_header",
+      "line": 26,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-hub-http"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-hub-http/src/http/router.rs",
+      "function": "build_router",
+      "line": 16,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-hub-http"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-hub-http/src/http/router.rs",
+      "function": "build_router_with_observer",
+      "line": 25,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-hub-http"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-hub-http/src/http/app_state.rs",
+      "function": "AppState::new",
+      "line": 22,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-hub-http"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-hub-http/src/http/app_state.rs",
+      "function": "AppState::with_push_observer",
+      "line": 27,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-hub-http"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-hub-http/src/http/app_state.rs",
+      "function": "AppState::push_observer",
+      "line": 40,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-hub-http"
     }
   ]
 }

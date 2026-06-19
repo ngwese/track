@@ -1631,9 +1631,7 @@ dependencies = [
  "futures-util",
  "http",
  "http-body",
- "http-body-util",
  "pin-project-lite",
- "tokio",
  "tower",
  "tower-layer",
  "tower-service",
@@ -1722,7 +1720,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "track-hub-memory"
+name = "track-hub-http"
 version = "0.1.0"
 dependencies = [
  "async-trait",
@@ -1730,15 +1728,29 @@ dependencies = [
  "base64",
  "bytes",
  "futures",
- "hyper",
- "reqwest",
  "serde",
  "serde_json",
  "thiserror 2.0.18",
  "tokio",
- "tower",
- "tower-http",
  "track-hub",
+ "track-hub-protocol",
+ "track-id",
+ "track-replication",
+ "url",
+ "urlencoding",
+]
+
+[[package]]
+name = "track-hub-memory"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "reqwest",
+ "serde_json",
+ "thiserror 2.0.18",
+ "tokio",
+ "track-hub",
+ "track-hub-http",
  "track-hub-protocol",
  "track-id",
  "track-replication",

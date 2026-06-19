@@ -1,0 +1,28 @@
+[package]
+name = "track-hub-http"
+version = "0.1.0"
+description = "ADR 0004 HTTP+NDJSON binding for hub services"
+publish = false
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+async-trait = { workspace = true }
+axum = { workspace = true }
+base64 = { workspace = true }
+bytes = { workspace = true }
+futures = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true }
+track-hub = { workspace = true }
+track-hub-protocol = { workspace = true }
+track-id = { workspace = true }
+track-replication = { workspace = true }
+url = { workspace = true }
+urlencoding = { workspace = true }
+
+[dev-dependencies]
+track-hub = { workspace = true }

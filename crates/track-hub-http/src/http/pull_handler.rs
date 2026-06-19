@@ -9,7 +9,6 @@ use axum::{
 use base64::Engine;
 use bytes::Bytes;
 use futures::stream;
-use track_hub::HubService;
 use track_hub_protocol::{
     CursorSet, PullRequest,
     ndjson::{PullRecordLine, write_line},

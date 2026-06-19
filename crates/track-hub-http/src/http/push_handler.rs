@@ -7,7 +7,6 @@ use axum::{
     http::{HeaderMap, StatusCode},
     response::{IntoResponse, Response},
 };
-use track_hub::HubService;
 use track_hub_protocol::{AckLevel, PushResponse};
 use track_id::{NodeUuid, TrackUlid};
 use track_replication::EventEnvelope;
@@ -65,15 +64,11 @@ pub async fn push_events(
         results.extend(response.results);
 
         if index + 1 < lines.len() {
-            let hooks = state.hub.push_test_hooks().lock().await;
-            if hooks
-                .abort_after_durable_count
-                .is_some_and(|limit| durable_committed >= limit)
-            {
-                return Err(PushHttpError::Hub(track_hub::HubError::Internal(
-                    "push stream aborted after partial durable commit".into(),
-                )));
-            }
+            state
+                .push_observer()
+                .after_line_committed(durable_committed, lines.len() - index - 1)
+                .await
+                .map_err(PushHttpError::Hub)?;
         }
     }
 

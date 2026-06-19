@@ -37,10 +37,16 @@ pub async fn latest_project_snapshot(
 
 #[cfg(test)]
 mod tests {
+    use std::sync::Arc;
+
     use super::*;
+    use async_trait::async_trait;
     use axum::http::HeaderMap;
+    use track_hub::{HubError, HubService};
     use track_hub_protocol::{HubOffset, TRACK_PROTOCOL_VERSION_HEADER, snapshot::ProjectSnapshot};
     use track_id::TrackUlid;
+
+    use crate::HttpHubService;
 
     fn pad_ulid(short: &str) -> String {
         format!("{short:0<26}")
@@ -50,11 +56,8 @@ mod tests {
     async fn returns_not_found_when_missing() {
         let workspace = TrackUlid::parse(&pad_ulid("01JHM8X9K2Q4W0")).unwrap();
         let project = TrackUlid::parse(&pad_ulid("01JHM8X9K2Q4P0")).unwrap();
-        let hub = std::sync::Arc::new(track_hub::InMemoryHubService::new());
-        let state = AppState {
-            hub,
-            workspace_uuid: workspace,
-        };
+        let hub: Arc<dyn HttpHubService> = Arc::new(track_hub::InMemoryHubService::new());
+        let state = AppState::new(workspace, hub);
 
         let mut headers = HeaderMap::new();
         headers.insert(
@@ -70,11 +73,62 @@ mod tests {
         assert_eq!(response.status(), StatusCode::NOT_FOUND);
     }
 
+    struct SnapshotHub {
+        inner: Arc<track_hub::InMemoryHubService>,
+        snapshot: ProjectSnapshot,
+    }
+
+    #[async_trait]
+    impl HubService for SnapshotHub {
+        async fn push_events(
+            &self,
+            workspace_uuid: TrackUlid,
+            authoring_node_uuid: track_id::NodeUuid,
+            events: Vec<track_replication::EventEnvelope>,
+        ) -> Result<track_hub_protocol::PushResponse, HubError> {
+            self.inner
+                .push_events(workspace_uuid, authoring_node_uuid, events)
+                .await
+        }
+
+        async fn pull_events(
+            &self,
+            request: track_hub_protocol::PullRequest,
+        ) -> Result<Vec<track_hub_protocol::PulledEvent>, HubError> {
+            self.inner.pull_events(request).await
+        }
+
+        async fn report_cursors(
+            &self,
+            workspace_uuid: TrackUlid,
+            reporter_node: track_id::NodeUuid,
+            cursors: track_hub_protocol::CursorSet,
+        ) -> Result<(), HubError> {
+            self.inner
+                .report_cursors(workspace_uuid, reporter_node, cursors)
+                .await
+        }
+    }
+
+    #[async_trait]
+    impl HttpHubService for SnapshotHub {
+        async fn latest_project_snapshot(
+            &self,
+            project_uuid: TrackUlid,
+        ) -> Option<ProjectSnapshot> {
+            if project_uuid == self.snapshot.project_uuid {
+                Some(self.snapshot.clone())
+            } else {
+                None
+            }
+        }
+    }
+
     #[tokio::test]
     async fn returns_latest_snapshot_json() {
         let workspace = TrackUlid::parse(&pad_ulid("01JHM8X9K2Q4W0")).unwrap();
         let project = TrackUlid::parse(&pad_ulid("01JHM8X9K2Q4P0")).unwrap();
-        let hub = std::sync::Arc::new(track_hub::InMemoryHubService::new());
+        let inner = Arc::new(track_hub::InMemoryHubService::new());
         let snapshot = ProjectSnapshot {
             snapshot_uuid: TrackUlid::parse(&pad_ulid("01J0SNAP00000000000001")).unwrap(),
             project_uuid: project,
@@ -93,14 +147,12 @@ mod tests {
                 registered_nodes: Vec::new(),
             },
         };
-        hub.publish_project_snapshot(snapshot.clone())
-            .await
-            .unwrap();
+        let hub: Arc<dyn HttpHubService> = Arc::new(SnapshotHub {
+            inner,
+            snapshot: snapshot.clone(),
+        });
 
-        let state = AppState {
-            hub,
-            workspace_uuid: workspace,
-        };
+        let state = AppState::new(workspace, hub);
         let mut headers = HeaderMap::new();
         headers.insert(
             TRACK_PROTOCOL_VERSION_HEADER,

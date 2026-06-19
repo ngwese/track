@@ -14,7 +14,24 @@ pub enum TestHubError {
     /// Hub processing error.
     #[error("hub error: {0}")]
     Hub(#[from] track_hub::HubError),
-    /// JSON serialization error.
-    #[error("json error: {0}")]
-    Json(#[from] serde_json::Error),
+}
+
+impl From<track_hub_http::ServeError> for TestHubError {
+    fn from(err: track_hub_http::ServeError) -> Self {
+        match err {
+            track_hub_http::ServeError::Server(message) => Self::Server(message),
+            track_hub_http::ServeError::Url(err) => Self::Url(err),
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn from_serve_error_maps_server_variant() {
+        let err: TestHubError = track_hub_http::ServeError::Server("bind failed".into()).into();
+        assert!(matches!(err, TestHubError::Server(message) if message == "bind failed"));
+    }
 }
