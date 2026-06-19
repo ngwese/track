@@ -104,6 +104,13 @@ mod tests {
     }
 
     #[test]
+    fn empty_set_reports_is_empty_and_display() {
+        let set = CursorSet::new();
+        assert!(set.is_empty());
+        assert_eq!(set.to_string(), "0 cursor(s)");
+    }
+
+    #[test]
     fn merge_keeps_newer_offset() {
         let node = TrackUlid::parse("01JHM8X9K2Q4N0000000000000").unwrap();
         let mut a = CursorSet::new();

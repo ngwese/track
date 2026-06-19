@@ -25,3 +25,16 @@ impl Default for InactiveReplicaPolicy {
         Self::default_test()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn default_policies_match_test_timeout() {
+        assert_eq!(
+            InactiveReplicaPolicy::default(),
+            InactiveReplicaPolicy::default_test()
+        );
+    }
+}

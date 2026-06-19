@@ -56,4 +56,11 @@ mod tests {
         let parsed: HubOffset = serde_json::from_str(&json).unwrap();
         assert_eq!(parsed, offset);
     }
+
+    #[test]
+    fn display_and_from_u64() {
+        let offset = HubOffset::from(7_u64);
+        assert_eq!(offset.0, 7);
+        assert_eq!(offset.to_string(), "7");
+    }
 }

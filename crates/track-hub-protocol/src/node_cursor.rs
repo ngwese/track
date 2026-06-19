@@ -36,4 +36,14 @@ mod tests {
         let parsed: NodeCursor = serde_json::from_str(&json).unwrap();
         assert_eq!(parsed, cursor);
     }
+
+    #[test]
+    fn is_before_compares_hub_offsets() {
+        let cursor = NodeCursor {
+            last_event_uuid: TrackUlid::parse("01J0G7YF1P8Q4CN0V0VJ8G8F13").unwrap(),
+            last_hub_offset: HubOffset(10),
+        };
+        assert!(cursor.is_before(HubOffset(11)));
+        assert!(!cursor.is_before(HubOffset(10)));
+    }
 }
