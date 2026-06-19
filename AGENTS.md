@@ -71,6 +71,27 @@ file must pass all of the following checks. Run from the repo root:
    cargo crap --workspace --lcov lcov.info --format json --output crap_baseline.json
    ```
 
+   **When new or changed code exceeds the CRAP threshold**, prefer **tests**
+   that cover the missing branches over structural refactors. Add
+   branch-covering tests until the function is back under threshold or the
+   baseline is legitimately improved.
+
+   Refactor to reduce cyclomatic complexity **only when all** of the following
+   hold:
+
+   - the result is **idiomatic Rust** for this codebase (matches surrounding
+     patterns, not clever indirection)
+   - **clarity of intent** is preserved or improved — a reader can still see
+     what the code does without decoding tables, macros, or deep call chains
+   - **maintenance cost** does not increase (no new abstraction layers,
+     registries, or generated dispatch solely to satisfy the metric)
+   - **execution complexity** is unchanged (same algorithm, same asymptotic
+     behavior; moving a `match` to another function does not count as a win)
+
+   If tests are impractical and a qualifying refactor is not available, prefer
+   a documented policy exception in [`.cargo-crap.toml`](.cargo-crap.toml) (see
+   integration plan §Known exceptions) over speculative decomposition.
+
 Fix violations in the same change set; do not leave follow-up cleanup for later.
 
 ## Commits
