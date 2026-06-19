@@ -4,8 +4,10 @@ use crate::{EventKind, EventPayload};
 use track_id::TrackUlid;
 
 use super::{
-    CommentAddPayload, ExecutionClaimPayload, ItemAdjustFieldPayload, ItemCreatePayload,
-    ItemSetFieldPayload, NodeRegisterPayload, RelationCreatePayload, SchemaAddFieldPayload,
+    CommentAddPayload, ExecutionClaimPayload, ItemAddLabelPayload, ItemAdjustFieldPayload,
+    ItemArchivePayload, ItemAssignUserPayload, ItemClearFieldPayload, ItemCreatePayload,
+    ItemRemoveLabelPayload, ItemRestorePayload, ItemSetFieldPayload, ItemSetStatePayload,
+    ItemUnassignUserPayload, NodeRegisterPayload, RelationCreatePayload, SchemaAddFieldPayload,
     SchemaInitPayload, SchemaSnapshotPayload,
 };
 
@@ -88,6 +90,92 @@ fn item_adjust_field_payload_api() {
     assert_eq!(ItemAdjustFieldPayload::kind(), EventKind::ItemAdjustField);
     let value = payload.into_value();
     let _ = ItemAdjustFieldPayload::from_value(&value).expect("roundtrip");
+}
+
+#[test]
+fn item_add_label_payload_api() {
+    let payload = ItemAddLabelPayload {
+        entity_uuid: TrackUlid::parse("01JHM8X9K2Q4Z0000000000000").unwrap(),
+        label: "urgent".into(),
+    };
+    assert_eq!(ItemAddLabelPayload::kind(), EventKind::ItemAddLabel);
+    let value = payload.into_value();
+    let _ = ItemAddLabelPayload::from_value(&value).expect("roundtrip");
+}
+
+#[test]
+fn item_remove_label_payload_api() {
+    let payload = ItemRemoveLabelPayload {
+        entity_uuid: TrackUlid::parse("01JHM8X9K2Q4Z0000000000000").unwrap(),
+        label: "urgent".into(),
+    };
+    assert_eq!(ItemRemoveLabelPayload::kind(), EventKind::ItemRemoveLabel);
+    let value = payload.into_value();
+    let _ = ItemRemoveLabelPayload::from_value(&value).expect("roundtrip");
+}
+
+#[test]
+fn item_assign_user_payload_api() {
+    let payload = ItemAssignUserPayload {
+        entity_uuid: TrackUlid::parse("01JHM8X9K2Q4Z0000000000000").unwrap(),
+        user: "user:greg".into(),
+    };
+    assert_eq!(ItemAssignUserPayload::kind(), EventKind::ItemAssignUser);
+    let value = payload.into_value();
+    let _ = ItemAssignUserPayload::from_value(&value).expect("roundtrip");
+}
+
+#[test]
+fn item_unassign_user_payload_api() {
+    let payload = ItemUnassignUserPayload {
+        entity_uuid: TrackUlid::parse("01JHM8X9K2Q4Z0000000000000").unwrap(),
+        user: "user:greg".into(),
+    };
+    assert_eq!(ItemUnassignUserPayload::kind(), EventKind::ItemUnassignUser);
+    let value = payload.into_value();
+    let _ = ItemUnassignUserPayload::from_value(&value).expect("roundtrip");
+}
+
+#[test]
+fn item_set_state_payload_api() {
+    let payload = ItemSetStatePayload {
+        entity_uuid: TrackUlid::parse("01JHM8X9K2Q4Z0000000000000").unwrap(),
+        state_key: "Done".into(),
+    };
+    assert_eq!(ItemSetStatePayload::kind(), EventKind::ItemSetState);
+    let value = payload.into_value();
+    let _ = ItemSetStatePayload::from_value(&value).expect("roundtrip");
+}
+
+#[test]
+fn item_clear_field_payload_api() {
+    let payload = ItemClearFieldPayload {
+        entity_uuid: TrackUlid::parse("01JHM8X9K2Q4Z0000000000000").unwrap(),
+        field: "title".into(),
+    };
+    assert_eq!(ItemClearFieldPayload::kind(), EventKind::ItemClearField);
+    let value = payload.into_value();
+    let _ = ItemClearFieldPayload::from_value(&value).expect("roundtrip");
+}
+
+#[test]
+fn item_archive_payload_api() {
+    let payload = ItemArchivePayload {
+        entity_uuid: TrackUlid::parse("01JHM8X9K2Q4Z0000000000000").unwrap(),
+    };
+    assert_eq!(ItemArchivePayload::kind(), EventKind::ItemArchive);
+    let value = payload.into_value();
+    let _ = ItemArchivePayload::from_value(&value).expect("roundtrip");
+}
+
+#[test]
+fn item_restore_payload_api() {
+    let payload = ItemRestorePayload {
+        entity_uuid: TrackUlid::parse("01JHM8X9K2Q4Z0000000000000").unwrap(),
+    };
+    assert_eq!(ItemRestorePayload::kind(), EventKind::ItemRestore);
+    let value = payload.into_value();
+    let _ = ItemRestorePayload::from_value(&value).expect("roundtrip");
 }
 
 #[test]

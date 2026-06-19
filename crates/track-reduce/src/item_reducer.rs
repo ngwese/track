@@ -2,13 +2,14 @@
 
 use std::str::FromStr;
 
-use serde::Deserialize;
 use track_entity::EntityKind;
 use track_entity::{FieldDefinition, FieldKind, FieldProvenance, FieldValue, ItemHeader};
 use track_id::TrackUlid;
 use track_replication::{
-    EventEnvelope, EventKind, EventPayload, ItemAdjustFieldPayload, ItemCreatePayload,
-    ItemSetFieldPayload,
+    EventEnvelope, EventKind, EventPayload, ItemAddLabelPayload, ItemAdjustFieldPayload,
+    ItemArchivePayload, ItemAssignUserPayload, ItemClearFieldPayload, ItemCreatePayload,
+    ItemRemoveLabelPayload, ItemRestorePayload, ItemSetFieldPayload, ItemSetStatePayload,
+    ItemUnassignUserPayload,
 };
 use track_store::{CounterAdjustOp, SetAddOp, SetRemoveOp};
 
@@ -18,47 +19,6 @@ use crate::{EventReducer, ReduceContext, ReduceError, ReduceOutcome};
 /// Reducer for item create and field mutation events.
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub struct ItemReducer;
-
-#[derive(Debug, Deserialize)]
-struct ItemAddLabelPayload {
-    entity_uuid: TrackUlid,
-    label: String,
-}
-
-#[derive(Debug, Deserialize)]
-struct ItemRemoveLabelPayload {
-    entity_uuid: TrackUlid,
-    label: String,
-}
-
-#[derive(Debug, Deserialize)]
-struct ItemAssignUserPayload {
-    entity_uuid: TrackUlid,
-    user: String,
-}
-
-#[derive(Debug, Deserialize)]
-struct ItemSetStatePayload {
-    entity_uuid: TrackUlid,
-    state_key: String,
-}
-
-#[derive(Debug, Deserialize)]
-struct ItemClearFieldPayload {
-    entity_uuid: TrackUlid,
-    field: String,
-}
-
-#[derive(Debug, Deserialize)]
-struct ItemUnassignUserPayload {
-    entity_uuid: TrackUlid,
-    user: String,
-}
-
-#[derive(Debug, Deserialize)]
-struct ItemLifecyclePayload {
-    entity_uuid: TrackUlid,
-}
 
 impl ItemReducer {
     fn apply_create(
@@ -382,16 +342,14 @@ impl ItemReducer {
     fn apply_lifecycle(
         &self,
         event: &EventEnvelope,
-        payload: ItemLifecyclePayload,
+        entity_uuid: TrackUlid,
         archived: bool,
         ctx: &mut ReduceContext<'_>,
     ) -> Result<(), ReduceError> {
         let mut header = ctx
             .entity_store
-            .get_header(&payload.entity_uuid)?
-            .ok_or_else(|| {
-                ReduceError::Failed(format!("entity `{}` not found", payload.entity_uuid))
-            })?;
+            .get_header(&entity_uuid)?
+            .ok_or_else(|| ReduceError::Failed(format!("entity `{entity_uuid}` not found")))?;
 
         let mut register = LwwRegister::new();
         if let Ok(hlc) = track_replication::Hlc::parse(&header.updated_hlc) {
@@ -437,47 +395,36 @@ impl EventReducer for ItemReducer {
                 self.apply_adjust_field(event, payload, ctx)?;
             }
             EventKind::ItemAddLabel => {
-                let payload: ItemAddLabelPayload = serde_json::from_value(event.payload.clone())
-                    .map_err(|e| ReduceError::Parse(e.to_string()))?;
+                let payload = ItemAddLabelPayload::from_value(&event.payload)?;
                 self.apply_add_label(event, payload, ctx)?;
             }
             EventKind::ItemRemoveLabel => {
-                let payload: ItemRemoveLabelPayload = serde_json::from_value(event.payload.clone())
-                    .map_err(|e| ReduceError::Parse(e.to_string()))?;
+                let payload = ItemRemoveLabelPayload::from_value(&event.payload)?;
                 self.apply_remove_label(event, payload, ctx)?;
             }
             EventKind::ItemAssignUser => {
-                let payload: ItemAssignUserPayload = serde_json::from_value(event.payload.clone())
-                    .map_err(|e| ReduceError::Parse(e.to_string()))?;
+                let payload = ItemAssignUserPayload::from_value(&event.payload)?;
                 self.apply_assign_user(event, payload, ctx)?;
             }
             EventKind::ItemSetState => {
-                let payload: ItemSetStatePayload = serde_json::from_value(event.payload.clone())
-                    .map_err(|e| ReduceError::Parse(e.to_string()))?;
+                let payload = ItemSetStatePayload::from_value(&event.payload)?;
                 self.apply_set_state(event, payload, ctx)?;
             }
             EventKind::ItemClearField => {
-                let payload: ItemClearFieldPayload = serde_json::from_value(event.payload.clone())
-                    .map_err(|e| ReduceError::Parse(e.to_string()))?;
+                let payload = ItemClearFieldPayload::from_value(&event.payload)?;
                 self.apply_clear_field(event, payload, ctx)?;
             }
             EventKind::ItemUnassignUser => {
-                let payload: ItemUnassignUserPayload =
-                    serde_json::from_value(event.payload.clone())
-                        .map_err(|e| ReduceError::Parse(e.to_string()))?;
+                let payload = ItemUnassignUserPayload::from_value(&event.payload)?;
                 self.apply_unassign_user(event, payload, ctx)?;
             }
             EventKind::ItemArchive => {
-                let payload: ItemLifecyclePayload =
-                    serde_json::from_value(event.payload.clone())
-                        .map_err(|e| ReduceError::Parse(e.to_string()))?;
-                self.apply_lifecycle(event, payload, true, ctx)?;
+                let payload = ItemArchivePayload::from_value(&event.payload)?;
+                self.apply_lifecycle(event, payload.entity_uuid, true, ctx)?;
             }
             EventKind::ItemRestore => {
-                let payload: ItemLifecyclePayload =
-                    serde_json::from_value(event.payload.clone())
-                        .map_err(|e| ReduceError::Parse(e.to_string()))?;
-                self.apply_lifecycle(event, payload, false, ctx)?;
+                let payload = ItemRestorePayload::from_value(&event.payload)?;
+                self.apply_lifecycle(event, payload.entity_uuid, false, ctx)?;
             }
             other => return Err(ReduceError::UnknownKind(other.to_string())),
         }
