@@ -15,4 +15,5 @@ jobs = 4
 allow = [
   "crates/track-sync-testing/**",
   "crates/track-hub-conformance-testing/**",
+  "crates/track-store-conformance-testing/**",
 ]

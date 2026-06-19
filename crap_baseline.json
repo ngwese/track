@@ -22,15 +22,6 @@
     },
     {
       "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_entity_store.rs",
-      "function": "load_header",
-      "line": 615,
-      "cyclomatic": 17.0,
-      "coverage": 0.0,
-      "crap": 306.0,
-      "crate": "track-store-sqlite"
-    },
-    {
-      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_entity_store.rs",
       "function": "TrackSqliteStore::get_relation",
       "line": 377,
       "cyclomatic": 15.0,
@@ -45,24 +36,6 @@
       "cyclomatic": 14.0,
       "coverage": 0.0,
       "crap": 210.0,
-      "crate": "track-store-sqlite"
-    },
-    {
-      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_conflict_store.rs",
-      "function": "TrackSqliteStore::list_for_entity",
-      "line": 43,
-      "cyclomatic": 14.0,
-      "coverage": 0.0,
-      "crap": 210.0,
-      "crate": "track-store-sqlite"
-    },
-    {
-      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_quarantine_store.rs",
-      "function": "TrackSqliteStore::list",
-      "line": 56,
-      "cyclomatic": 12.0,
-      "coverage": 0.0,
-      "crap": 156.0,
       "crate": "track-store-sqlite"
     },
     {
@@ -111,24 +84,6 @@
       "crate": "track-store-sqlite"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_replica_progress_store.rs",
-      "function": "TrackSqliteStore::get",
-      "line": 41,
-      "cyclomatic": 8.0,
-      "coverage": 0.0,
-      "crap": 72.0,
-      "crate": "track-store-sqlite"
-    },
-    {
-      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_log_store.rs",
-      "function": "TrackSqliteStore::list_unreduced",
-      "line": 89,
-      "cyclomatic": 8.0,
-      "coverage": 0.0,
-      "crap": 72.0,
-      "crate": "track-store-sqlite"
-    },
-    {
       "file": "/Users/greg/proj/track/crates/track-materialize-yaml/src/projectors/issue_projector.rs",
       "function": "field_value_to_yaml",
       "line": 52,
@@ -145,24 +100,6 @@
       "coverage": 0.0,
       "crap": 56.0,
       "crate": "track-entity"
-    },
-    {
-      "file": "/Users/greg/proj/track/crates/track-entity/src/validation/conflict_report.rs",
-      "function": "ConflictType::fmt",
-      "line": 105,
-      "cyclomatic": 7.0,
-      "coverage": 0.0,
-      "crap": 56.0,
-      "crate": "track-entity"
-    },
-    {
-      "file": "/Users/greg/proj/track/crates/track-materialize-yaml/src/projectors/schema_projector.rs",
-      "function": "project_schema",
-      "line": 12,
-      "cyclomatic": 7.0,
-      "coverage": 0.0,
-      "crap": 56.0,
-      "crate": "track-materialize-yaml"
     },
     {
       "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_entity_store.rs",
@@ -192,13 +129,13 @@
       "crate": "track-store-sqlite"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_snapshot_store.rs",
-      "function": "TrackSqliteStore::get_checkpoint",
-      "line": 36,
+      "file": "/Users/greg/proj/track/crates/track-materialize-yaml/src/projectors/schema_projector.rs",
+      "function": "project_schema",
+      "line": 12,
       "cyclomatic": 7.0,
       "coverage": 0.0,
       "crap": 56.0,
-      "crate": "track-store-sqlite"
+      "crate": "track-materialize-yaml"
     },
     {
       "file": "/Users/greg/proj/track/crates/track-materialize-yaml/src/default_projector.rs",
@@ -208,15 +145,6 @@
       "coverage": 52.83018867924528,
       "crap": 42.86781705703366,
       "crate": "track-materialize-yaml"
-    },
-    {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_schema_store.rs",
-      "function": "MemorySchemaStore::get_at_least",
-      "line": 41,
-      "cyclomatic": 6.0,
-      "coverage": 0.0,
-      "crap": 42.0,
-      "crate": "track-store"
     },
     {
       "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_entity_store.rs",
@@ -262,24 +190,6 @@
       "coverage": 97.61904761904762,
       "crap": 35.01653439153439,
       "crate": "track-reduce"
-    },
-    {
-      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_schema_store.rs",
-      "function": "TrackSqliteStore::get_at_least",
-      "line": 35,
-      "cyclomatic": 5.0,
-      "coverage": 0.0,
-      "crap": 30.0,
-      "crate": "track-store-sqlite"
-    },
-    {
-      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_schema_store.rs",
-      "function": "TrackSqliteStore::latest",
-      "line": 60,
-      "cyclomatic": 5.0,
-      "coverage": 0.0,
-      "crap": 30.0,
-      "crate": "track-store-sqlite"
     },
     {
       "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_entity_store.rs",
@@ -364,30 +274,30 @@
     },
     {
       "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_entity_store.rs",
-      "function": "entity_kind_to_str",
-      "line": 572,
-      "cyclomatic": 4.0,
-      "coverage": 0.0,
-      "crap": 20.0,
+      "function": "load_header",
+      "line": 615,
+      "cyclomatic": 17.0,
+      "coverage": 96.55172413793103,
+      "crap": 17.01184960432982,
       "crate": "track-store-sqlite"
     },
     {
       "file": "/Users/greg/proj/track/crates/track-reduce/src/snapshot_project.rs",
       "function": "export_project_snapshot_body",
-      "line": 18,
+      "line": 16,
       "cyclomatic": 15.0,
       "coverage": 80.0,
       "crap": 16.799999999999997,
       "crate": "track-reduce"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_entity_store.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_entity_store.rs",
       "function": "MemoryEntityStore::apply_reduced_item",
       "line": 108,
       "cyclomatic": 9.0,
       "coverage": 55.00000000000001,
       "crap": 16.381124999999997,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
       "file": "/Users/greg/proj/track/crates/track-reduce/src/item_reducer.rs",
@@ -408,6 +318,15 @@
       "crate": "track-entity"
     },
     {
+      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_conflict_store.rs",
+      "function": "TrackSqliteStore::list_for_entity",
+      "line": 43,
+      "cyclomatic": 14.0,
+      "coverage": 93.75,
+      "crap": 14.0478515625,
+      "crate": "track-store-sqlite"
+    },
+    {
       "file": "/Users/greg/proj/track/crates/track-materialize-yaml/src/projectors/state_json_projector.rs",
       "function": "update_issue_hash",
       "line": 14,
@@ -419,11 +338,20 @@
     {
       "file": "/Users/greg/proj/track/crates/track-reduce/src/snapshot_project.rs",
       "function": "hydrate_project_snapshot_body",
-      "line": 74,
+      "line": 72,
       "cyclomatic": 13.0,
       "coverage": 82.35294117647058,
       "crap": 13.928760431508245,
       "crate": "track-reduce"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-entity/src/validation/conflict_report.rs",
+      "function": "ConflictType::fmt",
+      "line": 105,
+      "cyclomatic": 7.0,
+      "coverage": 50.0,
+      "crap": 13.125,
+      "crate": "track-entity"
     },
     {
       "file": "/Users/greg/proj/track/crates/track-hub-memory/src/http/push_handler.rs",
@@ -453,6 +381,15 @@
       "crate": "track-reduce"
     },
     {
+      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_quarantine_store.rs",
+      "function": "TrackSqliteStore::list",
+      "line": 56,
+      "cyclomatic": 12.0,
+      "coverage": 94.11764705882352,
+      "crap": 12.02930999389375,
+      "crate": "track-store-sqlite"
+    },
+    {
       "file": "/Users/greg/proj/track/crates/track-reduce/src/item_reducer.rs",
       "function": "ItemReducer::apply_set_field",
       "line": 115,
@@ -480,63 +417,9 @@
       "crate": "track-reduce"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_replica_progress_store.rs",
-      "function": "TrackSqliteStore::upsert",
-      "line": 12,
-      "cyclomatic": 3.0,
-      "coverage": 0.0,
-      "crap": 12.0,
-      "crate": "track-store-sqlite"
-    },
-    {
-      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_schema_store.rs",
-      "function": "TrackSqliteStore::put_version",
-      "line": 13,
-      "cyclomatic": 3.0,
-      "coverage": 0.0,
-      "crap": 12.0,
-      "crate": "track-store-sqlite"
-    },
-    {
-      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_quarantine_store.rs",
-      "function": "TrackSqliteStore::quarantine",
-      "line": 12,
-      "cyclomatic": 3.0,
-      "coverage": 0.0,
-      "crap": 12.0,
-      "crate": "track-store-sqlite"
-    },
-    {
-      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_log_store.rs",
-      "function": "TrackSqliteStore::mark_reduced",
-      "line": 117,
-      "cyclomatic": 3.0,
-      "coverage": 0.0,
-      "crap": 12.0,
-      "crate": "track-store-sqlite"
-    },
-    {
-      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_log_store.rs",
-      "function": "TrackSqliteStore::is_reduced",
-      "line": 131,
-      "cyclomatic": 3.0,
-      "coverage": 0.0,
-      "crap": 12.0,
-      "crate": "track-store-sqlite"
-    },
-    {
       "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_entity_store.rs",
       "function": "field_value_inner_json",
       "line": 599,
-      "cyclomatic": 3.0,
-      "coverage": 0.0,
-      "crap": 12.0,
-      "crate": "track-store-sqlite"
-    },
-    {
-      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_conflict_store.rs",
-      "function": "TrackSqliteStore::insert",
-      "line": 13,
       "cyclomatic": 3.0,
       "coverage": 0.0,
       "crap": 12.0,
@@ -642,12 +525,30 @@
       "crate": "track-reduce"
     },
     {
+      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_replica_progress_store.rs",
+      "function": "TrackSqliteStore::get",
+      "line": 41,
+      "cyclomatic": 8.0,
+      "coverage": 94.11764705882352,
+      "crap": 8.013026663952779,
+      "crate": "track-store-sqlite"
+    },
+    {
       "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_log_store.rs",
       "function": "TrackSqliteStore::insert_if_absent",
       "line": 13,
       "cyclomatic": 8.0,
       "coverage": 95.0,
       "crap": 8.008000000000001,
+      "crate": "track-store-sqlite"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_log_store.rs",
+      "function": "TrackSqliteStore::list_unreduced",
+      "line": 89,
+      "cyclomatic": 8.0,
+      "coverage": 95.65217391304348,
+      "crap": 8.005260129859456,
       "crate": "track-store-sqlite"
     },
     {
@@ -696,6 +597,15 @@
       "crate": "track-reduce"
     },
     {
+      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_snapshot_store.rs",
+      "function": "TrackSqliteStore::get_checkpoint",
+      "line": 36,
+      "cyclomatic": 7.0,
+      "coverage": 94.73684210526315,
+      "crap": 7.007143898527482,
+      "crate": "track-store-sqlite"
+    },
+    {
       "file": "/Users/greg/proj/track/crates/track-sync/src/http_transport.rs",
       "function": "HttpTransport::post_push_body",
       "line": 109,
@@ -741,6 +651,15 @@
       "crate": "track-hub-memory"
     },
     {
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_schema_store.rs",
+      "function": "MemorySchemaStore::get_at_least",
+      "line": 41,
+      "cyclomatic": 6.0,
+      "coverage": 89.47368421052632,
+      "crap": 6.041988628079895,
+      "crate": "track-store-memory"
+    },
+    {
       "file": "/Users/greg/proj/track/crates/track-hub-memory/src/http/pull_handler.rs",
       "function": "pull_events",
       "line": 36,
@@ -750,22 +669,13 @@
       "crate": "track-hub-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_entity_store.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_entity_store.rs",
       "function": "MemoryEntityStore::get_reduced_item",
       "line": 349,
       "cyclomatic": 6.0,
       "coverage": 100.0,
       "crap": 6.0,
-      "crate": "track-store"
-    },
-    {
-      "file": "/Users/greg/proj/track/crates/track-materialize-yaml/src/default_projector.rs",
-      "function": "DefaultProjector::materialize_issue",
-      "line": 89,
-      "cyclomatic": 6.0,
-      "coverage": 100.0,
-      "crap": 6.0,
-      "crate": "track-materialize-yaml"
+      "crate": "track-store-memory"
     },
     {
       "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/error.rs",
@@ -777,63 +687,9 @@
       "crate": "track-store-sqlite"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_schema_store.rs",
-      "function": "decode_schema",
-      "line": 82,
-      "cyclomatic": 2.0,
-      "coverage": 0.0,
-      "crap": 6.0,
-      "crate": "track-store-sqlite"
-    },
-    {
-      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_quarantine_store.rs",
-      "function": "TrackSqliteStore::release",
-      "line": 34,
-      "cyclomatic": 2.0,
-      "coverage": 0.0,
-      "crap": 6.0,
-      "crate": "track-store-sqlite"
-    },
-    {
-      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_quarantine_store.rs",
-      "function": "TrackSqliteStore::is_quarantined",
-      "line": 44,
-      "cyclomatic": 2.0,
-      "coverage": 0.0,
-      "crap": 6.0,
-      "crate": "track-store-sqlite"
-    },
-    {
-      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_blob_store.rs",
-      "function": "TrackSqliteStore::insert_blob",
-      "line": 13,
-      "cyclomatic": 2.0,
-      "coverage": 0.0,
-      "crap": 6.0,
-      "crate": "track-store-sqlite"
-    },
-    {
-      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_blob_store.rs",
-      "function": "TrackSqliteStore::link",
-      "line": 38,
-      "cyclomatic": 2.0,
-      "coverage": 0.0,
-      "crap": 6.0,
-      "crate": "track-store-sqlite"
-    },
-    {
       "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_blob_store.rs",
       "function": "TrackSqliteStore::unlink",
       "line": 61,
-      "cyclomatic": 2.0,
-      "coverage": 0.0,
-      "crap": 6.0,
-      "crate": "track-store-sqlite"
-    },
-    {
-      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_entity_store.rs",
-      "function": "TrackSqliteStore::upsert_header",
-      "line": 17,
       "cyclomatic": 2.0,
       "coverage": 0.0,
       "crap": 6.0,
@@ -885,13 +741,13 @@
       "crate": "track-store-sqlite"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_snapshot_store.rs",
-      "function": "TrackSqliteStore::put_checkpoint",
-      "line": 12,
-      "cyclomatic": 2.0,
-      "coverage": 0.0,
+      "file": "/Users/greg/proj/track/crates/track-materialize-yaml/src/default_projector.rs",
+      "function": "DefaultProjector::materialize_issue",
+      "line": 89,
+      "cyclomatic": 6.0,
+      "coverage": 100.0,
       "crap": 6.0,
-      "crate": "track-store-sqlite"
+      "crate": "track-materialize-yaml"
     },
     {
       "file": "/Users/greg/proj/track/crates/track-sync/src/pull_session.rs",
@@ -936,6 +792,24 @@
       "cyclomatic": 5.0,
       "coverage": 93.33333333333333,
       "crap": 5.007407407407407,
+      "crate": "track-store-sqlite"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_schema_store.rs",
+      "function": "TrackSqliteStore::latest",
+      "line": 60,
+      "cyclomatic": 5.0,
+      "coverage": 93.75,
+      "crap": 5.006103515625,
+      "crate": "track-store-sqlite"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_schema_store.rs",
+      "function": "TrackSqliteStore::get_at_least",
+      "line": 35,
+      "cyclomatic": 5.0,
+      "coverage": 95.0,
+      "crap": 5.003125,
       "crate": "track-store-sqlite"
     },
     {
@@ -993,6 +867,15 @@
       "crate": "track-sync"
     },
     {
+      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_entity_store.rs",
+      "function": "entity_kind_to_str",
+      "line": 572,
+      "cyclomatic": 4.0,
+      "coverage": 66.66666666666666,
+      "crap": 4.5925925925925934,
+      "crate": "track-store-sqlite"
+    },
+    {
       "file": "/Users/greg/proj/track/crates/track-id/src/actor.rs",
       "function": "validate_actor",
       "line": 9,
@@ -1011,13 +894,13 @@
       "crate": "track-reduce"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/or_set_cell.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/or_set_cell.rs",
       "function": "OrSetMember::is_active",
       "line": 34,
       "cyclomatic": 4.0,
       "coverage": 83.33333333333334,
       "crap": 4.0740740740740735,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
       "file": "/Users/greg/proj/track/crates/track-reduce/src/semantic_validation.rs",
@@ -1101,13 +984,13 @@
       "crate": "track-hub-protocol"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_entity_store.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_entity_store.rs",
       "function": "MemoryEntityStore::set_scalar_field",
       "line": 187,
       "cyclomatic": 4.0,
       "coverage": 100.0,
       "crap": 4.0,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
       "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/connection.rs",
@@ -1155,13 +1038,13 @@
       "crate": "track-hub-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_entity_store.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_entity_store.rs",
       "function": "MemoryEntityStore::clear_project",
       "line": 82,
       "cyclomatic": 3.0,
       "coverage": 66.66666666666666,
       "crap": 3.333333333333334,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
       "file": "/Users/greg/proj/track/crates/track-sync/src/http_transport.rs",
@@ -1173,13 +1056,22 @@
       "crate": "track-sync"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/or_set_cell.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/or_set_cell.rs",
       "function": "merge_set_remove",
       "line": 56,
       "cyclomatic": 3.0,
       "coverage": 88.88888888888889,
       "crap": 3.0123456790123457,
-      "crate": "track-store"
+      "crate": "track-store-memory"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_log_store.rs",
+      "function": "TrackSqliteStore::mark_reduced",
+      "line": 117,
+      "cyclomatic": 3.0,
+      "coverage": 91.66666666666666,
+      "crap": 3.0052083333333335,
+      "crate": "track-store-sqlite"
     },
     {
       "file": "/Users/greg/proj/track/crates/track-reduce/src/reduction_engine.rs",
@@ -1200,13 +1092,13 @@
       "crate": "track-hub"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_entity_store.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_entity_store.rs",
       "function": "MemoryEntityStore::apply_counter_adjust",
       "line": 257,
       "cyclomatic": 3.0,
       "coverage": 95.0,
       "crap": 3.001125,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
       "file": "/Users/greg/proj/track/crates/track-reduce/src/schema_reducer.rs",
@@ -1272,22 +1164,76 @@
       "crate": "track-hub-protocol"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_entity_store.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_entity_store.rs",
       "function": "MemoryEntityStore::upsert_comment",
       "line": 296,
       "cyclomatic": 3.0,
       "coverage": 100.0,
       "crap": 3.0,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/or_set_cell.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/or_set_cell.rs",
       "function": "merge_set_add",
       "line": 44,
       "cyclomatic": 3.0,
       "coverage": 100.0,
       "crap": 3.0,
-      "crate": "track-store"
+      "crate": "track-store-memory"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_replica_progress_store.rs",
+      "function": "TrackSqliteStore::upsert",
+      "line": 12,
+      "cyclomatic": 3.0,
+      "coverage": 100.0,
+      "crap": 3.0,
+      "crate": "track-store-sqlite"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_schema_store.rs",
+      "function": "TrackSqliteStore::put_version",
+      "line": 13,
+      "cyclomatic": 3.0,
+      "coverage": 100.0,
+      "crap": 3.0,
+      "crate": "track-store-sqlite"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/bundle.rs",
+      "function": "TempSqliteStoreBundle::open",
+      "line": 19,
+      "cyclomatic": 3.0,
+      "coverage": 100.0,
+      "crap": 3.0,
+      "crate": "track-store-sqlite"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_quarantine_store.rs",
+      "function": "TrackSqliteStore::quarantine",
+      "line": 12,
+      "cyclomatic": 3.0,
+      "coverage": 100.0,
+      "crap": 3.0,
+      "crate": "track-store-sqlite"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_log_store.rs",
+      "function": "TrackSqliteStore::is_reduced",
+      "line": 131,
+      "cyclomatic": 3.0,
+      "coverage": 100.0,
+      "crap": 3.0,
+      "crate": "track-store-sqlite"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_conflict_store.rs",
+      "function": "TrackSqliteStore::insert",
+      "line": 13,
+      "cyclomatic": 3.0,
+      "coverage": 100.0,
+      "crap": 3.0,
+      "crate": "track-store-sqlite"
     },
     {
       "file": "/Users/greg/proj/track/crates/track-hub/src/auth.rs",
@@ -1344,13 +1290,13 @@
       "crate": "track-hub-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_entity_store.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_entity_store.rs",
       "function": "MemoryEntityStore::ensure_entity",
       "line": 37,
       "cyclomatic": 2.0,
       "coverage": 80.0,
       "crap": 2.032,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
       "file": "/Users/greg/proj/track/crates/track-hub/src/in_memory/in_memory_hub_log.rs",
@@ -1380,13 +1326,13 @@
       "crate": "track-hub"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_log_store.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_log_store.rs",
       "function": "MemoryLogStore::mark_reduced",
       "line": 57,
       "cyclomatic": 2.0,
       "coverage": 85.71428571428571,
       "crap": 2.011661807580175,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
       "file": "/Users/greg/proj/track/crates/track-reduce/src/item_reducer.rs",
@@ -1457,15 +1403,6 @@
       "line": 79,
       "cyclomatic": 2.0,
       "coverage": 100.0,
-      "crap": 2.0,
-      "crate": "track-id"
-    },
-    {
-      "file": "/Users/greg/proj/track/crates/track-id/src/schema_version.rs",
-      "function": "SchemaVersion::as_u64",
-      "line": 21,
-      "cyclomatic": 1.0,
-      "coverage": 0.0,
       "crap": 2.0,
       "crate": "track-id"
     },
@@ -2181,121 +2118,238 @@
       "crate": "track-hub-protocol"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_quarantine_store.rs",
-      "function": "MemoryQuarantineStore::is_quarantined",
-      "line": 33,
+      "file": "/Users/greg/proj/track/crates/track-store-memory/tests/store_conformance.rs",
+      "function": "MemoryStoreFixture::open",
+      "line": 13,
       "cyclomatic": 1.0,
-      "coverage": 0.0,
+      "coverage": null,
       "crap": 2.0,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/mod.rs",
-      "function": "MemoryStores::new",
-      "line": 49,
-      "cyclomatic": 1.0,
-      "coverage": 0.0,
-      "crap": 2.0,
-      "crate": "track-store"
-    },
-    {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_entity_store.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_entity_store.rs",
       "function": "MemoryEntityStore::apply_set_add",
       "line": 231,
       "cyclomatic": 2.0,
       "coverage": 100.0,
       "crap": 2.0,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_entity_store.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_entity_store.rs",
       "function": "MemoryEntityStore::apply_set_remove",
       "line": 244,
       "cyclomatic": 2.0,
       "coverage": 100.0,
       "crap": 2.0,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_entity_store.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_entity_store.rs",
       "function": "MemoryEntityStore::upsert_claim",
       "line": 324,
       "cyclomatic": 2.0,
       "coverage": 100.0,
       "crap": 2.0,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_entity_store.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_entity_store.rs",
       "function": "MemoryEntityStore::get_claim",
       "line": 330,
       "cyclomatic": 1.0,
       "coverage": 0.0,
       "crap": 2.0,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_log_store.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_log_store.rs",
       "function": "MemoryLogStore::is_empty",
       "line": 28,
       "cyclomatic": 1.0,
       "coverage": 0.0,
       "crap": 2.0,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_log_store.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_log_store.rs",
       "function": "MemoryLogStore::insert_if_absent",
       "line": 34,
       "cyclomatic": 2.0,
       "coverage": 100.0,
       "crap": 2.0,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_replica_progress_store.rs",
-      "function": "MemoryReplicaProgressStore::get",
-      "line": 28,
-      "cyclomatic": 1.0,
-      "coverage": 0.0,
-      "crap": 2.0,
-      "crate": "track-store"
-    },
-    {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_blob_store.rs",
-      "function": "MemoryBlobStore::insert_blob",
-      "line": 24,
-      "cyclomatic": 1.0,
-      "coverage": 0.0,
-      "crap": 2.0,
-      "crate": "track-store"
-    },
-    {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_blob_store.rs",
-      "function": "MemoryBlobStore::link",
-      "line": 33,
-      "cyclomatic": 1.0,
-      "coverage": 0.0,
-      "crap": 2.0,
-      "crate": "track-store"
-    },
-    {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_blob_store.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_blob_store.rs",
       "function": "MemoryBlobStore::unlink",
       "line": 37,
       "cyclomatic": 1.0,
       "coverage": 0.0,
       "crap": 2.0,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_snapshot_store.rs",
-      "function": "MemorySnapshotStore::get_checkpoint",
+      "file": "/Users/greg/proj/track/crates/track-store-sqlite/tests/store_conformance.rs",
+      "function": "SqliteStoreFixture::open",
+      "line": 13,
+      "cyclomatic": 1.0,
+      "coverage": null,
+      "crap": 2.0,
+      "crate": "track-store-sqlite"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_schema_store.rs",
+      "function": "decode_schema",
+      "line": 82,
+      "cyclomatic": 2.0,
+      "coverage": 100.0,
+      "crap": 2.0,
+      "crate": "track-store-sqlite"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/bundle.rs",
+      "function": "TempSqliteStoreBundle::reopen",
+      "line": 31,
+      "cyclomatic": 2.0,
+      "coverage": 100.0,
+      "crap": 2.0,
+      "crate": "track-store-sqlite"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_quarantine_store.rs",
+      "function": "TrackSqliteStore::release",
       "line": 34,
+      "cyclomatic": 2.0,
+      "coverage": 100.0,
+      "crap": 2.0,
+      "crate": "track-store-sqlite"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_quarantine_store.rs",
+      "function": "TrackSqliteStore::is_quarantined",
+      "line": 44,
+      "cyclomatic": 2.0,
+      "coverage": 100.0,
+      "crap": 2.0,
+      "crate": "track-store-sqlite"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_log_store.rs",
+      "function": "ensure_node",
+      "line": 146,
+      "cyclomatic": 2.0,
+      "coverage": 100.0,
+      "crap": 2.0,
+      "crate": "track-store-sqlite"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/track_sqlite_store.rs",
+      "function": "TrackSqliteStore::open",
+      "line": 17,
+      "cyclomatic": 2.0,
+      "coverage": 100.0,
+      "crap": 2.0,
+      "crate": "track-store-sqlite"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/track_sqlite_store.rs",
+      "function": "TrackSqliteStore::connection",
+      "line": 23,
       "cyclomatic": 1.0,
       "coverage": 0.0,
       "crap": 2.0,
-      "crate": "track-store"
+      "crate": "track-store-sqlite"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/track_sqlite_store.rs",
+      "function": "TrackSqliteStore::connection_mut",
+      "line": 28,
+      "cyclomatic": 1.0,
+      "coverage": 0.0,
+      "crap": 2.0,
+      "crate": "track-store-sqlite"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_blob_store.rs",
+      "function": "TrackSqliteStore::insert_blob",
+      "line": 13,
+      "cyclomatic": 2.0,
+      "coverage": 100.0,
+      "crap": 2.0,
+      "crate": "track-store-sqlite"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_blob_store.rs",
+      "function": "TrackSqliteStore::link",
+      "line": 38,
+      "cyclomatic": 2.0,
+      "coverage": 100.0,
+      "crap": 2.0,
+      "crate": "track-store-sqlite"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_entity_store.rs",
+      "function": "TrackSqliteStore::upsert_header",
+      "line": 17,
+      "cyclomatic": 2.0,
+      "coverage": 100.0,
+      "crap": 2.0,
+      "crate": "track-store-sqlite"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_entity_store.rs",
+      "function": "TrackSqliteStore::get_set_members",
+      "line": 256,
+      "cyclomatic": 1.0,
+      "coverage": 0.0,
+      "crap": 2.0,
+      "crate": "track-store-sqlite"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_entity_store.rs",
+      "function": "TrackSqliteStore::upsert_claim",
+      "line": 409,
+      "cyclomatic": 1.0,
+      "coverage": 0.0,
+      "crap": 2.0,
+      "crate": "track-store-sqlite"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_entity_store.rs",
+      "function": "TrackSqliteStore::get_claim",
+      "line": 413,
+      "cyclomatic": 1.0,
+      "coverage": 0.0,
+      "crap": 2.0,
+      "crate": "track-store-sqlite"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_entity_store.rs",
+      "function": "load_set_members",
+      "line": 724,
+      "cyclomatic": 1.0,
+      "coverage": 0.0,
+      "crap": 2.0,
+      "crate": "track-store-sqlite"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_snapshot_store.rs",
+      "function": "TrackSqliteStore::put_checkpoint",
+      "line": 12,
+      "cyclomatic": 2.0,
+      "coverage": 100.0,
+      "crap": 2.0,
+      "crate": "track-store-sqlite"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/connection.rs",
+      "function": "migrate",
+      "line": 21,
+      "cyclomatic": 2.0,
+      "coverage": 100.0,
+      "crap": 2.0,
+      "crate": "track-store-sqlite"
     },
     {
       "file": "/Users/greg/proj/track/crates/track-materialize-yaml/src/default_projector.rs",
@@ -2341,114 +2395,6 @@
       "coverage": 0.0,
       "crap": 2.0,
       "crate": "track-materialize-yaml"
-    },
-    {
-      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_log_store.rs",
-      "function": "ensure_node",
-      "line": 146,
-      "cyclomatic": 2.0,
-      "coverage": 100.0,
-      "crap": 2.0,
-      "crate": "track-store-sqlite"
-    },
-    {
-      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/track_sqlite_store.rs",
-      "function": "TrackSqliteStore::open",
-      "line": 17,
-      "cyclomatic": 2.0,
-      "coverage": 100.0,
-      "crap": 2.0,
-      "crate": "track-store-sqlite"
-    },
-    {
-      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/track_sqlite_store.rs",
-      "function": "TrackSqliteStore::connection",
-      "line": 23,
-      "cyclomatic": 1.0,
-      "coverage": 0.0,
-      "crap": 2.0,
-      "crate": "track-store-sqlite"
-    },
-    {
-      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/track_sqlite_store.rs",
-      "function": "TrackSqliteStore::connection_mut",
-      "line": 28,
-      "cyclomatic": 1.0,
-      "coverage": 0.0,
-      "crap": 2.0,
-      "crate": "track-store-sqlite"
-    },
-    {
-      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_entity_store.rs",
-      "function": "TrackSqliteStore::get_header",
-      "line": 53,
-      "cyclomatic": 1.0,
-      "coverage": 0.0,
-      "crap": 2.0,
-      "crate": "track-store-sqlite"
-    },
-    {
-      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_entity_store.rs",
-      "function": "TrackSqliteStore::get_set_members",
-      "line": 256,
-      "cyclomatic": 1.0,
-      "coverage": 0.0,
-      "crap": 2.0,
-      "crate": "track-store-sqlite"
-    },
-    {
-      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_entity_store.rs",
-      "function": "TrackSqliteStore::upsert_claim",
-      "line": 409,
-      "cyclomatic": 1.0,
-      "coverage": 0.0,
-      "crap": 2.0,
-      "crate": "track-store-sqlite"
-    },
-    {
-      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_entity_store.rs",
-      "function": "TrackSqliteStore::get_claim",
-      "line": 413,
-      "cyclomatic": 1.0,
-      "coverage": 0.0,
-      "crap": 2.0,
-      "crate": "track-store-sqlite"
-    },
-    {
-      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_entity_store.rs",
-      "function": "parse_entity_kind",
-      "line": 580,
-      "cyclomatic": 1.0,
-      "coverage": 0.0,
-      "crap": 2.0,
-      "crate": "track-store-sqlite"
-    },
-    {
-      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_entity_store.rs",
-      "function": "load_set_members",
-      "line": 724,
-      "cyclomatic": 1.0,
-      "coverage": 0.0,
-      "crap": 2.0,
-      "crate": "track-store-sqlite"
-    },
-    {
-      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/connection.rs",
-      "function": "migrate",
-      "line": 21,
-      "cyclomatic": 2.0,
-      "coverage": 100.0,
-      "crap": 2.0,
-      "crate": "track-store-sqlite"
-    },
-    {
-      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/row_mapping.rs",
-      "function": "optional_text_to_ulid",
-      "line": 19,
-      "cyclomatic": 1.0,
-      "coverage": 0.0,
-      "crap": 2.0,
-      "crate": "track-store-sqlite"
     },
     {
       "file": "/Users/greg/proj/track/crates/track-hub/src/pull_service.rs",
@@ -2685,13 +2631,13 @@
       "crate": "track-hub-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_entity_store.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_entity_store.rs",
       "function": "MemoryEntityStore::list_relations_for_project",
       "line": 59,
       "cyclomatic": 1.0,
       "coverage": 52.38095238095239,
       "crap": 1.1079796998164344,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
       "file": "/Users/greg/proj/track/crates/track-replication/src/event_classifier.rs",
@@ -2823,6 +2769,15 @@
       "file": "/Users/greg/proj/track/crates/track-id/src/schema_version.rs",
       "function": "SchemaVersion::new",
       "line": 16,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-id"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-id/src/schema_version.rs",
+      "function": "SchemaVersion::as_u64",
+      "line": 21,
       "cyclomatic": 1.0,
       "coverage": 100.0,
       "crap": 1.0,
@@ -3299,7 +3254,7 @@
     {
       "file": "/Users/greg/proj/track/crates/track-reduce/src/snapshot_project.rs",
       "function": "build_project_snapshot",
-      "line": 120,
+      "line": 118,
       "cyclomatic": 1.0,
       "coverage": 100.0,
       "crap": 1.0,
@@ -3441,337 +3396,607 @@
       "crate": "track-hub-protocol"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_schema_store.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_schema_store.rs",
       "function": "MemorySchemaStore::new",
       "line": 19,
       "cyclomatic": 1.0,
       "coverage": 100.0,
       "crap": 1.0,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_schema_store.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_schema_store.rs",
       "function": "MemorySchemaStore::put_version",
       "line": 25,
       "cyclomatic": 1.0,
       "coverage": 100.0,
       "crap": 1.0,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_schema_store.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_schema_store.rs",
       "function": "MemorySchemaStore::latest",
       "line": 63,
       "cyclomatic": 1.0,
       "coverage": 100.0,
       "crap": 1.0,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_quarantine_store.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/lib.rs",
+      "function": "MemoryStores::new",
+      "line": 55,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-store-memory"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/handles.rs",
+      "function": "MemoryStores::log_mut",
+      "line": 20,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-store-memory"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/handles.rs",
+      "function": "MemoryStores::schema_mut",
+      "line": 24,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-store-memory"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/handles.rs",
+      "function": "MemoryStores::entity_mut",
+      "line": 28,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-store-memory"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/handles.rs",
+      "function": "MemoryStores::quarantine_mut",
+      "line": 32,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-store-memory"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/handles.rs",
+      "function": "MemoryStores::conflict_mut",
+      "line": 36,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-store-memory"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/handles.rs",
+      "function": "MemoryStores::progress_mut",
+      "line": 40,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-store-memory"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/handles.rs",
+      "function": "MemoryStores::blob_mut",
+      "line": 44,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-store-memory"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/handles.rs",
+      "function": "MemoryStores::snapshot_mut",
+      "line": 48,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-store-memory"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_quarantine_store.rs",
       "function": "MemoryQuarantineStore::new",
       "line": 17,
       "cyclomatic": 1.0,
       "coverage": 100.0,
       "crap": 1.0,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_quarantine_store.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_quarantine_store.rs",
       "function": "MemoryQuarantineStore::quarantine",
       "line": 23,
       "cyclomatic": 1.0,
       "coverage": 100.0,
       "crap": 1.0,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_quarantine_store.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_quarantine_store.rs",
       "function": "MemoryQuarantineStore::release",
       "line": 28,
       "cyclomatic": 1.0,
       "coverage": 100.0,
       "crap": 1.0,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_quarantine_store.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_quarantine_store.rs",
+      "function": "MemoryQuarantineStore::is_quarantined",
+      "line": 33,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-store-memory"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_quarantine_store.rs",
       "function": "MemoryQuarantineStore::list",
       "line": 37,
       "cyclomatic": 1.0,
       "coverage": 100.0,
       "crap": 1.0,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_entity_store.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_entity_store.rs",
       "function": "MemoryEntityStore::new",
       "line": 33,
       "cyclomatic": 1.0,
       "coverage": 100.0,
       "crap": 1.0,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_entity_store.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_entity_store.rs",
       "function": "MemoryEntityStore::list_entities_for_project",
       "line": 46,
       "cyclomatic": 1.0,
       "coverage": 100.0,
       "crap": 1.0,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_entity_store.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_entity_store.rs",
       "function": "MemoryEntityStore::upsert_header",
       "line": 178,
       "cyclomatic": 1.0,
       "coverage": 100.0,
       "crap": 1.0,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_entity_store.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_entity_store.rs",
       "function": "MemoryEntityStore::get_header",
       "line": 183,
       "cyclomatic": 1.0,
       "coverage": 100.0,
       "crap": 1.0,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_entity_store.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_entity_store.rs",
       "function": "MemoryEntityStore::get_scalar_field",
       "line": 209,
       "cyclomatic": 1.0,
       "coverage": 100.0,
       "crap": 1.0,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_entity_store.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_entity_store.rs",
       "function": "MemoryEntityStore::get_field_provenance",
       "line": 220,
       "cyclomatic": 1.0,
       "coverage": 100.0,
       "crap": 1.0,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_entity_store.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_entity_store.rs",
       "function": "MemoryEntityStore::get_set_members",
       "line": 279,
       "cyclomatic": 1.0,
       "coverage": 100.0,
       "crap": 1.0,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_entity_store.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_entity_store.rs",
       "function": "MemoryEntityStore::get_comments",
       "line": 310,
       "cyclomatic": 1.0,
       "coverage": 100.0,
       "crap": 1.0,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_entity_store.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_entity_store.rs",
       "function": "MemoryEntityStore::upsert_relation",
       "line": 314,
       "cyclomatic": 1.0,
       "coverage": 100.0,
       "crap": 1.0,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_entity_store.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_entity_store.rs",
       "function": "MemoryEntityStore::get_relation",
       "line": 320,
       "cyclomatic": 1.0,
       "coverage": 100.0,
       "crap": 1.0,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_entity_store.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_entity_store.rs",
       "function": "MemoryEntityStore::list_relations_for_entity",
       "line": 334,
       "cyclomatic": 1.0,
       "coverage": 100.0,
       "crap": 1.0,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_entity_store.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_entity_store.rs",
       "function": "MemoryEntityStore::list_entity_uuids_for_project",
       "line": 385,
       "cyclomatic": 1.0,
       "coverage": 100.0,
       "crap": 1.0,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_entity_store.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_entity_store.rs",
       "function": "MemoryEntityStore::list_active_relations_for_project",
       "line": 392,
       "cyclomatic": 1.0,
       "coverage": 100.0,
       "crap": 1.0,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_log_store.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_log_store.rs",
       "function": "MemoryLogStore::new",
       "line": 19,
       "cyclomatic": 1.0,
       "coverage": 100.0,
       "crap": 1.0,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_log_store.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_log_store.rs",
       "function": "MemoryLogStore::len",
       "line": 23,
       "cyclomatic": 1.0,
       "coverage": 100.0,
       "crap": 1.0,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_log_store.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_log_store.rs",
       "function": "MemoryLogStore::get",
       "line": 42,
       "cyclomatic": 1.0,
       "coverage": 100.0,
       "crap": 1.0,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_log_store.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_log_store.rs",
       "function": "MemoryLogStore::list_unreduced",
       "line": 46,
       "cyclomatic": 1.0,
       "coverage": 100.0,
       "crap": 1.0,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_log_store.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_log_store.rs",
       "function": "MemoryLogStore::is_reduced",
       "line": 65,
       "cyclomatic": 1.0,
       "coverage": 100.0,
       "crap": 1.0,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_replica_progress_store.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_replica_progress_store.rs",
       "function": "MemoryReplicaProgressStore::new",
       "line": 17,
       "cyclomatic": 1.0,
       "coverage": 100.0,
       "crap": 1.0,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_replica_progress_store.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_replica_progress_store.rs",
       "function": "MemoryReplicaProgressStore::upsert",
       "line": 23,
       "cyclomatic": 1.0,
       "coverage": 100.0,
       "crap": 1.0,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_blob_store.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_replica_progress_store.rs",
+      "function": "MemoryReplicaProgressStore::get",
+      "line": 28,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-store-memory"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_blob_store.rs",
       "function": "MemoryBlobStore::new",
       "line": 18,
       "cyclomatic": 1.0,
       "coverage": 100.0,
       "crap": 1.0,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_conflict_store.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_blob_store.rs",
+      "function": "MemoryBlobStore::insert_blob",
+      "line": 24,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-store-memory"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_blob_store.rs",
+      "function": "MemoryBlobStore::link",
+      "line": 33,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-store-memory"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_conflict_store.rs",
       "function": "MemoryConflictStore::new",
       "line": 17,
       "cyclomatic": 1.0,
       "coverage": 100.0,
       "crap": 1.0,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_conflict_store.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_conflict_store.rs",
       "function": "MemoryConflictStore::insert",
       "line": 23,
       "cyclomatic": 1.0,
       "coverage": 100.0,
       "crap": 1.0,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_conflict_store.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_conflict_store.rs",
       "function": "MemoryConflictStore::list_for_entity",
       "line": 28,
       "cyclomatic": 1.0,
       "coverage": 100.0,
       "crap": 1.0,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_snapshot_store.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_snapshot_store.rs",
       "function": "MemorySnapshotStore::new",
       "line": 17,
       "cyclomatic": 1.0,
       "coverage": 100.0,
       "crap": 1.0,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/memory_snapshot_store.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_snapshot_store.rs",
       "function": "MemorySnapshotStore::put_checkpoint",
       "line": 23,
       "cyclomatic": 1.0,
       "coverage": 100.0,
       "crap": 1.0,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/or_set_cell.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/memory_snapshot_store.rs",
+      "function": "MemorySnapshotStore::get_checkpoint",
+      "line": 34,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-store-memory"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/or_set_cell.rs",
       "function": "stamp_from_add",
       "line": 67,
       "cyclomatic": 1.0,
       "coverage": 100.0,
       "crap": 1.0,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/or_set_cell.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/or_set_cell.rs",
       "function": "stamp_from_remove",
       "line": 76,
       "cyclomatic": 1.0,
       "coverage": 100.0,
       "crap": 1.0,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/or_set_cell.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/or_set_cell.rs",
       "function": "compare_stamps",
       "line": 85,
       "cyclomatic": 1.0,
       "coverage": 100.0,
       "crap": 1.0,
-      "crate": "track-store"
+      "crate": "track-store-memory"
     },
     {
-      "file": "/Users/greg/proj/track/crates/track-store/src/memory/or_set_cell.rs",
+      "file": "/Users/greg/proj/track/crates/track-store-memory/src/or_set_cell.rs",
       "function": "envelope_from_stamp",
       "line": 89,
       "cyclomatic": 1.0,
       "coverage": 100.0,
       "crap": 1.0,
-      "crate": "track-store"
+      "crate": "track-store-memory"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/bundle.rs",
+      "function": "TempSqliteStoreBundle::log_mut",
+      "line": 47,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-store-sqlite"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/bundle.rs",
+      "function": "TempSqliteStoreBundle::schema_mut",
+      "line": 51,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-store-sqlite"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/bundle.rs",
+      "function": "TempSqliteStoreBundle::entity_mut",
+      "line": 55,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-store-sqlite"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/bundle.rs",
+      "function": "TempSqliteStoreBundle::quarantine_mut",
+      "line": 59,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-store-sqlite"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/bundle.rs",
+      "function": "TempSqliteStoreBundle::conflict_mut",
+      "line": 63,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-store-sqlite"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/bundle.rs",
+      "function": "TempSqliteStoreBundle::progress_mut",
+      "line": 67,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-store-sqlite"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/bundle.rs",
+      "function": "TempSqliteStoreBundle::blob_mut",
+      "line": 71,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-store-sqlite"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/bundle.rs",
+      "function": "TempSqliteStoreBundle::snapshot_mut",
+      "line": 75,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-store-sqlite"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/bundle.rs",
+      "function": "TempSqliteStoreBundle::reconnect",
+      "line": 81,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-store-sqlite"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/track_sqlite_store.rs",
+      "function": "TrackSqliteStore::migrate",
+      "line": 33,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-store-sqlite"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_entity_store.rs",
+      "function": "TrackSqliteStore::get_header",
+      "line": 53,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-store-sqlite"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_entity_store.rs",
+      "function": "parse_entity_kind",
+      "line": 580,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-store-sqlite"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/row_mapping.rs",
+      "function": "ulid_to_text",
+      "line": 9,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-store-sqlite"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/row_mapping.rs",
+      "function": "text_to_ulid",
+      "line": 14,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-store-sqlite"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/row_mapping.rs",
+      "function": "optional_text_to_ulid",
+      "line": 19,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-store-sqlite"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/row_mapping.rs",
+      "function": "row_get",
+      "line": 24,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-store-sqlite"
     },
     {
       "file": "/Users/greg/proj/track/crates/track-materialize-yaml/src/yaml_exclusion_policy.rs",
@@ -3853,42 +4078,6 @@
       "coverage": 100.0,
       "crap": 1.0,
       "crate": "track-materialize-yaml"
-    },
-    {
-      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/track_sqlite_store.rs",
-      "function": "TrackSqliteStore::migrate",
-      "line": 33,
-      "cyclomatic": 1.0,
-      "coverage": 100.0,
-      "crap": 1.0,
-      "crate": "track-store-sqlite"
-    },
-    {
-      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/row_mapping.rs",
-      "function": "ulid_to_text",
-      "line": 9,
-      "cyclomatic": 1.0,
-      "coverage": 100.0,
-      "crap": 1.0,
-      "crate": "track-store-sqlite"
-    },
-    {
-      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/row_mapping.rs",
-      "function": "text_to_ulid",
-      "line": 14,
-      "cyclomatic": 1.0,
-      "coverage": 100.0,
-      "crap": 1.0,
-      "crate": "track-store-sqlite"
-    },
-    {
-      "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/row_mapping.rs",
-      "function": "row_get",
-      "line": 24,
-      "cyclomatic": 1.0,
-      "coverage": 100.0,
-      "crap": 1.0,
-      "crate": "track-store-sqlite"
     },
     {
       "file": "/Users/greg/proj/track/crates/track-hub/src/pull_service.rs",
