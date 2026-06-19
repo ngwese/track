@@ -161,6 +161,12 @@ mod tests {
     }
 
     #[test]
+    fn default_map_is_empty() {
+        let map: OrMap<TrackUlid, String> = OrMap::default();
+        assert!(map.active().is_empty());
+    }
+
+    #[test]
     fn delete_recreate_same_uuid() {
         let mut map = OrMap::new();
         let key = TrackUlid::parse("01J0G7Y9V7QZ4A1QF7J0M7Y1Q2").unwrap();

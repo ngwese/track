@@ -426,3 +426,24 @@ fn affected_entity_uuid(event: &EventEnvelope) -> Option<TrackUlid> {
         _ => None,
     }
 }
+
+#[cfg(test)]
+mod engine_tests {
+    use super::*;
+    use track_store_memory::{
+        MemoryConflictStore, MemoryEntityStore, MemoryLogStore, MemoryQuarantineStore,
+        MemorySchemaStore,
+    };
+
+    #[test]
+    fn schema_accessor_reflects_current_snapshot() {
+        let engine = ReductionEngine::new(
+            MemoryLogStore::new(),
+            MemorySchemaStore::new(),
+            MemoryEntityStore::new(),
+            MemoryQuarantineStore::new(),
+            MemoryConflictStore::new(),
+        );
+        assert!(engine.schema().is_none());
+    }
+}

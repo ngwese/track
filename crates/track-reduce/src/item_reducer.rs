@@ -660,11 +660,8 @@ mod conversion_tests {
         )
         .unwrap();
         assert!(matches!(dt, FieldValue::DateTime(_)));
-        let member = typed_json_to_field(
-            &serde_json::json!("user:greg"),
-            FieldKind::Member,
-        )
-        .unwrap();
+        let member =
+            typed_json_to_field(&serde_json::json!("user:greg"), FieldKind::Member).unwrap();
         assert!(matches!(member, FieldValue::Member(_)));
         let urn = typed_json_to_field(
             &serde_json::json!("track:issue:01JHM8X9K2Q4Z0000000000000"),
@@ -683,7 +680,9 @@ mod conversion_tests {
         assert!(typed_json_to_field(&serde_json::json!(1), FieldKind::Date).is_err());
         assert!(typed_json_to_field(&serde_json::json!(1), FieldKind::DateTime).is_err());
         assert!(typed_json_to_field(&serde_json::json!("bad"), FieldKind::Member).is_err());
-        assert!(typed_json_to_field(&serde_json::json!("not-a-urn"), FieldKind::EntityRef).is_err());
+        assert!(
+            typed_json_to_field(&serde_json::json!("not-a-urn"), FieldKind::EntityRef).is_err()
+        );
         assert!(matches!(
             typed_json_to_field(&serde_json::json!(1), FieldKind::Counter),
             Err(ReduceError::Failed(_))
@@ -728,11 +727,8 @@ mod conversion_tests {
 
     #[test]
     fn typed_json_member_and_entity_ref_round_trip_values() {
-        let member = typed_json_to_field(
-            &serde_json::json!("agent:cursor"),
-            FieldKind::Member,
-        )
-        .unwrap();
+        let member =
+            typed_json_to_field(&serde_json::json!("agent:cursor"), FieldKind::Member).unwrap();
         if let FieldValue::Member(actor) = member {
             assert_eq!(actor, Actor::try_new("agent:cursor".to_string()).unwrap());
         } else {
