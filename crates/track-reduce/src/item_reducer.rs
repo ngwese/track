@@ -616,3 +616,136 @@ fn set_remove_op(
         stream_seq: event.stream_seq,
     }
 }
+
+#[cfg(test)]
+mod conversion_tests {
+    use super::*;
+    use track_entity::schema::FieldDefinition;
+    use track_id::{Actor, EntityUrn};
+
+    fn text_def() -> FieldDefinition {
+        FieldDefinition {
+            kind: FieldKind::Text,
+            enum_name: None,
+            required: false,
+            default: None,
+        }
+    }
+
+    #[test]
+    fn typed_json_to_field_coerces_scalar_kinds() {
+        assert!(matches!(
+            typed_json_to_field(&serde_json::json!("hello"), FieldKind::Text).unwrap(),
+            FieldValue::String(_)
+        ));
+        assert!(matches!(
+            typed_json_to_field(&serde_json::json!(7), FieldKind::Number).unwrap(),
+            FieldValue::Integer(7)
+        ));
+        assert!(matches!(
+            typed_json_to_field(&serde_json::json!(1.5), FieldKind::Decimal).unwrap(),
+            FieldValue::Decimal(d) if (d - 1.5).abs() < f64::EPSILON
+        ));
+        assert!(matches!(
+            typed_json_to_field(&serde_json::json!(true), FieldKind::Boolean).unwrap(),
+            FieldValue::Boolean(true)
+        ));
+        assert!(matches!(
+            typed_json_to_field(&serde_json::json!("2026-01-01"), FieldKind::Date).unwrap(),
+            FieldValue::Date(_)
+        ));
+        let dt = typed_json_to_field(
+            &serde_json::json!("2026-06-14T17:35:21.184Z"),
+            FieldKind::DateTime,
+        )
+        .unwrap();
+        assert!(matches!(dt, FieldValue::DateTime(_)));
+        let member = typed_json_to_field(
+            &serde_json::json!("user:greg"),
+            FieldKind::Member,
+        )
+        .unwrap();
+        assert!(matches!(member, FieldValue::Member(_)));
+        let urn = typed_json_to_field(
+            &serde_json::json!("track:issue:01JHM8X9K2Q4Z0000000000000"),
+            FieldKind::EntityRef,
+        )
+        .unwrap();
+        assert!(matches!(urn, FieldValue::EntityRef(_)));
+    }
+
+    #[test]
+    fn typed_json_to_field_rejects_wrong_shapes() {
+        assert!(typed_json_to_field(&serde_json::json!(1), FieldKind::Text).is_err());
+        assert!(typed_json_to_field(&serde_json::json!("x"), FieldKind::Number).is_err());
+        assert!(typed_json_to_field(&serde_json::json!("x"), FieldKind::Decimal).is_err());
+        assert!(typed_json_to_field(&serde_json::json!(1), FieldKind::Boolean).is_err());
+        assert!(typed_json_to_field(&serde_json::json!(1), FieldKind::Date).is_err());
+        assert!(typed_json_to_field(&serde_json::json!(1), FieldKind::DateTime).is_err());
+        assert!(typed_json_to_field(&serde_json::json!("bad"), FieldKind::Member).is_err());
+        assert!(typed_json_to_field(&serde_json::json!("not-a-urn"), FieldKind::EntityRef).is_err());
+        assert!(matches!(
+            typed_json_to_field(&serde_json::json!(1), FieldKind::Counter),
+            Err(ReduceError::Failed(_))
+        ));
+    }
+
+    #[test]
+    fn json_to_field_value_without_schema_uses_json_fallback() {
+        assert!(matches!(
+            json_to_field_value(&serde_json::json!("x"), None).unwrap(),
+            FieldValue::String(_)
+        ));
+        assert!(matches!(
+            json_to_field_value(&serde_json::json!(3), None).unwrap(),
+            FieldValue::Integer(3)
+        ));
+        assert!(matches!(
+            json_to_field_value(&serde_json::json!(2.5), None).unwrap(),
+            FieldValue::Decimal(_)
+        ));
+        assert!(matches!(
+            json_to_field_value(&serde_json::json!(false), None).unwrap(),
+            FieldValue::Boolean(false)
+        ));
+        assert!(matches!(
+            json_to_field_value(&serde_json::json!({"k": 1}), None).unwrap(),
+            FieldValue::Json(_)
+        ));
+    }
+
+    #[test]
+    fn json_to_field_value_with_schema_delegates_to_typed_conversion() {
+        let value = json_to_field_value(&serde_json::json!("high"), Some(&text_def())).unwrap();
+        assert_eq!(value, FieldValue::String("high".into()));
+    }
+
+    #[test]
+    fn typed_json_number_from_float_truncates_for_number_kind() {
+        let value = typed_json_to_field(&serde_json::json!(3.9), FieldKind::Number).unwrap();
+        assert_eq!(value, FieldValue::Integer(3));
+    }
+
+    #[test]
+    fn typed_json_member_and_entity_ref_round_trip_values() {
+        let member = typed_json_to_field(
+            &serde_json::json!("agent:cursor"),
+            FieldKind::Member,
+        )
+        .unwrap();
+        if let FieldValue::Member(actor) = member {
+            assert_eq!(actor, Actor::try_new("agent:cursor".to_string()).unwrap());
+        } else {
+            panic!("expected member");
+        }
+
+        let urn_str = "track:issue:01JHM8X9K2Q4Z0000000000000";
+        let entity_ref =
+            typed_json_to_field(&serde_json::json!(urn_str), FieldKind::EntityRef).unwrap();
+        if let FieldValue::EntityRef(urn) = entity_ref {
+            assert_eq!(urn, EntityUrn::from_str(urn_str).unwrap());
+        } else {
+            panic!("expected entity ref");
+        }
+    }
+}
