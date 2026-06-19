@@ -37,3 +37,14 @@ impl From<strum::ParseError> for IdError {
         Self::InvalidUrn(err.to_string())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn from_strum_parse_error_maps_to_invalid_urn() {
+        let err = IdError::from(strum::ParseError::VariantNotFound);
+        assert!(matches!(err, IdError::InvalidUrn(_)));
+    }
+}

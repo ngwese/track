@@ -78,4 +78,11 @@ mod tests {
         let back: TrackUlid = serde_json::from_str(&json).unwrap();
         assert_eq!(id, back);
     }
+
+    #[test]
+    fn matches_prefix_checks_wire_prefix() {
+        let id = TrackUlid::parse("01JHM8X9K2Q4Z0000000000000").unwrap();
+        assert!(TrackUlid::matches_prefix("01JHM8", id));
+        assert!(!TrackUlid::matches_prefix("01JHM9", id));
+    }
 }
