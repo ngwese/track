@@ -71,4 +71,26 @@ mod tests {
         let mapped = map_rusqlite_error(err);
         assert!(matches!(mapped, StoreError::ForeignKey(_)));
     }
+
+    #[test]
+    fn sqlite_error_from_maps_variants() {
+        let mapped: StoreError = SqliteError::Mapping("bad json".into()).into();
+        assert!(matches!(mapped, StoreError::Serialization(_)));
+
+        let conn = Connection::open_in_memory().unwrap();
+        let err = conn.execute("SELECT no_such_table", []).unwrap_err();
+        let mapped: StoreError = SqliteError::Rusqlite(err).into();
+        assert!(matches!(mapped, StoreError::Other(_)));
+    }
+
+    #[test]
+    fn sqlite_error_from_maps_migration_failures() {
+        let file = tempfile::NamedTempFile::new().unwrap();
+        let mut conn = crate::connection::open_connection(file.path()).unwrap();
+        conn.execute("DELETE FROM refinery_schema_history", [])
+            .unwrap();
+        let err = crate::connection::migrate(&mut conn).unwrap_err();
+        let mapped: StoreError = err.into();
+        assert!(matches!(mapped, StoreError::Other(_)));
+    }
 }
