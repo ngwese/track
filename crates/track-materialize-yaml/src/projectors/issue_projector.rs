@@ -125,4 +125,34 @@ mod tests {
         let yaml = project_issue_yaml(&sample_item()).unwrap();
         insta::assert_yaml_snapshot!(yaml);
     }
+
+    #[test]
+    fn field_value_to_yaml_covers_all_variants() {
+        use track_id::{Actor, EntityUrn, EntityType};
+
+        let dt = time::OffsetDateTime::parse(
+            "2026-06-14T17:35:21.184Z",
+            &time::format_description::well_known::Rfc3339,
+        )
+        .unwrap();
+
+        let cases = [
+            FieldValue::String("text".into()),
+            FieldValue::Integer(7),
+            FieldValue::Decimal(2.5),
+            FieldValue::Boolean(true),
+            FieldValue::Date("2026-01-01".into()),
+            FieldValue::DateTime(dt),
+            FieldValue::Member(Actor::try_new("user:greg".to_string()).unwrap()),
+            FieldValue::EntityRef(EntityUrn {
+                entity_type: EntityType::Issue,
+                entity_uuid: TrackUlid::parse("01JHM8X9K2Q4Z0000000000000").unwrap(),
+            }),
+            FieldValue::Json(serde_json::json!({"nested": true})),
+        ];
+
+        for value in cases {
+            field_value_to_yaml(&value).expect("yaml conversion");
+        }
+    }
 }
