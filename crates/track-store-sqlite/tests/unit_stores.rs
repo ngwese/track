@@ -674,3 +674,24 @@ fn header_update_changes_mutable_fields() {
     store.upsert_header(&updated).unwrap();
     assert_eq!(store.get_header(&entity_uuid).unwrap(), Some(updated));
 }
+
+#[test]
+fn upsert_claim_requires_entity_header() {
+    let (_dir, mut store) = open_store();
+    let entity_uuid = TrackUlid::parse("01J0G7YD7Q2Y8MGM7J6C2DM949").unwrap();
+    let claim = track_entity::Claim {
+        entity_uuid,
+        executor: Actor::try_new("agent:cursor".to_string()).unwrap(),
+        claim_expires_at: Some("2026-06-14T18:00:00Z".into()),
+        claimed_at: hlc_wire().to_string(),
+        claim_event_uuid: TrackUlid::parse("01J0G7YD7Q2Y8MGM7J6C2DM94A").unwrap(),
+    };
+    let err = store.upsert_claim(&claim).unwrap_err();
+    assert!(matches!(err, StoreError::NotFound(_)));
+
+    store
+        .upsert_header(&sample_header(entity_uuid, hlc_wire()))
+        .unwrap();
+    store.upsert_claim(&claim).unwrap();
+    assert_eq!(store.get_claim(&entity_uuid).unwrap(), None);
+}

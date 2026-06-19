@@ -45,3 +45,23 @@ impl BlobStore for MemoryBlobStore {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use track_id::TrackUlid;
+
+    #[test]
+    fn unlink_is_noop_stub() {
+        let mut store = MemoryBlobStore::new();
+        store
+            .unlink(
+                &TrackUlid::generate(),
+                &TrackUlid::generate(),
+                "attachment",
+                &TrackUlid::generate(),
+                "2026-06-14T17:35:21.184Z/01JHM8X9K2Q4N0/0001",
+            )
+            .unwrap();
+    }
+}

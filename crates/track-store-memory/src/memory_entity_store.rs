@@ -411,3 +411,40 @@ impl EntityStore for MemoryEntityStore {
         self.list_relations_for_project(project_uuid)
     }
 }
+
+#[cfg(test)]
+mod claim_tests {
+    use super::*;
+    use track_entity::{EntityKind, ItemHeader};
+    use track_id::{Actor, SchemaVersion, TrackUlid};
+
+    #[test]
+    fn get_claim_returns_stored_claim() {
+        let mut store = MemoryEntityStore::new();
+        let entity_uuid = TrackUlid::generate();
+        store
+            .upsert_header(&ItemHeader {
+                entity_uuid,
+                project_uuid: TrackUlid::generate(),
+                entity_kind: EntityKind::Issue,
+                item_type: None,
+                identifier: None,
+                number: None,
+                state_key: None,
+                archived: false,
+                schema_version_applied: SchemaVersion::new(1),
+                created_hlc: "2026-06-14T17:35:21.184Z/01JHM8X9K2Q4N0/0001".into(),
+                updated_hlc: "2026-06-14T17:35:21.184Z/01JHM8X9K2Q4N0/0002".into(),
+            })
+            .unwrap();
+        let claim = Claim {
+            entity_uuid,
+            executor: Actor::try_new("agent:cursor".to_string()).unwrap(),
+            claim_expires_at: None,
+            claimed_at: "2026-06-14T17:35:21.184Z/01JHM8X9K2Q4N0/0001".into(),
+            claim_event_uuid: TrackUlid::generate(),
+        };
+        store.upsert_claim(&claim).unwrap();
+        assert_eq!(store.get_claim(&entity_uuid).unwrap(), Some(claim));
+    }
+}

@@ -92,6 +92,12 @@ mod tests {
     }
 
     #[test]
+    fn new_store_is_empty() {
+        let store = MemoryLogStore::new();
+        assert!(store.is_empty());
+    }
+
+    #[test]
     fn insert_is_idempotent() {
         let mut store = MemoryLogStore::new();
         let event = sample_event("01J0G7YD7Q2Y8MGM7J6C2DM912");

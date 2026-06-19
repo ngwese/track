@@ -34,3 +34,20 @@ impl TrackSqliteStore {
         connection::migrate(&mut self.conn)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use tempfile::NamedTempFile;
+
+    #[test]
+    fn connection_accessors_borrow_inner_connection() {
+        let file = NamedTempFile::new().unwrap();
+        let mut store = TrackSqliteStore::open(file.path()).unwrap();
+        assert!(store.connection().is_autocommit());
+        store
+            .connection_mut()
+            .pragma_update(None, "foreign_keys", "ON")
+            .unwrap();
+    }
+}
