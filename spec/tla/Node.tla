@@ -1,25 +1,48 @@
 ---- MODULE Node ----
 (***************************************************************************
   Replica-side transitions: pull delivery, local persist, cursor advance.
+
+  Phase 1: per-authoring-node cursors (ADR 0004 §Cursor model).
  ***************************************************************************)
 EXTENDS Common
 
-PullWindow(hubLog, cursor, pageLimit) ==
-  LET hubLen == HubLen(hubLog)
-      start == cursor + 1
-      last ==
-        IF hubLen = 0
-        THEN 0
-        ELSE IF start + pageLimit - 1 <= hubLen
-             THEN start + pageLimit - 1
-             ELSE hubLen
-  IN IF start > hubLen \/ start > last
-     THEN <<>>
-     ELSE SubSeq(hubLog, start, last)
+RECURSIVE CollectPullPage(_, _, _, _, _, _)
 
-PersistBeforeCursorOK(hubLog, localEvents, cursor) ==
-  IF cursor = 0
-  THEN TRUE
-  ELSE \A i \in 1..cursor : hubLog[i] \in localEvents
+CollectPullPage(hubLog, cursorsNode, pageLimit, authorOf, nextIdx, acc) ==
+  IF Len(acc) >= pageLimit \/ nextIdx > HubLen(hubLog)
+  THEN acc
+  ELSE IF nextIdx > cursorsNode[authorOf[hubLog[nextIdx]]]
+       THEN CollectPullPage(hubLog, cursorsNode, pageLimit, authorOf, nextIdx + 1,
+                            Append(acc, hubLog[nextIdx]))
+       ELSE CollectPullPage(hubLog, cursorsNode, pageLimit, authorOf, nextIdx + 1, acc)
+
+PullWindow(hubLog, cursorsNode, pageLimit, authorOf) ==
+  CollectPullPage(hubLog, cursorsNode, pageLimit, authorOf, 1, <<>>)
+
+NextOffsetForAuthor(hubLog, author, cursor, authorOf) ==
+  IF \E i \in DOMAIN hubLog : authorOf[hubLog[i]] = author /\ i > cursor
+  THEN CHOOSE i \in DOMAIN hubLog :
+         /\ authorOf[hubLog[i]] = author
+         /\ i > cursor
+         /\ \A j \in DOMAIN hubLog :
+              (authorOf[hubLog[j]] = author /\ j < i /\ j > cursor) => FALSE
+  ELSE 0
+
+PersistBeforeCursorOK(hubLog, localEvents, cursorsNode, authorOf) ==
+  \A author \in DOMAIN cursorsNode :
+    \A i \in DOMAIN hubLog :
+      (authorOf[hubLog[i]] = author /\ i <= cursorsNode[author])
+        => hubLog[i] \in localEvents
+
+MinUnseenOffset(hubLog, cursorsNode, authorOf) ==
+  IF \E i \in DOMAIN hubLog : i > cursorsNode[authorOf[hubLog[i]]]
+  THEN CHOOSE i \in DOMAIN hubLog :
+         /\ i > cursorsNode[authorOf[hubLog[i]]]
+         /\ \A j \in DOMAIN hubLog :
+              (j < i) => (j <= cursorsNode[authorOf[hubLog[j]]])
+  ELSE 0
+
+HubOffsetOfEvent(hubLog, event) ==
+  CHOOSE i \in DOMAIN hubLog : hubLog[i] = event
 
 ====

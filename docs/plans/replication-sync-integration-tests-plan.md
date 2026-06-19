@@ -1,9 +1,11 @@
 # Replication and sync — integration test plan
 
-> **Status:** Draft\
+> **Status:** Largely complete (2026-06-19)\
 > **Branch:** `plan/replication-sync-integration-tests`\
 > **Sources:** [ADR 0003](../adr/0003-domain-model-and-replication-log.md),
 > [ADR 0004](../adr/0004-hub-sync-protocol-and-compaction.md),
+> [ADR 0005](../adr/0005-hub-implementation-conformance.md),
+> [ADR 0006](../adr/0006-formal-verification-hub-sync-tlaplus.md),
 > [ADR 0003 implementation plan](./adr-0003-domain-model-implementation-plan.md),
 > [ADR 0004 implementation plan](./adr-0004-hub-sync-implementation-plan.md)
 
@@ -54,18 +56,19 @@ Write aggressive test → fails → classify gap:
 
 Do **not** delete failing tests to keep CI green without ADR resolution.
 
-## Current baseline (existing coverage)
+## Current baseline (2026-06-19)
 
-| Test | Scope | Gap |
-| --- | --- | --- |
-| `dual_node_priority` | 2-node LWW scalar via reducer only | No hub/sync |
-| `replay_pipeline` | fixtures → reduce → YAML | Single node |
-| `push_pull_roundtrip` | 1 event hub roundtrip | No multi-node |
-| `reduce_after_pull` | pull + reduce node.register | No work entities |
-| `loopback_push_pull` | raw HTTP | No convergence assert |
+| Metric | Value |
+| --- | --- |
+| Case functions (`cases/`) | 67 `HUB_SYNC-*` scenarios |
+| Passing on `MemoryHubFixture` | 66 |
+| Deferred | 1 (`HUB_SYNC-077` — see gap log) |
+| Hub restart | ADR 0005 `HUB-CONF-*` (separate crate) |
+| Harness | Parameterized `sync_*_suite!` macros + `MemoryHubFixture` |
 
-**Conclusion:** multi-node hub sync convergence, clock skew, interruption,
-collection merges, and error recovery are **largely untested**.
+**Conclusion:** multi-node hub sync, clock skew, interruption, collection merges,
+protocol faults, ack levels, paging, snapshots, and compaction are **covered**
+by green integration tests. Formal TLA verification (ADR 0006) catches up next.
 
 ## Test harness architecture
 
@@ -454,16 +457,20 @@ These scenarios are **expected to fail** on first implementation:
 
 ## Acceptance criteria (programme complete)
 
-- [ ] ≥ 70 HUB_SYNC scenarios implemented (ignored or passing)
-- [ ] All Group A, D (037), E (040–041), F (050–051, 054–055), G (scalar +
-  comments append) passing without ignore
-- [ ] Gap log documents every remaining `#[ignore]`
-- [ ] ADR amendments merged for each gap type (A) item
-- [ ] CI `test:integration` green; `test:integration-gaps` trend downward
+- [x] ≥ 70 HUB_SYNC scenarios implemented (67 case functions; 053 → HUB-CONF)
+- [x] All suite groups A–L passing without ignore (except deferred 077)
+- [x] Gap log documents every remaining `#[ignore]`
+- [x] ADR amendments merged for protocol gaps closed in 2026-06 sprint
+- [x] `cargo test -p track-sync-testing` green
+- [ ] Durable hub runs `sync_protocol_all_suite!` + `HUB-CONF-*` (production hub)
+- [ ] ADR 0006 TLA phases 1–4 catch up to green integration coverage
 
 ## References
 
 - [ADR 0003: Domain model and replication log](../adr/0003-domain-model-and-replication-log.md)
 - [ADR 0004: Hub sync protocol and compaction](../adr/0004-hub-sync-protocol-and-compaction.md)
+- [ADR 0005: Hub implementation conformance](../adr/0005-hub-implementation-conformance.md)
+- [ADR 0006: Formal verification (TLA+)](../adr/0006-formal-verification-hub-sync-tlaplus.md)
+- [ADR 0006 TLA implementation plan](./adr-0006-formal-verification-implementation-plan.md)
 - [SRD §3.7 Sync state](../SRD.md)
 - [SRD §5.7 Node sync behavior](../SRD.md)

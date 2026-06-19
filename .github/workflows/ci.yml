@@ -62,3 +62,42 @@ jobs:
 
       - name: Test
         run: cargo test --workspace
+
+  tlc-hub-sync:
+    name: TLC hub sync
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Detect TLA-related changes
+        uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            tla:
+              - 'spec/tla/**'
+              - 'docs/adr/0004-hub-sync-protocol-and-compaction.md'
+              - 'docs/adr/0006-formal-verification-hub-sync-tlaplus.md'
+              - '.github/workflows/ci.yml'
+
+      - name: Setup Java
+        if: steps.changes.outputs.tla == 'true'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      # Pinned release: https://github.com/tlaplus/tlaplus/releases/tag/v1.8.0
+      - name: Download TLC
+        if: steps.changes.outputs.tla == 'true'
+        run: |
+          curl -fsSL -o /tmp/tla2tools.jar \
+            https://github.com/tlaplus/tlaplus/releases/download/v1.8.0/tla2tools.jar
+
+      - name: Model check
+        if: steps.changes.outputs.tla == 'true'
+        working-directory: spec/tla
+        env:
+          TLA_TOOLS_JAR: /tmp/tla2tools.jar
+        run: ./run-tlc.sh

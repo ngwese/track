@@ -1,10 +1,14 @@
 # ADR 0006: Formal verification of hub sync protocol (TLA+)
 
-> **Status:** Proposed\
+> **Status:** Proposed (amended 2026-06-19)\
+> **Amendments:** Integration test baseline — parameterized `HUB_SYNC` suite
+> largely green; TLA phases reprioritized to catch up with Rust coverage\
 > **Related:** [ADR 0004](0004-hub-sync-protocol-and-compaction.md),
+> [ADR 0005](0005-hub-implementation-conformance.md),
 > [Integration test plan](../plans/replication-sync-integration-tests-plan.md)
 
 **Date:** 2026-06-18\
+**Amended:** 2026-06-19
 **Deciders:** Track maintainers (draft for review)
 
 ## Context
@@ -36,9 +40,38 @@ essential for end-to-end fidelity but have inherent limits:
   occur.
 
 ADR 0003 defines domain reduction and merge semantics. ADR 0004 defines
-**transport and retention** semantics. This ADR decides how Track will use
-**TLA+** to model and mechanically check the latter without duplicating reducer
-proof obligations.
+**transport and retention** semantics. [ADR 0005](0005-hub-implementation-conformance.md)
+covers **durable hub restart** behaviour (`HUB-CONF-*`), complementing the
+ephemeral protocol scenarios in `track-sync-testing`. This ADR decides how
+Track will use **TLA+** to model and mechanically check ADR 0004 transport and
+retention semantics without duplicating reducer proof obligations.
+
+### Integration test baseline (2026-06-19)
+
+Since this ADR was first proposed, the `track-sync-testing` programme has
+reached **near-complete coverage** of ADR 0004 protocol behaviour:
+
+| Metric | Value |
+| --- | --- |
+| Parameterized scenarios | **67** (`HUB_SYNC-*` case functions in `cases/`) |
+| Passing on `MemoryHubFixture` | **66** |
+| Deferred | **1** (`HUB_SYNC-077` — hub-assigned issue numbers; see gap log) |
+| Hub restart durability | **ADR 0005** (`HUB-CONF-001`–`008` in `track-hub-conformance-testing`) |
+
+Scenarios are **fixture-parameterized**: `sync_protocol_all_suite!(F)` runs the
+same case functions against any [`EphemeralHubFixture`](../../crates/track-sync-testing/src/hub_fixture.rs)
+implementation. Production-capable hubs must pass both the full HUB_SYNC protocol
+suite and HUB-CONF lifecycle cases.
+
+**Consequence for formal verification:** integration tests now validate push/pull,
+partial failure, paging, ack levels, snapshots, compaction, and multi-node
+convergence at deployable fidelity. The TLA+ model remains valuable for
+**unbounded interleavings** and **compaction safety under adversarial ordering**,
+but it is no longer the primary source of protocol confidence — it is the
+**complement** that must catch up to the green Rust suite, not lead it.
+
+See [implementation plan](../plans/adr-0006-formal-verification-implementation-plan.md)
+for phased TLA work aligned with this baseline.
 
 ## Decision drivers
 
@@ -218,19 +251,25 @@ are a non-goal for v1.
 
 ### Traceability to integration tests
 
-Formal properties complement — they do not replace — `HUB_SYNC-*` tests:
+Formal properties complement — they do not replace — `HUB_SYNC-*` tests.
+Case functions live under `crates/track-sync-testing/src/cases/`; suites are
+wired via macros in `suite.rs` and `tests/hub_sync_*.rs`.
 
-| TLA+ property | Representative integration test |
-| --- | --- |
-| `Inv_IdempotentAppend` | `hub_sync_recovery` push retry cases |
-| `Inv_DurableOnlyPull` | `HUB_SYNC-100` (`hub_sync_100_accepted_not_pull_visible`) |
-| `Inv_PartialPush` / `Inv_PartialPull` | `HUB_SYNC-102`, `HUB_SYNC-091`, `HUB_SYNC-096` |
-| `Inv_CompactionSafe` / `Inv_NoSilentLoss` | `HUB_SYNC-120`, `HUB_SYNC-122` |
-| `Inv_TombstoneRetained` | `HUB_SYNC-121` |
-| `Inv_PaginationStable` | `hub_sync_pull_paging` |
+| TLA+ property | Integration test | Status (2026-06-19) |
+| --- | --- | --- |
+| `Inv_IdempotentAppend` | `recovery::hub_sync_051`, `hub_sync_052` | green |
+| `Inv_DurableOnlyPull` | `ack::hub_sync_100` | green |
+| `Inv_PersistBeforeCursor` | implied by `recovery::hub_sync_050`, `hub_sync_054` | green |
+| `Inv_PartialPush` / `Inv_PartialPull` | `recovery::hub_sync_050`, `ack::hub_sync_102`, `protocol::hub_sync_091`, `hub_sync_096` | green |
+| `Inv_PaginationStable` / `Inv_HubOffsetOrder` | `pull_paging::hub_sync_110`–`112` | green |
+| `Inv_CompactionSafe` / `Inv_NoSilentLoss` | `compaction::hub_sync_120`, `hub_sync_122` | green |
+| `Inv_TombstoneRetained` | `compaction::hub_sync_121` | green |
+| `Live_InactiveBootstrap` | `convergence::hub_sync_042`, `compaction::hub_sync_120` | green |
+| Per-authoring-node cursors | all multi-node suites | green (Rust); TLA Phase 1 pending |
 
 When TLC finds a counterexample, add a **minimal** regression scenario to
-`track-sync-testing` if one does not already exist.
+`track-sync-testing` if one does not already exist. When a green integration
+test exposes behaviour not yet modeled, extend `spec/tla/` in the same or next PR.
 
 ### Toolchain and CI
 
@@ -301,9 +340,17 @@ Subsequent work should specify:
 
 ## Status rationale
 
-This ADR is **Proposed**. ADR 0004 remains **Proposed**; formal verification
-should proceed in parallel with protocol stabilization. Acceptance of this ADR
-does not require a complete `spec/tla/` tree on day one — it authorizes the
-approach and directory layout. The first milestone is a minimal model covering
-push, pull, idempotency, and cursor rules with `Inv_IdempotentAppend`,
-`Inv_DurableOnlyPull`, and `Inv_PersistBeforeCursor` passing TLC in CI.
+This ADR is **Proposed**. ADR 0004 remains **Proposed**.
+
+**Phase 0 TLA milestone (delivered 2026-06-18):** `spec/tla/` exists; TLC passes
+five safety invariants on default `HubSync.cfg` (~108k states, ~2s locally).
+
+**Integration programme (2026-06-19):** 66/67 `HUB_SYNC-*` scenarios pass on
+`MemoryHubFixture`; hub restart durability is covered separately by ADR 0005.
+The TLA model still abstracts per-authoring-node cursors, network faults,
+snapshots, and compaction — areas now exercised by integration tests but not
+yet formally modeled.
+
+**Next milestone:** Phase 1 TLA (per-authoring-node cursors + pagination
+invariants) and CI `tlc-hub-sync` job — see
+[implementation plan](../plans/adr-0006-formal-verification-implementation-plan.md).
