@@ -116,3 +116,32 @@ impl std::fmt::Display for ConflictType {
 }
 
 impl std::error::Error for ConflictReport {}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn conflict_report_display_formats_entries() {
+        let report = ConflictReport::from(vec![
+            Conflict::new(ConflictType::UnknownItemType, "missing type"),
+            Conflict::new(ConflictType::MissingRequiredField, "title absent")
+                .with_field("title"),
+        ]);
+        let text = report.to_string();
+        assert!(text.contains("unknown_item_type: missing type"));
+        assert!(text.contains("title (missing_required_field): title absent"));
+    }
+
+    #[test]
+    fn conflict_type_display_uses_snake_labels() {
+        assert_eq!(
+            ConflictType::FieldTypeMismatch.to_string(),
+            "field_type_mismatch"
+        );
+        assert_eq!(
+            ConflictType::MissingEntityRef.to_string(),
+            "missing_entity_ref"
+        );
+    }
+}
