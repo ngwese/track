@@ -1,45 +1,19 @@
 //! Hub lifecycle traits for conformance fixtures (ADR 0005).
 
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 use async_trait::async_trait;
-use tempfile::TempDir;
 use track_id::TrackUlid;
 use url::Url;
 
 use crate::error::ConformanceError;
 
+pub use track_sync_testing::{DurableHubFixture, EphemeralHubFixture, HubStorage};
+
 /// On-disk storage root for one conformance case.
 ///
-/// A persistent hub fixture must bind all durable hub state under this path.
-pub struct HubConformanceStorage {
-    root: PathBuf,
-    _temp: Option<TempDir>,
-}
-
-impl HubConformanceStorage {
-    /// Root directory the fixture must use for durable state.
-    pub fn root(&self) -> &Path {
-        &self.root
-    }
-
-    /// Provisions an isolated temporary directory (for integration tests).
-    pub fn provision_temp() -> Result<Self, ConformanceError> {
-        let temp = TempDir::new()?;
-        Ok(Self {
-            root: temp.path().to_path_buf(),
-            _temp: Some(temp),
-        })
-    }
-
-    /// Wraps an existing directory (for out-of-process or manual fixtures).
-    pub fn at(path: PathBuf) -> Self {
-        Self {
-            root: path,
-            _temp: None,
-        }
-    }
-}
+/// Alias for [`HubStorage`] from `track-sync-testing` (shared ADR 0005 storage type).
+pub type HubConformanceStorage = HubStorage;
 
 /// A running hub instance bound to loopback HTTP.
 #[async_trait]
@@ -79,4 +53,9 @@ pub trait HubConformanceFixture: Send + Sync {
     /// Simulated crash (non-graceful); durable state must reflect only events
     /// already committed before the interrupt.
     async fn stop_interrupt(&self, handle: Self::Handle) -> Result<(), ConformanceError>;
+}
+
+/// Root directory accessor for conformance storage.
+pub fn conformance_storage_root(storage: &HubConformanceStorage) -> &Path {
+    storage.root()
 }

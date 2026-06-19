@@ -24,7 +24,10 @@ pub use cases::state::{
     hub_conf_007_snapshots_survive_restart, hub_conf_008_compaction_watermark_survives,
 };
 pub use error::ConformanceError;
-pub use lifecycle::{HubConformanceFixture, HubConformanceHandle, HubConformanceStorage};
+pub use lifecycle::{
+    DurableHubFixture, EphemeralHubFixture, HubConformanceFixture, HubConformanceHandle,
+    HubConformanceStorage, HubStorage, conformance_storage_root,
+};
 pub use replica::{ConformanceReplica, assert_all_converged};
 pub use suite::{
     ADMIN_CASES, CORE_CASES, ConformanceCase, EXTENDED_ADMIN_CASES, run_admin, run_all, run_core,

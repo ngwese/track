@@ -5,9 +5,9 @@ use thiserror::Error;
 /// Failure in a test cluster operation.
 #[derive(Debug, Error)]
 pub enum ClusterError {
-    /// Hub lifecycle failure.
+    /// Hub lifecycle or service failure.
     #[error("hub error: {0}")]
-    Hub(#[from] track_hub_memory::TestHubError),
+    Hub(String),
     /// Sync client failure.
     #[error("sync error: {0}")]
     Sync(#[from] track_sync::SyncError),
@@ -17,4 +17,7 @@ pub enum ClusterError {
     /// Convergence assertion failure.
     #[error("convergence: {0}")]
     Convergence(String),
+    /// Storage provisioning failure.
+    #[error("io: {0}")]
+    Io(#[from] std::io::Error),
 }

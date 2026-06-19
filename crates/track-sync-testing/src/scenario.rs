@@ -5,17 +5,22 @@ use track_entity::CanonicalSchema;
 use crate::assert_convergence::field_string;
 use crate::cluster::TestCluster;
 use crate::error::ClusterError;
+use crate::hub_fixture::SyncTestHub;
 use crate::replica_simulator::ReplicaSimulator;
 use crate::schema_fixtures::merge_matrix_schema;
 use track_id::TrackUlid;
 
 /// Register the node locally (does not push).
-pub fn bootstrap_node(replica: &mut ReplicaSimulator) -> Result<(), ClusterError> {
+pub fn bootstrap_node<H: SyncTestHub>(
+    replica: &mut ReplicaSimulator<H>,
+) -> Result<(), ClusterError> {
     replica.bootstrap_register()
 }
 
 /// Emit `schema.init` with the merge-matrix schema.
-pub fn emit_schema(replica: &mut ReplicaSimulator) -> Result<CanonicalSchema, ClusterError> {
+pub fn emit_schema<H: SyncTestHub>(
+    replica: &mut ReplicaSimulator<H>,
+) -> Result<CanonicalSchema, ClusterError> {
     let schema = merge_matrix_schema();
     let event = replica.events().schema_init(&schema);
     replica.emit_local(event)?;
@@ -23,7 +28,7 @@ pub fn emit_schema(replica: &mut ReplicaSimulator) -> Result<CanonicalSchema, Cl
 }
 
 /// Create the standard bug item on a replica.
-pub fn emit_item(replica: &mut ReplicaSimulator) -> Result<(), ClusterError> {
+pub fn emit_item<H: SyncTestHub>(replica: &mut ReplicaSimulator<H>) -> Result<(), ClusterError> {
     let event = replica
         .events()
         .item_create("Integration test item", "high");
@@ -32,7 +37,9 @@ pub fn emit_item(replica: &mut ReplicaSimulator) -> Result<(), ClusterError> {
 }
 
 /// Full project bootstrap on one node: register + schema + item, then push.
-pub async fn bootstrap_project(leader: &mut ReplicaSimulator) -> Result<(), ClusterError> {
+pub async fn bootstrap_project<H: SyncTestHub>(
+    leader: &mut ReplicaSimulator<H>,
+) -> Result<(), ClusterError> {
     bootstrap_node(leader)?;
     emit_schema(leader)?;
     emit_item(leader)?;
@@ -41,19 +48,22 @@ pub async fn bootstrap_project(leader: &mut ReplicaSimulator) -> Result<(), Clus
 }
 
 /// Pull all replicas and assert reduced-item convergence.
-pub async fn pull_and_assert_converged(
-    cluster: &TestCluster,
-    replicas: &mut [&mut ReplicaSimulator],
+pub async fn pull_and_assert_converged<H: SyncTestHub>(
+    cluster: &TestCluster<H>,
+    replicas: &mut [&mut ReplicaSimulator<H>],
 ) -> Result<(), ClusterError> {
     for replica in replicas.iter_mut() {
         replica.pull_until_idle(100).await?;
     }
-    let refs: Vec<&ReplicaSimulator> = replicas.iter().map(|r| &**r).collect();
+    let refs: Vec<&ReplicaSimulator<H>> = replicas.iter().map(|r| &**r).collect();
     crate::assert_convergence::assert_all_converged(&refs, &cluster.ids.entity)
 }
 
 /// Read the priority scalar from a replica.
-pub fn priority_of(replica: &ReplicaSimulator, entity: &TrackUlid) -> Option<String> {
+pub fn priority_of<H: SyncTestHub>(
+    replica: &ReplicaSimulator<H>,
+    entity: &TrackUlid,
+) -> Option<String> {
     replica
         .reduced_item(entity)
         .ok()

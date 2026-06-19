@@ -79,7 +79,11 @@ crates/track-sync-testing/
 ├── Cargo.toml
 ├── src/
 │   ├── lib.rs
-│   ├── cluster.rs              # TestCluster: one hub, N replicas
+│   ├── hub_fixture.rs          # EphemeralHub / DurableHub fixture traits
+│   ├── fixtures/memory.rs      # MemoryHubFixture (reference ephemeral impl)
+│   ├── cases/                  # Generic HUB_SYNC case functions
+│   ├── suite.rs                # sync_*_suite! macros
+│   ├── cluster.rs              # TestCluster<H>: one hub, N replicas
 │   ├── replica_simulator.rs    # one node: stores + SyncEngine + reducer
 │   ├── synthetic_hlc.rs        # HLC factory with clock skew / TZ wire stamps
 │   ├── event_builder.rs        # fluent EventEnvelope builders per work kind
@@ -87,19 +91,13 @@ crates/track-sync-testing/
 │   ├── assert_convergence.rs   # compare ReducedItem across replicas
 │   └── schema_fixtures.rs      # canonical schema_init for merge matrix
 └── tests/
-    ├── hub_sync_multi_node.rs
-    ├── hub_sync_clocks.rs
-    ├── hub_sync_offline.rs
-    ├── hub_sync_concurrent.rs
-    ├── hub_sync_convergence.rs
-    ├── hub_sync_recovery.rs
-    ├── hub_sync_merge_matrix.rs
-    ├── hub_sync_protocol.rs
-    ├── hub_sync_ack.rs
-    ├── hub_sync_pull_paging.rs
-    ├── hub_sync_compaction.rs
-    └── hub_sync_event_kinds.rs
+    ├── hub_sync_multi_node.rs  # sync_*_suite!(MemoryHubFixture)
+    └── …
 ```
+
+Durable production hubs run the same case functions via
+`sync_protocol_all_suite!(MyFixture)`; restart durability is
+[HUB-CONF in ADR 0005](../adr/0005-hub-implementation-conformance.md).
 
 ### Dependency graph
 

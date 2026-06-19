@@ -35,6 +35,7 @@ impl From<track_sync_testing::ClusterError> for ConformanceError {
             track_sync_testing::ClusterError::Sync(inner) => Self::Sync(inner),
             track_sync_testing::ClusterError::Reduce(inner) => Self::Reduce(inner),
             track_sync_testing::ClusterError::Convergence(msg) => Self::Assertion(msg),
+            track_sync_testing::ClusterError::Io(inner) => Self::Io(inner),
         }
     }
 }

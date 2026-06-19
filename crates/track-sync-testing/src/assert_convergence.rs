@@ -4,6 +4,7 @@ use track_entity::{Comment, FieldValue, ReducedItem};
 use track_id::TrackUlid;
 
 use crate::error::ClusterError;
+use crate::hub_fixture::SyncTestHub;
 use crate::replica_simulator::ReplicaSimulator;
 
 /// Assert two reduced items are equal (fields, labels, assignees, header state).
@@ -17,8 +18,8 @@ pub fn assert_reduced_items_match(a: &ReducedItem, b: &ReducedItem) -> Result<()
 }
 
 /// Assert all replicas agree on the reduced item for `entity_uuid`.
-pub fn assert_all_converged(
-    replicas: &[&ReplicaSimulator],
+pub fn assert_all_converged<H: SyncTestHub>(
+    replicas: &[&ReplicaSimulator<H>],
     entity_uuid: &TrackUlid,
 ) -> Result<(), ClusterError> {
     let Some(first) = replicas
@@ -43,8 +44,8 @@ pub fn assert_all_converged(
 }
 
 /// Assert visible comment bodies match across replicas (order-independent).
-pub fn assert_comments_match(
-    replicas: &[&ReplicaSimulator],
+pub fn assert_comments_match<H: SyncTestHub>(
+    replicas: &[&ReplicaSimulator<H>],
     entity_uuid: &TrackUlid,
 ) -> Result<(), ClusterError> {
     let visible = |comments: &[Comment]| {

@@ -3,26 +3,34 @@
 #![deny(missing_docs)]
 
 mod assert_convergence;
+pub mod cases;
 mod cluster;
-mod compaction;
 mod error;
 mod event_builder;
 mod fault_injection;
+mod fixtures;
+mod hub_fixture;
 mod ids;
 mod replica_simulator;
 mod scenario;
 mod schema_fixtures;
 mod shared_log_store;
 mod snapshot;
+mod suite;
 mod synthetic_hlc;
 
 pub use assert_convergence::{
     assert_all_converged, assert_comments_match, assert_reduced_items_match, field_string,
 };
-pub use cluster::TestCluster;
+pub use cluster::{TestCluster, is_compaction_blocked};
 pub use error::ClusterError;
 pub use event_builder::EventBuilder;
 pub use fault_injection::{FaultConfig, FaultInjectingTransport, PullFault, PushFault};
+pub use fixtures::{MemoryHubFixture, MemorySyncTestHub};
+pub use hub_fixture::{
+    AckTestHub, DurableHub, DurableHubFixture, EphemeralHub, EphemeralHubFixture, HubAdmin,
+    HubStorage, SyncTestHub,
+};
 pub use ids::{TestIds, pad_ulid};
 pub use replica_simulator::ReplicaSimulator;
 pub use scenario::{

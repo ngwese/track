@@ -9,8 +9,9 @@ algorithm](../adr/0003-domain-model-and-replication-log.md),
 
 Hub restart durability (`HUB_SYNC-053`) moved to [ADR 0005 hub implementation
 conformance](../adr/0005-hub-implementation-conformance.md) as **HUB-CONF-001**.
-No persistent hub implementation exists yet; conformance cases run when a
-`track-hub-*` durable crate lands.
+Production-capable hubs must pass **both** the full HUB_SYNC protocol suite
+(`sync_protocol_all_suite!`) and HUB-CONF lifecycle cases when a durable
+`track-hub-*` crate lands.
 
 | HUB_SYNC ID | Test | Gap type | ADR / PR | Status |
 | --- | --- | --- | --- | --- |

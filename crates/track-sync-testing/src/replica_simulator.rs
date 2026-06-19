@@ -1,9 +1,9 @@
 //! One simulated execution environment with sync + reduction.
 
+use std::marker::PhantomData;
 use std::sync::{Arc, Mutex};
 
 use track_entity::{Comment, ReducedItem};
-use track_hub_memory::TestHubHandle;
 use track_id::TrackUlid;
 use track_reduce::ReductionEngine;
 use track_replication::EventEnvelope;
@@ -16,6 +16,7 @@ use track_sync::{MemoryCursorStore, SyncEngine, SyncError};
 use crate::error::ClusterError;
 use crate::event_builder::EventBuilder;
 use crate::fault_injection::FaultInjectingTransport;
+use crate::hub_fixture::SyncTestHub;
 use crate::ids::TestIds;
 use crate::shared_log_store::SharedMemoryLogStore;
 
@@ -28,7 +29,7 @@ type Engine = ReductionEngine<
 >;
 
 /// One node: local stores, sync engine, and reduction engine sharing one log.
-pub struct ReplicaSimulator {
+pub struct ReplicaSimulator<H: SyncTestHub> {
     ids: TestIds,
     node_uuid: TrackUlid,
     log: SharedMemoryLogStore,
@@ -36,21 +37,19 @@ pub struct ReplicaSimulator {
     sync: SyncEngine<FaultInjectingTransport, MemoryCursorStore, SharedMemoryLogStore>,
     reducer: Arc<Mutex<Engine>>,
     events: EventBuilder,
+    _hub: PhantomData<H>,
 }
 
-impl ReplicaSimulator {
+impl<H: SyncTestHub> ReplicaSimulator<H> {
     /// Creates a replica registered on the hub but not yet bootstrapped.
     pub async fn new(
-        hub: &TestHubHandle,
+        hub: &H,
         ids: TestIds,
         node_uuid: TrackUlid,
         skew_secs: i64,
         hlc_seq: Option<Arc<Mutex<u64>>>,
     ) -> Result<Self, ClusterError> {
-        hub.hub
-            .register_node(ids.workspace, node_uuid)
-            .await
-            .map_err(|err| ClusterError::Hub(track_hub_memory::TestHubError::Hub(err)))?;
+        hub.register_node(node_uuid).await?;
 
         let log = SharedMemoryLogStore::new();
         let reducer = Arc::new(Mutex::new(ReductionEngine::new(
@@ -62,7 +61,7 @@ impl ReplicaSimulator {
         )));
 
         let transport =
-            FaultInjectingTransport::new(track_sync::HttpTransport::new(hub.base_url.clone()));
+            FaultInjectingTransport::new(track_sync::HttpTransport::new(hub.base_url().clone()));
 
         let cursors = MemoryCursorStore::new();
         let mut sync = SyncEngine::new(
@@ -93,6 +92,7 @@ impl ReplicaSimulator {
             sync,
             reducer,
             events: EventBuilder::new(ids, node_uuid, skew_secs, hlc_seq),
+            _hub: PhantomData,
         })
     }
 
