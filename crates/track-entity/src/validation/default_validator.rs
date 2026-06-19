@@ -379,14 +379,8 @@ mod tests {
             (FieldKind::Decimal, FieldValue::Boolean(true)),
             (FieldKind::Boolean, FieldValue::Decimal(1.0)),
             (FieldKind::Date, FieldValue::Json(serde_json::json!({}))),
-            (
-                FieldKind::DateTime,
-                FieldValue::Date("2026-01-01".into()),
-            ),
-            (
-                FieldKind::Member,
-                FieldValue::String("user:greg".into()),
-            ),
+            (FieldKind::DateTime, FieldValue::Date("2026-01-01".into())),
+            (FieldKind::Member, FieldValue::String("user:greg".into())),
             (
                 FieldKind::EntityRef,
                 FieldValue::String("track:issue:01JHM8X9K2Q4Z0000000000000".into()),

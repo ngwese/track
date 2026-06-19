@@ -64,3 +64,62 @@ impl ReducedItem {
         self.assignees.shift_remove(assignee);
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{EntityKind, ItemHeader};
+    use track_id::{SchemaVersion, TrackUlid};
+
+    fn sample_item() -> ReducedItem {
+        ReducedItem {
+            header: ItemHeader {
+                entity_uuid: TrackUlid::generate(),
+                project_uuid: TrackUlid::generate(),
+                entity_kind: EntityKind::Issue,
+                item_type: None,
+                identifier: None,
+                number: None,
+                state_key: None,
+                archived: false,
+                schema_version_applied: SchemaVersion::new(1),
+                created_hlc: "2026-06-14T17:35:21.184Z/01JHM8X9K2Q4N0/0001".into(),
+                updated_hlc: "2026-06-14T17:35:21.184Z/01JHM8X9K2Q4N0/0002".into(),
+            },
+            fields: IndexMap::new(),
+            field_provenance: IndexMap::new(),
+            labels: IndexSet::new(),
+            assignees: IndexSet::new(),
+        }
+    }
+
+    #[test]
+    fn label_and_assignee_mutators() {
+        let mut item = sample_item();
+        item.add_label("backend");
+        assert!(item.labels.contains("backend"));
+        item.remove_label("backend");
+        assert!(!item.labels.contains("backend"));
+
+        let actor = track_id::Actor::try_new("user:greg".to_string()).unwrap();
+        item.add_assignee(actor.clone());
+        assert!(item.assignees.contains(&actor));
+        item.remove_assignee(&actor);
+        assert!(!item.assignees.contains(&actor));
+    }
+
+    #[test]
+    fn clear_field_removes_value_and_provenance() {
+        let mut item = sample_item();
+        let prov = FieldProvenance {
+            event_uuid: TrackUlid::generate(),
+            hlc_wire: "2026-06-14T17:35:21.184Z/01JHM8X9K2Q4N0/0001".into(),
+            node_uuid: TrackUlid::generate(),
+            stream_seq: 1,
+        };
+        item.set_field("title", FieldValue::String("x".into()), prov);
+        item.clear_field("title");
+        assert!(!item.fields.contains_key("title"));
+        assert!(!item.field_provenance.contains_key("title"));
+    }
+}

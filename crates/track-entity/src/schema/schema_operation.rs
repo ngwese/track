@@ -114,3 +114,23 @@ impl From<CanonicalSchemaSnapshot> for super::CanonicalSchema {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::CanonicalSchema;
+    use track_id::SchemaVersion;
+
+    #[test]
+    fn canonical_schema_from_snapshot() {
+        let snapshot = CanonicalSchemaSnapshot {
+            version: SchemaVersion::new(2),
+            item_types: IndexMap::new(),
+            enums: IndexMap::new(),
+            relation_kinds: IndexMap::new(),
+            compatibility: CompatibilityPolicy::Strict,
+        };
+        let schema: CanonicalSchema = snapshot.into();
+        assert_eq!(schema.version, SchemaVersion::new(2));
+    }
+}

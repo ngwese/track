@@ -32,3 +32,24 @@ impl Relation {
         self.deleted
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use track_id::TrackUlid;
+
+    #[test]
+    fn is_deleted_reflects_tombstone_flag() {
+        let relation = Relation {
+            relation_uuid: TrackUlid::generate(),
+            project_uuid: TrackUlid::generate(),
+            relation_kind: "blocks".into(),
+            from_entity_uuid: TrackUlid::generate(),
+            to_entity_uuid: TrackUlid::generate(),
+            attrs: None,
+            created_hlc: "2026-06-14T17:35:21.184Z/01JHM8X9K2Q4N0/0001".into(),
+            deleted: true,
+        };
+        assert!(relation.is_deleted());
+    }
+}

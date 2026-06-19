@@ -125,8 +125,7 @@ mod tests {
     fn conflict_report_display_formats_entries() {
         let report = ConflictReport::from(vec![
             Conflict::new(ConflictType::UnknownItemType, "missing type"),
-            Conflict::new(ConflictType::MissingRequiredField, "title absent")
-                .with_field("title"),
+            Conflict::new(ConflictType::MissingRequiredField, "title absent").with_field("title"),
         ]);
         let text = report.to_string();
         assert!(text.contains("unknown_item_type: missing type"));

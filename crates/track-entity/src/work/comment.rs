@@ -136,6 +136,7 @@ mod tests {
     #[test]
     fn deleted_comments_are_never_visible() {
         let deleted = comment("01J0G7Y9V7QZ4A1QF7J0M7Y1Q2", None, None, true);
+        assert!(deleted.is_deleted());
         assert!(!deleted.is_visible_in_thread());
         assert!(Comment::visible_thread(&[deleted]).is_empty());
     }
