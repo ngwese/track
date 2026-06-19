@@ -85,9 +85,7 @@ mod tests {
             relation_kinds: Default::default(),
             compatibility: CompatibilityPolicy::Strict,
         };
-        DefaultProjector
-            .write_schema(root.path(), &schema)
-            .unwrap();
+        DefaultProjector.write_schema(root.path(), &schema).unwrap();
         assert!(root.path().join("schema/types.yaml").exists());
     }
 }

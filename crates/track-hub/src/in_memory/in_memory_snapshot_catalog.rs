@@ -96,7 +96,8 @@ mod tests {
             cursors_at_boundary: CursorSet::default(),
             body: ProjectSnapshotBody {
                 schema_json: serde_json::Value::Null,
-                schema_created_hlc: "2026-06-14T17:35:21.184Z/01JHM8X9K2Q4N0000000000000/0001".into(),
+                schema_created_hlc: "2026-06-14T17:35:21.184Z/01JHM8X9K2Q4N0000000000000/0001"
+                    .into(),
                 items: Vec::new(),
                 comments: Vec::new(),
                 relations: Vec::new(),
