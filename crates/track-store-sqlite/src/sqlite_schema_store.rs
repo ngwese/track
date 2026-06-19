@@ -42,7 +42,7 @@ impl SchemaStore for TrackSqliteStore {
             .prepare(
                 "SELECT schema_json FROM schema_versions
                  WHERE project_uuid = ?1 AND CAST(schema_version AS INTEGER) >= ?2
-                 ORDER BY CAST(schema_version AS INTEGER) ASC
+                 ORDER BY CAST(schema_version AS INTEGER) DESC
                  LIMIT 1",
             )
             .map_err(map_rusqlite_error)?;

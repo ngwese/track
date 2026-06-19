@@ -7,6 +7,7 @@
 mod bundle;
 mod connection;
 mod error;
+mod or_set_sqlite;
 mod row_mapping;
 mod sqlite_blob_store;
 mod sqlite_conflict_store;

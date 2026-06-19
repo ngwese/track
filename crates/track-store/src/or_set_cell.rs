@@ -1,11 +1,11 @@
-//! Observed-remove set cell for in-memory entity materialization.
+//! Observed-remove set cell merge shared by store backends.
 
 use std::cmp::Ordering;
 
 use track_id::{Actor, SchemaVersion, TrackUlid};
 use track_replication::{EventEnvelope, EventKind, Hlc, compare_events};
 
-use track_store::{SetAddOp, SetRemoveOp};
+use crate::{SetAddOp, SetRemoveOp};
 
 /// Causality metadata for one OR-set member add or remove.
 #[derive(Clone, Debug, Eq, PartialEq)]

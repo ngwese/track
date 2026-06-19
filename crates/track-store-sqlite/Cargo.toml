@@ -22,5 +22,11 @@ track-store.workspace = true
 track-store-conformance-testing = { workspace = true }
 
 [dev-dependencies]
+indexmap.workspace = true
 tempfile = "3"
+track-entity.workspace = true
+track-id.workspace = true
+track-reduce.workspace = true
+track-replication.workspace = true
+track-store.workspace = true
 track-store-conformance-testing = { workspace = true }

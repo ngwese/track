@@ -2,7 +2,7 @@
 
 use rusqlite::{OptionalExtension, params};
 use track_id::TrackUlid;
-use track_replication::{EventEnvelope, EventKind, Hlc};
+use track_replication::{EventEnvelope, EventKind, Hlc, compare_events};
 use track_store::{LogStore, StoreError};
 
 use crate::error::map_rusqlite_error;
@@ -93,8 +93,7 @@ impl LogStore for TrackSqliteStore {
                 "SELECT event_uuid, workspace_uuid, project_uuid, node_uuid, actor,
                         stream_id, stream_seq, hlc, deps_json, schema_version, kind, payload_json
                  FROM log_events
-                 WHERE project_uuid = ?1 AND reduced = 0
-                 ORDER BY hlc ASC",
+                 WHERE project_uuid = ?1 AND reduced = 0",
             )
             .map_err(map_rusqlite_error)?;
 
@@ -111,6 +110,7 @@ impl LogStore for TrackSqliteStore {
             )?;
             events.push(row_to_envelope(&event_uuid, row, 1)?);
         }
+        events.sort_by(compare_events);
         Ok(events)
     }
 
@@ -129,17 +129,16 @@ impl LogStore for TrackSqliteStore {
     }
 
     fn is_reduced(&self, event_uuid: &TrackUlid) -> Result<bool, StoreError> {
-        let reduced: i32 = self
+        let reduced = self
             .conn
             .query_row(
                 "SELECT reduced FROM log_events WHERE event_uuid = ?1",
                 params![ulid_to_text(event_uuid)],
-                |row| row.get(0),
+                |row| row.get::<_, i32>(0),
             )
             .optional()
-            .map_err(map_rusqlite_error)?
-            .ok_or_else(|| StoreError::NotFound(format!("event {event_uuid}")))?;
-        Ok(reduced != 0)
+            .map_err(map_rusqlite_error)?;
+        Ok(reduced.is_some_and(|value| value != 0))
     }
 }
 

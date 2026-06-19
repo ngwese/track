@@ -27,3 +27,27 @@ pub(crate) fn row_get<T: rusqlite::types::FromSql>(
 ) -> Result<T, StoreError> {
     row.get(idx).map_err(map_rusqlite_error)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use track_id::TrackUlid;
+
+    #[test]
+    fn ulid_text_roundtrip() {
+        let ulid = TrackUlid::parse("01J0G7YD7Q2Y8MGM7J6C2DM912").unwrap();
+        let text = ulid_to_text(&ulid);
+        assert_eq!(text_to_ulid(&text).unwrap(), ulid);
+    }
+
+    #[test]
+    fn optional_ulid_none_roundtrip() {
+        assert_eq!(optional_text_to_ulid(None).unwrap(), None);
+    }
+
+    #[test]
+    fn text_to_ulid_rejects_invalid() {
+        let err = text_to_ulid("not-a-ulid").unwrap_err();
+        assert!(matches!(err, StoreError::Serialization(_)));
+    }
+}

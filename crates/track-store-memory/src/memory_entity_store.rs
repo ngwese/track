@@ -8,9 +8,10 @@ use track_entity::{
 };
 use track_id::{Actor, TrackUlid};
 
-use track_store::{CounterAdjustOp, EntityStore, SetAddOp, SetRemoveOp, StoreError};
-
-use super::or_set_cell::{OrSetMember, merge_set_add, merge_set_remove};
+use track_store::{
+    CounterAdjustOp, EntityStore, OrSetMember, SetAddOp, SetRemoveOp, StoreError, merge_set_add,
+    merge_set_remove,
+};
 
 type FieldKey = (TrackUlid, String);
 type SetKey = (TrackUlid, String);

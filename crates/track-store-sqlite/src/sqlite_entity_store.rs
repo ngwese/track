@@ -6,7 +6,6 @@ use track_entity::{
     Claim, Comment, EntityKind, FieldProvenance, FieldValue, ItemHeader, ReducedItem, Relation,
 };
 use track_id::{Actor, TrackUlid};
-use track_replication::Hlc;
 use track_store::{CounterAdjustOp, EntityStore, SetAddOp, SetRemoveOp, StoreError};
 
 use crate::error::map_rusqlite_error;
@@ -90,8 +89,21 @@ impl EntityStore for TrackSqliteStore {
             None => {
                 self.conn
                     .execute(
-                        "DELETE FROM entity_fields WHERE entity_uuid = ?1 AND field_name = ?2",
-                        params![ulid_to_text(entity_uuid), field],
+                        "INSERT INTO entity_fields (
+                            entity_uuid, field_name, value_json, value_type,
+                            updated_by_event_uuid, updated_hlc
+                        ) VALUES (?1, ?2, NULL, 'cleared', ?3, ?4)
+                        ON CONFLICT(entity_uuid, field_name) DO UPDATE SET
+                            value_json = NULL,
+                            value_type = 'cleared',
+                            updated_by_event_uuid = excluded.updated_by_event_uuid,
+                            updated_hlc = excluded.updated_hlc",
+                        params![
+                            ulid_to_text(entity_uuid),
+                            field,
+                            ulid_to_text(&provenance.event_uuid),
+                            provenance.hlc_wire,
+                        ],
                     )
                     .map_err(map_rusqlite_error)?;
             }
@@ -117,7 +129,11 @@ impl EntityStore for TrackSqliteStore {
         let Some(row) = rows.next().map_err(map_rusqlite_error)? else {
             return Ok(None);
         };
-        decode_field_value(&row_get::<String>(row, 1)?, &row_get::<String>(row, 0)?).map(Some)
+        let value_json: Option<String> = row_get(row, 0)?;
+        let Some(value_json) = value_json else {
+            return Ok(None);
+        };
+        decode_field_value(&row_get::<String>(row, 1)?, &value_json).map(Some)
     }
 
     fn get_field_provenance(
@@ -128,8 +144,10 @@ impl EntityStore for TrackSqliteStore {
         let mut stmt = self
             .conn
             .prepare(
-                "SELECT updated_by_event_uuid, updated_hlc FROM entity_fields
-                 WHERE entity_uuid = ?1 AND field_name = ?2",
+                "SELECT ef.updated_by_event_uuid, ef.updated_hlc, le.node_uuid, le.stream_seq
+                 FROM entity_fields ef
+                 INNER JOIN log_events le ON le.event_uuid = ef.updated_by_event_uuid
+                 WHERE ef.entity_uuid = ?1 AND ef.field_name = ?2",
             )
             .map_err(map_rusqlite_error)?;
         let mut rows = stmt
@@ -138,58 +156,21 @@ impl EntityStore for TrackSqliteStore {
         let Some(row) = rows.next().map_err(map_rusqlite_error)? else {
             return Ok(None);
         };
-        let hlc_wire: String = row_get(row, 1)?;
-        Ok(Some(FieldProvenance {
-            event_uuid: text_to_ulid(row_get::<String>(row, 0)?.as_str())?,
-            hlc_wire: hlc_wire.clone(),
-            node_uuid: Hlc::parse(&hlc_wire)
-                .map(|hlc| hlc.node_uuid)
-                .unwrap_or_else(|_| TrackUlid::generate()),
-            stream_seq: 0,
-        }))
+        field_provenance_from_parts(
+            row_get(row, 0)?,
+            row_get(row, 1)?,
+            row_get(row, 2)?,
+            row_get(row, 3)?,
+        )
+        .map(Some)
     }
 
     fn apply_set_add(&mut self, op: SetAddOp) -> Result<(), StoreError> {
-        self.conn
-            .execute(
-                "INSERT INTO entity_set_members (
-                    entity_uuid, field_name, member_key, added_by_event_uuid,
-                    added_hlc, removed_by_event_uuid, removed_hlc
-                ) VALUES (?1, ?2, ?3, ?4, ?5, NULL, NULL)
-                ON CONFLICT(entity_uuid, field_name, member_key) DO UPDATE SET
-                    added_by_event_uuid = excluded.added_by_event_uuid,
-                    added_hlc = excluded.added_hlc,
-                    removed_by_event_uuid = NULL,
-                    removed_hlc = NULL",
-                params![
-                    ulid_to_text(&op.entity_uuid),
-                    op.set_name,
-                    op.member,
-                    ulid_to_text(&op.event_uuid),
-                    op.hlc_wire,
-                ],
-            )
-            .map_err(map_rusqlite_error)?;
-        Ok(())
+        crate::or_set_sqlite::apply_or_set_add(&self.conn, &op)
     }
 
     fn apply_set_remove(&mut self, op: SetRemoveOp) -> Result<(), StoreError> {
-        self.conn
-            .execute(
-                "UPDATE entity_set_members SET
-                    removed_by_event_uuid = ?4,
-                    removed_hlc = ?5
-                 WHERE entity_uuid = ?1 AND field_name = ?2 AND member_key = ?3",
-                params![
-                    ulid_to_text(&op.entity_uuid),
-                    op.set_name,
-                    op.member,
-                    ulid_to_text(&op.event_uuid),
-                    op.hlc_wire,
-                ],
-            )
-            .map_err(map_rusqlite_error)?;
-        Ok(())
+        crate::or_set_sqlite::apply_or_set_remove(&self.conn, &op)
     }
 
     fn apply_counter_adjust(&mut self, op: CounterAdjustOp) -> Result<(), StoreError> {
@@ -258,7 +239,7 @@ impl EntityStore for TrackSqliteStore {
         entity_uuid: &TrackUlid,
         set_name: &str,
     ) -> Result<Vec<String>, StoreError> {
-        load_set_member_list(&self.conn, entity_uuid, set_name)
+        crate::or_set_sqlite::list_active_set_members(&self.conn, entity_uuid, set_name)
     }
 
     fn upsert_comment(&mut self, comment: &Comment) -> Result<(), StoreError> {
@@ -660,8 +641,11 @@ fn load_fields(
 ) -> Result<EntityFields, StoreError> {
     let mut stmt = conn
         .prepare(
-            "SELECT field_name, value_json, value_type, updated_by_event_uuid, updated_hlc
-             FROM entity_fields WHERE entity_uuid = ?1",
+            "SELECT ef.field_name, ef.value_json, ef.value_type,
+                    ef.updated_by_event_uuid, ef.updated_hlc, le.node_uuid, le.stream_seq
+             FROM entity_fields ef
+             INNER JOIN log_events le ON le.event_uuid = ef.updated_by_event_uuid
+             WHERE ef.entity_uuid = ?1",
         )
         .map_err(map_rusqlite_error)?;
 
@@ -674,51 +658,41 @@ fn load_fields(
 
     while let Some(row) = rows.next().map_err(map_rusqlite_error)? {
         let field_name: String = row.get(0).map_err(map_rusqlite_error)?;
-        let value_json: String = row.get(1).map_err(map_rusqlite_error)?;
-        let value_type: String = row.get(2).map_err(map_rusqlite_error)?;
-        let event_text: String = row.get(3).map_err(map_rusqlite_error)?;
-        let hlc_wire: String = row.get(4).map_err(map_rusqlite_error)?;
-        fields.insert(
-            field_name.clone(),
-            decode_field_value(&value_type, &value_json)?,
-        );
-        provenance.insert(
-            field_name,
-            FieldProvenance {
-                event_uuid: text_to_ulid(&event_text)?,
-                hlc_wire: hlc_wire.clone(),
-                node_uuid: Hlc::parse(&hlc_wire)
-                    .map(|hlc| hlc.node_uuid)
-                    .unwrap_or_else(|_| TrackUlid::generate()),
-                stream_seq: 0,
-            },
-        );
+        let value_json: Option<String> = row.get(1).map_err(map_rusqlite_error)?;
+        if let Some(value_json) = value_json {
+            let value_type: String = row.get(2).map_err(map_rusqlite_error)?;
+            fields.insert(
+                field_name.clone(),
+                decode_field_value(&value_type, &value_json)?,
+            );
+            provenance.insert(field_name, field_provenance_from_row(row)?);
+        }
     }
 
     Ok((fields, provenance))
 }
 
-fn load_set_member_list(
-    conn: &rusqlite::Connection,
-    entity_uuid: &TrackUlid,
-    field_name: &str,
-) -> Result<Vec<String>, StoreError> {
-    let mut stmt = conn
-        .prepare(
-            "SELECT member_key FROM entity_set_members
-             WHERE entity_uuid = ?1 AND field_name = ?2 AND removed_by_event_uuid IS NULL",
-        )
-        .map_err(map_rusqlite_error)?;
+fn field_provenance_from_row(row: &rusqlite::Row<'_>) -> Result<FieldProvenance, StoreError> {
+    field_provenance_from_parts(
+        row_get::<String>(row, 3)?,
+        row_get::<String>(row, 4)?,
+        row_get::<String>(row, 5)?,
+        row_get::<i64>(row, 6)?,
+    )
+}
 
-    let mut rows = stmt
-        .query(params![ulid_to_text(entity_uuid), field_name])
-        .map_err(map_rusqlite_error)?;
-
-    let mut keys = Vec::new();
-    while let Some(row) = rows.next().map_err(map_rusqlite_error)? {
-        keys.push(row.get(0).map_err(map_rusqlite_error)?);
-    }
-    Ok(keys)
+fn field_provenance_from_parts(
+    event_text: String,
+    hlc_wire: String,
+    node_text: String,
+    stream_seq: i64,
+) -> Result<FieldProvenance, StoreError> {
+    Ok(FieldProvenance {
+        event_uuid: text_to_ulid(&event_text)?,
+        hlc_wire,
+        node_uuid: text_to_ulid(&node_text)?,
+        stream_seq: stream_seq as u64,
+    })
 }
 
 fn load_set_members(
@@ -726,14 +700,15 @@ fn load_set_members(
     entity_uuid: &TrackUlid,
     field_name: &str,
 ) -> Result<IndexSet<String>, StoreError> {
-    load_set_member_list(conn, entity_uuid, field_name).map(|v| v.into_iter().collect())
+    crate::or_set_sqlite::list_active_set_members(conn, entity_uuid, field_name)
+        .map(|v| v.into_iter().collect())
 }
 
 fn load_assignees(
     conn: &rusqlite::Connection,
     entity_uuid: &TrackUlid,
 ) -> Result<IndexSet<Actor>, StoreError> {
-    let keys = load_set_member_list(conn, entity_uuid, "assignees")?;
+    let keys = crate::or_set_sqlite::list_active_set_members(conn, entity_uuid, "assignees")?;
     keys.into_iter()
         .map(|s| {
             s.parse()
