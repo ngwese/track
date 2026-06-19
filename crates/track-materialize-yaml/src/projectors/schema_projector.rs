@@ -62,10 +62,32 @@ mod tests {
         };
 
         let report = project_schema(root.path(), &schema).unwrap();
-        assert!(report.paths_written.iter().any(|p| p.ends_with("types.yaml")));
+        assert!(
+            report
+                .paths_written
+                .iter()
+                .any(|p| p.ends_with("types.yaml"))
+        );
         assert!(root.path().join("schema/states.yaml").exists());
         assert!(root.path().join("schema/workflows.yaml").exists());
         let types = std::fs::read_to_string(root.path().join("schema/types.yaml")).unwrap();
         assert!(types.contains("version: 3"));
+    }
+
+    #[test]
+    fn default_projector_write_schema_delegates_to_project_schema() {
+        use crate::DefaultProjector;
+        let root = tempdir().unwrap();
+        let schema = CanonicalSchema {
+            version: SchemaVersion::new(1),
+            item_types: Default::default(),
+            enums: Default::default(),
+            relation_kinds: Default::default(),
+            compatibility: CompatibilityPolicy::Strict,
+        };
+        DefaultProjector
+            .write_schema(root.path(), &schema)
+            .unwrap();
+        assert!(root.path().join("schema/types.yaml").exists());
     }
 }

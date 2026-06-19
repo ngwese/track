@@ -40,3 +40,18 @@ pub fn state_json_path(root: &Path) -> PathBuf {
 pub fn cache_db_path(root: &Path) -> PathBuf {
     root.join(".track").join("cache").join("index.db")
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use track_id::TrackUlid;
+
+    #[test]
+    fn issue_bundle_paths_under_work_issues() {
+        let root = std::path::Path::new("/tmp/project");
+        let entity = TrackUlid::parse("01JHM8X9K2Q4Z0000000000000").unwrap();
+        assert!(relations_yaml_path(root, &entity).ends_with("relations.yaml"));
+        assert!(comments_yaml_path(root, &entity).ends_with("comments.yaml"));
+        assert!(cache_db_path(root).ends_with("index.db"));
+    }
+}

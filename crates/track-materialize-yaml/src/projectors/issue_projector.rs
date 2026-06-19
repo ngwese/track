@@ -128,7 +128,7 @@ mod tests {
 
     #[test]
     fn field_value_to_yaml_covers_all_variants() {
-        use track_id::{Actor, EntityUrn, EntityType};
+        use track_id::{Actor, EntityType, EntityUrn};
 
         let dt = time::OffsetDateTime::parse(
             "2026-06-14T17:35:21.184Z",
