@@ -54,4 +54,6 @@ dependency flow within the workspace.
 
 - [Crate layering](./layering.md) — dependency diagram and data paths
 - [Types vs interfaces](./types-vs-interfaces.md) — classification taxonomy
+- [Trait inventory](../interfaces/README.md) — swappable boundaries
+- [Implementation guides](../guides/new-store-backend.md) — store and hub recipes
 - [Crate index](../crates/README.md) — one page per workspace member

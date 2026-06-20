@@ -10,6 +10,21 @@
 - [Crate layering](./architecture/layering.md)
 - [Types vs interfaces](./architecture/types-vs-interfaces.md)
 
+# Interfaces
+
+- [Trait inventory overview](./interfaces/README.md)
+- [Store traits](./interfaces/store.md)
+- [Hub traits](./interfaces/hub.md)
+- [Sync and transport](./interfaces/sync-and-transport.md)
+- [Reduction and materialize](./interfaces/reduction-and-materialize.md)
+- [Domain validation](./interfaces/domain-validation.md)
+
+# Guides
+
+- [Implement a new store backend](./guides/new-store-backend.md)
+- [Implement a new hub service](./guides/new-hub-implementation.md)
+- [Build a memory-backed HTTP hub server](./guides/memory-hub-server.md)
+
 # Crates
 
 - [Crate index](./crates/README.md)
@@ -29,18 +44,3 @@
 - [track-store-conformance-testing](./crates/track-store-conformance-testing.md)
 - [track-hub-conformance-testing](./crates/track-hub-conformance-testing.md)
 - [track-sync-testing](./crates/track-sync-testing.md)
-
-# Interfaces
-
-- [Trait inventory overview](./interfaces/README.md)
-- [Store traits](./interfaces/store.md)
-- [Hub traits](./interfaces/hub.md)
-- [Sync and transport](./interfaces/sync-and-transport.md)
-- [Reduction and materialize](./interfaces/reduction-and-materialize.md)
-- [Domain validation](./interfaces/domain-validation.md)
-
-# Guides
-
-- [Implement a new store backend](./guides/new-store-backend.md)
-- [Implement a new hub service](./guides/new-hub-implementation.md)
-- [Build a memory-backed HTTP hub server](./guides/memory-hub-server.md)
