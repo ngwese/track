@@ -1,0 +1,17 @@
+[book]
+title = "Track Developer Guide"
+authors = ["Track maintainers"]
+description = "Crate-oriented developer documentation for the Track workspace"
+language = "en"
+src = "src"
+
+[build]
+build-dir = "book"
+
+[output.html]
+git-repository-url = "https://github.com/ngwese/track"
+edit-url-template = "https://github.com/ngwese/track/edit/main/docs/dev/{path}"
+additional-js = ["mermaid.min.js", "mermaid-init.js"]
+
+[preprocessor.mermaid]
+command = "mdbook-mermaid"

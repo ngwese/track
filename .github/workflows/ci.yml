@@ -35,6 +35,30 @@ jobs:
       - name: Lint markdown
         run: npx --yes markdownlint-cli2@0.22.1 "**/*.md"
 
+  dev-docs:
+    name: Developer docs (mdBook)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: 1.96.0
+
+      - name: Install mdBook
+        run: cargo install mdbook --locked --version 0.5.3
+
+      - name: Install mdbook-mermaid
+        run: cargo install mdbook-mermaid --locked --version 0.15.0
+
+      - name: Build developer guide
+        run: |
+          cd docs/dev
+          mdbook-mermaid install .
+          mdbook build
+
   rust:
     name: Rust
     runs-on: ubuntu-latest
