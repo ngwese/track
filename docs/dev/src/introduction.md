@@ -30,7 +30,7 @@ Link upward for *why*; use this book for *where* and *how* in the Rust workspace
 ## Build locally
 
 ```bash
-cargo install mdbook mdbook-mermaid   # mdbook 0.5+
+cargo install mdbook mdbook-mermaid   # mdbook 0.5+, mdbook-mermaid 0.17+
 cd docs/dev
 mdbook-mermaid install .
 mdbook build
