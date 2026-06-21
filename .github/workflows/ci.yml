@@ -184,6 +184,9 @@ jobs:
   tlc-hub-sync:
     name: TLC hub sync
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
     steps:
       - name: Checkout
         uses: actions/checkout@v6
