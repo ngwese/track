@@ -69,3 +69,94 @@ fn map_property(prop: &crate::types_document::PropertyDefinition) -> Option<Fiel
         default: None,
     })
 }
+
+#[cfg(test)]
+mod tests {
+    use std::collections::HashMap;
+
+    use track_entity::FieldKind;
+
+    use crate::schema_bundle::SchemaBundle;
+    use crate::types_document::{PropertyDefinition, TypeDefinition};
+
+    use super::*;
+
+    fn bundle_with_properties(props: HashMap<String, PropertyDefinition>) -> SchemaBundle {
+        let mut bundle = SchemaBundle::default();
+        bundle.types.types.insert(
+            "Task".into(),
+            TypeDefinition {
+                description: None,
+                workflow: "default".into(),
+                is_container: false,
+                properties: props,
+            },
+        );
+        bundle
+    }
+
+    #[test]
+    fn maps_supported_property_kinds() {
+        let mut props = HashMap::new();
+        for (name, kind) in [
+            ("text_field", "text"),
+            ("num_field", "number"),
+            ("dec_field", "decimal"),
+            ("date_field", "date"),
+            ("dt_field", "datetime"),
+            ("opt_field", "option"),
+            ("sel_field", "select"),
+            ("bool_field", "boolean"),
+            ("url_field", "url"),
+            ("email_field", "email"),
+            ("member_field", "member"),
+            ("ref_field", "entity_ref"),
+        ] {
+            props.insert(
+                name.into(),
+                PropertyDefinition {
+                    kind: kind.into(),
+                    r#enum: if kind == "option" {
+                        Some("severity".into())
+                    } else {
+                        None
+                    },
+                    required: kind == "text",
+                },
+            );
+        }
+        let schema = compile_canonical_schema(&bundle_with_properties(props));
+        let fields = &schema.item_types["Task"].fields;
+        assert_eq!(fields["text_field"].kind, FieldKind::Text);
+        assert!(fields["text_field"].required);
+        assert_eq!(fields["num_field"].kind, FieldKind::Number);
+        assert_eq!(fields["dec_field"].kind, FieldKind::Decimal);
+        assert_eq!(fields["date_field"].kind, FieldKind::Date);
+        assert_eq!(fields["dt_field"].kind, FieldKind::DateTime);
+        assert_eq!(fields["opt_field"].kind, FieldKind::Enum);
+        assert_eq!(fields["opt_field"].enum_name.as_deref(), Some("severity"));
+        assert_eq!(fields["sel_field"].kind, FieldKind::Enum);
+        assert_eq!(fields["bool_field"].kind, FieldKind::Boolean);
+        assert_eq!(fields["url_field"].kind, FieldKind::Url);
+        assert_eq!(fields["email_field"].kind, FieldKind::Email);
+        assert_eq!(fields["member_field"].kind, FieldKind::Member);
+        assert_eq!(fields["ref_field"].kind, FieldKind::EntityRef);
+    }
+
+    #[test]
+    fn skips_unknown_property_kind() {
+        let mut props = HashMap::new();
+        props.insert(
+            "bad".into(),
+            PropertyDefinition {
+                kind: "formula".into(),
+                r#enum: None,
+                required: false,
+            },
+        );
+        let schema = compile_canonical_schema(&bundle_with_properties(props));
+        let fields = &schema.item_types["Task"].fields;
+        assert!(!fields.contains_key("bad"));
+        assert!(fields.contains_key("title"));
+    }
+}

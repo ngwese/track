@@ -233,7 +233,7 @@ mod tests {
     use crate::state_group::StateGroup;
     use crate::states_document::StateDefinition;
     use crate::types_document::TypeDefinition;
-    use crate::workflows_document::WorkflowDefinition;
+    use crate::workflows_document::{TransitionTarget, WorkflowDefinition};
 
     fn manifest() -> ManifestContext {
         ManifestContext {
@@ -243,16 +243,7 @@ mod tests {
         }
     }
 
-    #[test]
-    fn default_template_is_valid() {
-        let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../templates/default");
-        let bundle = SchemaBundle::load(&root).unwrap();
-        let report = validate_schema_bundle(&bundle, &manifest());
-        assert!(report.is_valid(), "{:?}", report.issues);
-    }
-
-    #[test]
-    fn rejects_unknown_workflow_state() {
+    fn minimal_valid_bundle() -> SchemaBundle {
         let mut bundle = SchemaBundle::default();
         bundle.states.states.insert(
             "Todo".into(),
@@ -268,7 +259,7 @@ mod tests {
             WorkflowDefinition {
                 description: None,
                 issue_types: vec!["Task".into()],
-                states: vec!["Missing".into()],
+                states: vec!["Todo".into()],
                 transitions: HashMap::new(),
             },
         );
@@ -281,7 +272,183 @@ mod tests {
                 properties: HashMap::new(),
             },
         );
+        bundle
+    }
+
+    #[test]
+    fn default_template_is_valid() {
+        let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../templates/default");
+        let bundle = SchemaBundle::load(&root).unwrap();
+        let report = validate_schema_bundle(&bundle, &manifest());
+        assert!(report.is_valid(), "{:?}", report.issues);
+    }
+
+    #[test]
+    fn rejects_unknown_workflow_state() {
+        let mut bundle = minimal_valid_bundle();
+        bundle
+            .workflows
+            .workflows
+            .get_mut("default")
+            .unwrap()
+            .states = vec!["Missing".into()];
         let report = validate_schema_bundle(&bundle, &manifest());
         assert!(!report.is_valid());
+        assert!(
+            report
+                .issues
+                .iter()
+                .any(|i| i.code == ValidationCode::UnknownReference)
+        );
+    }
+
+    #[test]
+    fn rejects_empty_states() {
+        let mut bundle = minimal_valid_bundle();
+        bundle.states.states.clear();
+        let report = validate_schema_bundle(&bundle, &manifest());
+        assert!(!report.is_valid());
+        assert!(
+            report
+                .issues
+                .iter()
+                .any(|i| i.code == ValidationCode::MissingField)
+        );
+    }
+
+    #[test]
+    fn rejects_wrong_default_state_count() {
+        let mut bundle = minimal_valid_bundle();
+        bundle.states.states.insert(
+            "Done".into(),
+            StateDefinition {
+                group: StateGroup::Completed,
+                color: "#111111".into(),
+                is_default: true,
+                allow_issue_creation: false,
+            },
+        );
+        let report = validate_schema_bundle(&bundle, &manifest());
+        assert!(!report.is_valid());
+        assert!(
+            report
+                .issues
+                .iter()
+                .any(|i| i.code == ValidationCode::Invariant)
+        );
+    }
+
+    #[test]
+    fn rejects_invalid_state_color() {
+        let mut bundle = minimal_valid_bundle();
+        bundle.states.states.get_mut("Todo").unwrap().color = "red".into();
+        let report = validate_schema_bundle(&bundle, &manifest());
+        assert!(!report.is_valid());
+        assert!(
+            report
+                .issues
+                .iter()
+                .any(|i| i.code == ValidationCode::InvalidValue)
+        );
+    }
+
+    #[test]
+    fn rejects_duplicate_and_empty_labels() {
+        use crate::labels_document::LabelDefinition;
+
+        let mut bundle = minimal_valid_bundle();
+        bundle.labels.labels = vec![
+            LabelDefinition {
+                name: "".into(),
+                color: "#000000".into(),
+            },
+            LabelDefinition {
+                name: "dup".into(),
+                color: "#111111".into(),
+            },
+            LabelDefinition {
+                name: "dup".into(),
+                color: "#222222".into(),
+            },
+        ];
+        let report = validate_schema_bundle(&bundle, &manifest());
+        assert!(!report.is_valid());
+        assert!(
+            report
+                .issues
+                .iter()
+                .any(|i| i.code == ValidationCode::MissingField)
+        );
+        assert!(
+            report
+                .issues
+                .iter()
+                .any(|i| i.code == ValidationCode::Duplicate)
+        );
+    }
+
+    #[test]
+    fn rejects_unknown_workflow_issue_type() {
+        let mut bundle = minimal_valid_bundle();
+        bundle
+            .workflows
+            .workflows
+            .get_mut("default")
+            .unwrap()
+            .issue_types = vec!["Story".into()];
+        let report = validate_schema_bundle(&bundle, &manifest());
+        assert!(!report.is_valid());
+    }
+
+    #[test]
+    fn rejects_invalid_workflow_transitions() {
+        let mut bundle = minimal_valid_bundle();
+        bundle
+            .workflows
+            .workflows
+            .get_mut("default")
+            .unwrap()
+            .transitions = HashMap::from([
+            ("Ghost".into(), vec![TransitionTarget { to: "Todo".into() }]),
+            (
+                "Todo".into(),
+                vec![TransitionTarget {
+                    to: "Nowhere".into(),
+                }],
+            ),
+        ]);
+        let report = validate_schema_bundle(&bundle, &manifest());
+        assert!(!report.is_valid());
+        assert_eq!(
+            report
+                .issues
+                .iter()
+                .filter(|i| i.file == "schema/workflows.yaml")
+                .count(),
+            2
+        );
+    }
+
+    #[test]
+    fn rejects_unknown_type_workflow() {
+        let mut bundle = minimal_valid_bundle();
+        bundle.types.types.get_mut("Task").unwrap().workflow = "missing".into();
+        let report = validate_schema_bundle(&bundle, &manifest());
+        assert!(!report.is_valid());
+    }
+
+    #[test]
+    fn rejects_invalid_manifest_defaults() {
+        let bundle = minimal_valid_bundle();
+        let report = validate_schema_bundle(
+            &bundle,
+            &ManifestContext {
+                key: String::new(),
+                default_type: "Missing".into(),
+                default_workflow: "missing".into(),
+            },
+        );
+        assert!(!report.is_valid());
+        assert_eq!(report.issues.len(), 3);
     }
 }
