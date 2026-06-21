@@ -10,6 +10,11 @@ members = [
     "crates/track-store-sqlite",
     "crates/track-store-conformance-testing",
     "crates/track-materialize-yaml",
+    "crates/track-locations",
+    "crates/track-schema-yaml",
+    "crates/track-project",
+    "crates/track-node",
+    "crates/track-cli",
     "crates/track-hub-protocol",
     "crates/track-hub",
     "crates/track-hub-conformance-testing",
@@ -34,6 +39,11 @@ track-store-memory = { path = "crates/track-store-memory" }
 track-store-sqlite = { path = "crates/track-store-sqlite" }
 track-store-conformance-testing = { path = "crates/track-store-conformance-testing" }
 track-materialize-yaml = { path = "crates/track-materialize-yaml" }
+track-locations = { path = "crates/track-locations" }
+track-schema-yaml = { path = "crates/track-schema-yaml" }
+track-project = { path = "crates/track-project" }
+track-node = { path = "crates/track-node" }
+track-cli = { path = "crates/track-cli" }
 track-hub-protocol = { path = "crates/track-hub-protocol" }
 track-hub = { path = "crates/track-hub" }
 track-hub-http = { path = "crates/track-hub-http" }
@@ -67,3 +77,11 @@ futures = "0.3"
 url = "2"
 urlencoding = "2"
 base64 = "0.22"
+dirs = "6"
+anyhow = "1"
+clap = { version = "4", features = ["derive"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tempfile = "3"
+assert_cmd = "2"
+predicates = "3"

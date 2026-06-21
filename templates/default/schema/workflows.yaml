@@ -1,0 +1,11 @@
+workflows:
+  default:
+    description: Standard task flow
+    issue_types:
+      - Task
+    states:
+      - Backlog
+      - Todo
+      - In Progress
+      - Done
+      - Cancelled

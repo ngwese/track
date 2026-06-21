@@ -1,0 +1,13 @@
+[book]
+title = "Track User Guide"
+authors = ["Track maintainers"]
+description = "Concepts, workflows, and schema reference for Track users"
+language = "en"
+src = "src"
+
+[build]
+build-dir = "book"
+
+[output.html]
+git-repository-url = "https://github.com/ngwese/track"
+edit-url-template = "https://github.com/ngwese/track/edit/main/docs/user/{path}"

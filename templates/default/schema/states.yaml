@@ -1,0 +1,19 @@
+states:
+  Backlog:
+    group: backlog
+    color: "#6b7280"
+    allow_issue_creation: true
+  Todo:
+    group: unstarted
+    color: "#3b82f6"
+    is_default: true
+    allow_issue_creation: true
+  In Progress:
+    group: started
+    color: "#f59e0b"
+  Done:
+    group: completed
+    color: "#22c55e"
+  Cancelled:
+    group: cancelled
+    color: "#ef4444"

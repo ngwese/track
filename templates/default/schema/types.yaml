@@ -1,0 +1,5 @@
+types:
+  Task:
+    description: A general task
+    workflow: default
+    properties: {}

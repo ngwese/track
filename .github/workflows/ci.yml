@@ -59,6 +59,25 @@ jobs:
           mdbook-mermaid install .
           mdbook build
 
+  user-docs:
+    name: User docs (mdBook)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: 1.96.0
+
+      - name: Install mdBook
+        run: cargo install mdbook --locked --version 0.5.3
+
+      - name: Build user guide
+        working-directory: docs/user
+        run: mdbook build
+
   rust:
     name: Rust
     runs-on: ubuntu-latest
@@ -184,6 +203,9 @@ jobs:
   tlc-hub-sync:
     name: TLC hub sync
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
     steps:
       - name: Checkout
         uses: actions/checkout@v6
