@@ -27,10 +27,11 @@ fn main() -> ExitCode {
 
 fn run() -> anyhow::Result<ExitCode> {
     let cli = Cli::parse();
-    tracing_init::init_tracing(cli.verbose, cli.debug, cli.trace);
+    tracing_init::init_tracing(cli.global.verbose, cli.global.debug, cli.global.trace);
 
     let cwd = std::env::current_dir().context("read current directory")?;
-    let log_level = tracing_init::resolved_level(cli.verbose, cli.debug, cli.trace);
+    let log_level =
+        tracing_init::resolved_level(cli.global.verbose, cli.global.debug, cli.global.trace);
 
     let bootstrap_span = info_span!(
         "track.bootstrap",
@@ -53,13 +54,13 @@ fn run() -> anyhow::Result<ExitCode> {
         Command::Schema { .. } | Command::Push(_) => CommandKind::RequiresProject,
     };
 
-    if let Some(project) = &cli.project {
+    if let Some(project) = &cli.global.project {
         bootstrap_span.record("explicit_project", project.display().to_string());
     }
 
     let outcome = bootstrap(BootstrapRequest {
         cwd: cwd.clone(),
-        explicit_project: cli.project.clone(),
+        explicit_project: cli.global.project.clone(),
         command: command_kind,
         locations_override: track_locations::LocationsOverride::default(),
     })
@@ -67,7 +68,12 @@ fn run() -> anyhow::Result<ExitCode> {
 
     tracing::info!(
         cwd = %cwd.display(),
-        explicit_project = cli.project.as_ref().map(|p| p.display().to_string()).unwrap_or_default(),
+        explicit_project = cli
+            .global
+            .project
+            .as_ref()
+            .map(|p| p.display().to_string())
+            .unwrap_or_default(),
         log_level = %log_level,
         node_uuid = %outcome.user_identity.node_uuid,
         default_actor = %outcome.user_identity.default_actor,
@@ -92,7 +98,7 @@ fn run() -> anyhow::Result<ExitCode> {
         outcome.locations.user.config.display().to_string(),
     );
 
-    let json = cli.json;
+    let json = cli.global.json;
     match cli.command {
         Command::Init(args) => run_init(json, outcome, args),
         Command::Schema { command } => match command {
