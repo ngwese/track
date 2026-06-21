@@ -42,6 +42,7 @@ Track provides:
 | --- | --- |
 | [docs/PRD.md](docs/PRD.md) | Vision, goals, personas, product principles |
 | [docs/SRD.md](docs/SRD.md) | Domain model, file formats, CLI, hub API, MVP |
+| [docs/user/](docs/user/) | User guide (mdBook): concepts, schema authoring, reference |
 | [docs/dev/](docs/dev/) | Developer guide (mdBook): crates, traits, implementation guides |
 | [docs/adr/](docs/adr/) | Architecture decision records |
 | [infra/README.md](infra/README.md) | Deploy a sync hub workspace |
