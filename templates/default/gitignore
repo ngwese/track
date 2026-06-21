@@ -1,0 +1,7 @@
+# Lazy work: omit bulk materialized entities from git by default
+/work/issues/
+/work/effort/
+/work/components/
+
+# Always track schema
+!schema/

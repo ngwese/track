@@ -1,0 +1,5 @@
+efforts: false
+components: false
+hierarchy: false
+relation_enforcement: false
+workflows: true

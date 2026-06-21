@@ -1,0 +1,25 @@
+[package]
+name = "track-node"
+version = "0.1.0"
+description = "Track node command logic (init, validate, push planning)"
+publish = false
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+sha2 = { workspace = true }
+time = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+track-id = { workspace = true }
+track-locations = { workspace = true }
+track-project = { workspace = true }
+track-replication = { workspace = true }
+track-schema-yaml = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }
+track-locations = { workspace = true }
