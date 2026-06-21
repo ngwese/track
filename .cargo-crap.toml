@@ -6,8 +6,11 @@ missing = "pessimistic"
 epsilon = 0.01
 jobs = 4
 
-# Phase 2: fail CI when CRAP regresses vs crap_baseline.json (see integration plan).
+# Phase 2: fail when CRAP regresses vs crap_baseline.json (see integration plan).
 fail-regression = true
+
+# Phase 4: fail when any function exceeds threshold (catches new risky functions).
+fail-above = true
 
 # Production crates only — test harness crates are not deployable logic.
 # `allow` path globs hide functions (cargo-crap 0.2.2 `--exclude` is unreliable

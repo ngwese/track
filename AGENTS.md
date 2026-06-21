@@ -56,13 +56,19 @@ file must pass all of the following checks. Run from the repo root:
    cargo test --workspace
    ```
 
-5. **Change risk** — no CRAP regression vs the committed baseline (policy in
-   [`.cargo-crap.toml`](.cargo-crap.toml); see
+5. **Change risk** — no CRAP regression vs the committed baseline and no function
+   above the threshold (policy in [`.cargo-crap.toml`](.cargo-crap.toml); see
    [docs/plans/cargo-crap-integration-plan.md](docs/plans/cargo-crap-integration-plan.md)):
 
    ```bash
    cargo llvm-cov --workspace --lcov --output-path lcov.info
    cargo crap --workspace --lcov lcov.info --baseline crap_baseline.json
+   ```
+
+   Or use the helper script (same gates; generates coverage with `-c`):
+
+   ```bash
+   ./scripts/crap-check.sh --update-coverage
    ```
 
    If scores improve repo-wide, refresh the baseline:

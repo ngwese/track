@@ -15,7 +15,7 @@ at the repo root; CI installs pinned tools and runs a fixed command sequence.
 | --- | --- |
 | **`.cargo-crap.toml`** | Threshold, exclusions, gate mode, epsilon |
 | **`crap_baseline.json`** | Committed snapshot for regression detection |
-| **`change-risk` CI job** | Coverage + CRAP report on PRs; fails on baseline regression (Phase 2) |
+| **`change-risk` CI job** | Coverage + CRAP report on PRs; fails on regression or threshold breach |
 | **`AGENTS.md` gate** | Agent completion checklist (Phase 3) |
 
 ```text
@@ -27,7 +27,8 @@ CRAP(m) = comp(m)² × (1 − cov(m)/100)³ + comp(m)
 1. **Agent completion gate** — extend `AGENTS.md` Rust checklist with coverage
    + CRAP.
 2. **PR feedback** — sticky PR comment with regressions and new risky functions.
-3. **PR enforcement** — CI fails when scores regress vs `crap_baseline.json`.
+3. **PR enforcement** — CI fails when scores regress vs `crap_baseline.json` or
+   any function exceeds `threshold`.
 4. **Config-driven policy** — no thresholds or exclusions hard-coded in CI YAML.
 
 ## Non-goals (initial rollout)
@@ -42,7 +43,7 @@ CRAP(m) = comp(m)² × (1 − cov(m)/100)³ + comp(m)
 | Mode | When | Track fit |
 | --- | --- | --- |
 | `--fail-regression` + baseline | Primary gate (Phase 2+) | Mature multi-crate workspace |
-| `--fail-above` | Optional tighten (Phase 4) | After worst legacy debt addressed |
+| `--fail-above` | Active (Phase 4) | Catches new functions above threshold |
 | Report-only | Bootstrap (Phase 1) | Calibrate CI; no merge blocks |
 
 ## Artifacts
@@ -86,8 +87,8 @@ cargo llvm-cov --workspace --lcov --output-path lcov.info
 cargo crap --workspace --lcov lcov.info --baseline crap_baseline.json
 ```
 
-With `fail-regression = true` in `.cargo-crap.toml`, the second command exits
-non-zero on regressions.
+With `fail-regression = true` and `fail-above = true` in `.cargo-crap.toml`, the
+second command exits non-zero on regressions or any function above `threshold`.
 
 ### Remediation
 
@@ -143,7 +144,7 @@ Parallel job in `.github/workflows/ci.yml` (llvm-cov rebuilds the workspace).
 + Policy from `.cargo-crap.toml` only.
 + Phase 1: generate report + PR comment.
 + Phase 2: `fail-regression = true` in `.cargo-crap.toml`; CI **Check CRAP
-+ regression** step fails the job on baseline drift.
++ gates** step fails on baseline drift or functions above threshold.
 
 Path filter: skip when only docs/spec/infra change (see workflow).
 
@@ -159,7 +160,7 @@ Path filter: skip when only docs/spec/infra change (see workflow).
 | **1 — Baseline** | Done | `crap_baseline.json`, `.gitignore`, report-only CI | Comment only | — |
 | **2 — Enforce** | Done | `fail-regression = true`, CI regression step | Fails on regression | — |
 | **3 — Complete** | Done | `AGENTS.md` step 5 | Unchanged | Required |
-| **4 — Tighten** | Optional | `fail-above = true` | Absolute threshold | Same |
+| **4 — Tighten** | Done | `fail-above = true`, `scripts/crap-check.sh` | Absolute threshold | Same |
 
 ## Tool versions
 
@@ -175,6 +176,7 @@ Path filter: skip when only docs/spec/infra change (see workflow).
 + [x] `crap_baseline.json` committed
 + [x] `change-risk` CI job on PRs (report-only)
 + [x] PRs fail on CRAP regression (Phase 2)
++ [x] PRs fail when new/changed functions exceed threshold (Phase 4)
 + [x] `AGENTS.md` lists CRAP as Rust step 5 (Phase 3)
 
 ## References

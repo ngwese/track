@@ -158,7 +158,7 @@ jobs:
         if: steps.changes.outputs.rust == 'true'
         run: cargo crap --workspace --lcov lcov.info --summary
 
-      - name: Check CRAP regression
+      - name: Check CRAP gates
         if: steps.changes.outputs.rust == 'true'
         run: cargo crap --workspace --lcov lcov.info --baseline crap_baseline.json
 
