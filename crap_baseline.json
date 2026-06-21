@@ -120,6 +120,15 @@
       "crate": "track-materialize-yaml"
     },
     {
+      "file": "/Users/greg/proj/track/crates/track-project/src/init.rs",
+      "function": "init_project",
+      "line": 49,
+      "cyclomatic": 15.0,
+      "coverage": 95.45454545454545,
+      "crap": 15.021130728775356,
+      "crate": "track-project"
+    },
+    {
       "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_entity_store.rs",
       "function": "TrackSqliteStore::get_relation",
       "line": 363,
@@ -201,6 +210,15 @@
       "crate": "track-store-sqlite"
     },
     {
+      "file": "/Users/greg/proj/track/crates/track-schema-yaml/src/compile.rs",
+      "function": "map_property",
+      "line": 50,
+      "cyclomatic": 13.0,
+      "coverage": 100.0,
+      "crap": 13.0,
+      "crate": "track-schema-yaml"
+    },
+    {
       "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_quarantine_store.rs",
       "function": "TrackSqliteStore::list",
       "line": 56,
@@ -226,6 +244,15 @@
       "coverage": 100.0,
       "crap": 12.0,
       "crate": "track-materialize-yaml"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-cli/src/main.rs",
+      "function": "run",
+      "line": 28,
+      "cyclomatic": 11.0,
+      "coverage": 81.48148148148148,
+      "crap": 11.768429609307525,
+      "crate": "track-cli"
     },
     {
       "file": "/Users/greg/proj/track/crates/track-entity/src/validation/default_validator.rs",
@@ -309,6 +336,15 @@
       "crate": "track-id"
     },
     {
+      "file": "/Users/greg/proj/track/crates/track-schema-yaml/src/validate.rs",
+      "function": "validate_workflows",
+      "line": 111,
+      "cyclomatic": 10.0,
+      "coverage": 100.0,
+      "crap": 10.0,
+      "crate": "track-schema-yaml"
+    },
+    {
       "file": "/Users/greg/proj/track/crates/track-materialize-yaml/src/projectors/issue_projector.rs",
       "function": "project_issue_yaml",
       "line": 10,
@@ -316,6 +352,15 @@
       "coverage": 83.87096774193549,
       "crap": 9.339867745292203,
       "crate": "track-materialize-yaml"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-project/src/init.rs",
+      "function": "write_project_tree",
+      "line": 129,
+      "cyclomatic": 9.0,
+      "coverage": 100.0,
+      "crap": 9.0,
+      "crate": "track-project"
     },
     {
       "file": "/Users/greg/proj/track/crates/track-hub-protocol/src/ndjson/line_codec.rs",
@@ -343,6 +388,15 @@
       "coverage": 83.78378378378379,
       "crap": 8.272915720687816,
       "crate": "track-reduce"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-locations/src/locations.rs",
+      "function": "ensure_bucket_dirs",
+      "line": 108,
+      "cyclomatic": 8.0,
+      "coverage": 90.9090909090909,
+      "crap": 8.0480841472577,
+      "crate": "track-locations"
     },
     {
       "file": "/Users/greg/proj/track/crates/track-replication/src/hlc.rs",
@@ -424,6 +478,15 @@
       "coverage": 72.72727272727273,
       "crap": 7.993989481592787,
       "crate": "track-reduce"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-node/src/push_plan.rs",
+      "function": "plan_push",
+      "line": 30,
+      "cyclomatic": 7.0,
+      "coverage": 79.6875,
+      "crap": 7.410663604736328,
+      "crate": "track-node"
     },
     {
       "file": "/Users/greg/proj/track/crates/track-entity/src/validation/conflict_report.rs",
@@ -561,6 +624,24 @@
       "crate": "track-store-sqlite"
     },
     {
+      "file": "/Users/greg/proj/track/crates/track-schema-yaml/src/validate.rs",
+      "function": "validate_states",
+      "line": 50,
+      "cyclomatic": 7.0,
+      "coverage": 100.0,
+      "crap": 7.0,
+      "crate": "track-schema-yaml"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-project/src/template.rs",
+      "function": "load_local_template",
+      "line": 70,
+      "cyclomatic": 7.0,
+      "coverage": 100.0,
+      "crap": 7.0,
+      "crate": "track-project"
+    },
+    {
       "file": "/Users/greg/proj/track/crates/track-sync/src/http_transport.rs",
       "function": "HttpTransport::post_push_body",
       "line": 109,
@@ -579,6 +660,24 @@
       "crate": "track-hub-http"
     },
     {
+      "file": "/Users/greg/proj/track/crates/track-cli/src/output.rs",
+      "function": "print_schema_validate",
+      "line": 20,
+      "cyclomatic": 4.0,
+      "coverage": 46.666666666666664,
+      "crap": 6.427259259259261,
+      "crate": "track-cli"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-project/src/discovery.rs",
+      "function": "discover_project_root",
+      "line": 21,
+      "cyclomatic": 6.0,
+      "coverage": 78.26086956521739,
+      "crap": 6.369852880742993,
+      "crate": "track-project"
+    },
+    {
       "file": "/Users/greg/proj/track/crates/track-reduce/src/relation_reducer.rs",
       "function": "RelationReducer::apply_set_attr",
       "line": 78,
@@ -588,6 +687,15 @@
       "crate": "track-reduce"
     },
     {
+      "file": "/Users/greg/proj/track/crates/track-project/src/init.rs",
+      "function": "reset_project_tree",
+      "line": 115,
+      "cyclomatic": 6.0,
+      "coverage": 83.33333333333334,
+      "crap": 6.166666666666666,
+      "crate": "track-project"
+    },
+    {
       "file": "/Users/greg/proj/track/crates/track-id/src/stream_id.rs",
       "function": "StreamId::format",
       "line": 47,
@@ -595,6 +703,15 @@
       "coverage": 87.5,
       "crap": 6.0703125,
       "crate": "track-id"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-locations/src/locations.rs",
+      "function": "resolve_user_locations",
+      "line": 52,
+      "cyclomatic": 6.0,
+      "coverage": 87.5,
+      "crap": 6.0703125,
+      "crate": "track-locations"
     },
     {
       "file": "/Users/greg/proj/track/crates/track-hub-http/src/http/push_handler.rs",
@@ -613,6 +730,15 @@
       "coverage": 89.47368421052632,
       "crap": 6.041988628079895,
       "crate": "track-store-memory"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-node/src/push.rs",
+      "function": "push",
+      "line": 49,
+      "cyclomatic": 6.0,
+      "coverage": 91.17647058823529,
+      "crap": 6.024730307347853,
+      "crate": "track-node"
     },
     {
       "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_entity_store.rs",
@@ -642,6 +768,24 @@
       "crate": "track-materialize-yaml"
     },
     {
+      "file": "/Users/greg/proj/track/crates/track-locations/src/user_identity.rs",
+      "function": "ensure_user_identity",
+      "line": 40,
+      "cyclomatic": 6.0,
+      "coverage": 100.0,
+      "crap": 6.0,
+      "crate": "track-locations"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-schema-yaml/src/schema_bundle.rs",
+      "function": "SchemaBundle::load",
+      "line": 30,
+      "cyclomatic": 6.0,
+      "coverage": 100.0,
+      "crap": 6.0,
+      "crate": "track-schema-yaml"
+    },
+    {
       "file": "/Users/greg/proj/track/crates/track-sync/src/pull_session.rs",
       "function": "PullSession::run",
       "line": 60,
@@ -658,6 +802,15 @@
       "coverage": 100.0,
       "crap": 6.0,
       "crate": "track-sync"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-node/src/schema_validate.rs",
+      "function": "schema_validate",
+      "line": 36,
+      "cyclomatic": 5.0,
+      "coverage": 66.66666666666666,
+      "crap": 5.925925925925927,
+      "crate": "track-node"
     },
     {
       "file": "/Users/greg/proj/track/crates/track-reduce/src/schema_reducer.rs",
@@ -685,6 +838,15 @@
       "coverage": 93.33333333333333,
       "crap": 5.007407407407407,
       "crate": "track-store-sqlite"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-node/src/bootstrap.rs",
+      "function": "resolve_project",
+      "line": 101,
+      "cyclomatic": 5.0,
+      "coverage": 93.33333333333333,
+      "crap": 5.007407407407407,
+      "crate": "track-node"
     },
     {
       "file": "/Users/greg/proj/track/crates/track-store-sqlite/src/sqlite_schema_store.rs",
@@ -750,6 +912,33 @@
       "crate": "track-store-sqlite"
     },
     {
+      "file": "/Users/greg/proj/track/crates/track-locations/src/user_identity.rs",
+      "function": "load_or_create_node_uuid",
+      "line": 57,
+      "cyclomatic": 5.0,
+      "coverage": 100.0,
+      "crap": 5.0,
+      "crate": "track-locations"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-locations/src/user_identity.rs",
+      "function": "load_or_create_default_actor",
+      "line": 71,
+      "cyclomatic": 5.0,
+      "coverage": 100.0,
+      "crap": 5.0,
+      "crate": "track-locations"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-node/src/bootstrap.rs",
+      "function": "bootstrap",
+      "line": 83,
+      "cyclomatic": 5.0,
+      "coverage": 100.0,
+      "crap": 5.0,
+      "crate": "track-node"
+    },
+    {
       "file": "/Users/greg/proj/track/crates/track-hub/src/compaction/compaction_engine.rs",
       "function": "compute_watermark",
       "line": 15,
@@ -786,6 +975,15 @@
       "crate": "track-hub-http"
     },
     {
+      "file": "/Users/greg/proj/track/crates/track-cli/src/output.rs",
+      "function": "print_push",
+      "line": 39,
+      "cyclomatic": 3.0,
+      "coverage": 40.0,
+      "crap": 4.944,
+      "crate": "track-cli"
+    },
+    {
       "file": "/Users/greg/proj/track/crates/track-sync/src/http_transport.rs",
       "function": "HttpTransport::ensure_response_version",
       "line": 87,
@@ -793,6 +991,33 @@
       "coverage": 64.70588235294117,
       "crap": 4.703439853450031,
       "crate": "track-sync"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-cli/src/tracing_init.rs",
+      "function": "resolved_level",
+      "line": 17,
+      "cyclomatic": 4.0,
+      "coverage": 66.66666666666666,
+      "crap": 4.5925925925925934,
+      "crate": "track-cli"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-project/src/init.rs",
+      "function": "validate_key",
+      "line": 96,
+      "cyclomatic": 4.0,
+      "coverage": 76.47058823529412,
+      "crap": 4.208426623244454,
+      "crate": "track-project"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-locations/src/locations.rs",
+      "function": "resolve_override",
+      "line": 87,
+      "cyclomatic": 4.0,
+      "coverage": 78.94736842105263,
+      "crap": 4.149292899839627,
+      "crate": "track-locations"
     },
     {
       "file": "/Users/greg/proj/track/crates/track-reduce/src/comment_reducer.rs",
@@ -820,6 +1045,15 @@
       "coverage": 83.33333333333334,
       "crap": 4.0740740740740735,
       "crate": "track-store-sqlite"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-node/src/bootstrap.rs",
+      "function": "DiscoveryMethod::from",
+      "line": 73,
+      "cyclomatic": 4.0,
+      "coverage": 83.33333333333334,
+      "crap": 4.0740740740740735,
+      "crate": "track-node"
     },
     {
       "file": "/Users/greg/proj/track/crates/track-reduce/src/semantic_validation.rs",
@@ -858,6 +1092,24 @@
       "crate": "track-store-sqlite"
     },
     {
+      "file": "/Users/greg/proj/track/crates/track-node/src/push_plan.rs",
+      "function": "read_pushed_schema_hash",
+      "line": 119,
+      "cyclomatic": 4.0,
+      "coverage": 91.66666666666666,
+      "crap": 4.0092592592592595,
+      "crate": "track-node"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-project/src/init.rs",
+      "function": "write_initial_state",
+      "line": 145,
+      "cyclomatic": 4.0,
+      "coverage": 92.85714285714286,
+      "crap": 4.005830903790088,
+      "crate": "track-project"
+    },
+    {
       "file": "/Users/greg/proj/track/crates/track-reduce/src/execution_reducer.rs",
       "function": "ExecutionReducer::reduce",
       "line": 13,
@@ -865,6 +1117,24 @@
       "coverage": 94.73684210526315,
       "crap": 4.002332701559994,
       "crate": "track-reduce"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-project/src/discovery.rs",
+      "function": "resolve_init_target",
+      "line": 50,
+      "cyclomatic": 4.0,
+      "coverage": 94.73684210526315,
+      "crap": 4.002332701559994,
+      "crate": "track-project"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-cli/src/main.rs",
+      "function": "run_push",
+      "line": 154,
+      "cyclomatic": 4.0,
+      "coverage": 95.0,
+      "crap": 4.002,
+      "crate": "track-cli"
     },
     {
       "file": "/Users/greg/proj/track/crates/track-entity/src/work/comment.rs",
@@ -948,6 +1218,51 @@
       "crate": "track-store-sqlite"
     },
     {
+      "file": "/Users/greg/proj/track/crates/track-locations/src/user_identity.rs",
+      "function": "write_json_atomic",
+      "line": 97,
+      "cyclomatic": 4.0,
+      "coverage": 100.0,
+      "crap": 4.0,
+      "crate": "track-locations"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-schema-yaml/src/compile.rs",
+      "function": "compile_canonical_schema",
+      "line": 12,
+      "cyclomatic": 4.0,
+      "coverage": 100.0,
+      "crap": 4.0,
+      "crate": "track-schema-yaml"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-schema-yaml/src/validate.rs",
+      "function": "validate_labels",
+      "line": 87,
+      "cyclomatic": 4.0,
+      "coverage": 100.0,
+      "crap": 4.0,
+      "crate": "track-schema-yaml"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-schema-yaml/src/validate.rs",
+      "function": "validate_manifest_defaults",
+      "line": 174,
+      "cyclomatic": 4.0,
+      "coverage": 100.0,
+      "crap": 4.0,
+      "crate": "track-schema-yaml"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-project/src/template.rs",
+      "function": "load_template",
+      "line": 28,
+      "cyclomatic": 4.0,
+      "coverage": 100.0,
+      "crap": 4.0,
+      "crate": "track-project"
+    },
+    {
       "file": "/Users/greg/proj/track/crates/track-hub/src/pull_service.rs",
       "function": "next_cursors",
       "line": 35,
@@ -1018,6 +1333,15 @@
       "coverage": 91.66666666666666,
       "crap": 3.0052083333333335,
       "crate": "track-store-sqlite"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-cli/src/main.rs",
+      "function": "run_schema_validate",
+      "line": 138,
+      "cyclomatic": 3.0,
+      "coverage": 92.3076923076923,
+      "crap": 3.0040964952207556,
+      "crate": "track-cli"
     },
     {
       "file": "/Users/greg/proj/track/crates/track-reduce/src/reduction_engine.rs",
@@ -1227,6 +1551,42 @@
       "crate": "track-store-sqlite"
     },
     {
+      "file": "/Users/greg/proj/track/crates/track-schema-yaml/src/validate.rs",
+      "function": "validate_types",
+      "line": 160,
+      "cyclomatic": 3.0,
+      "coverage": 100.0,
+      "crap": 3.0,
+      "crate": "track-schema-yaml"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-node/src/push_plan.rs",
+      "function": "hash_schema_dir",
+      "line": 101,
+      "cyclomatic": 3.0,
+      "coverage": 100.0,
+      "crap": 3.0,
+      "crate": "track-node"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-node/src/init.rs",
+      "function": "init",
+      "line": 39,
+      "cyclomatic": 3.0,
+      "coverage": 100.0,
+      "crap": 3.0,
+      "crate": "track-node"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-cli/src/main.rs",
+      "function": "main",
+      "line": 18,
+      "cyclomatic": 3.0,
+      "coverage": 100.0,
+      "crap": 3.0,
+      "crate": "track-cli"
+    },
+    {
       "file": "/Users/greg/proj/track/crates/track-hub/src/auth.rs",
       "function": "ActorAllowlistAuthorizer::authorize_push",
       "line": 85,
@@ -1299,6 +1659,33 @@
       "crate": "track-hub-http"
     },
     {
+      "file": "/Users/greg/proj/track/crates/track-schema-yaml/src/schema_bundle.rs",
+      "function": "load_file",
+      "line": 42,
+      "cyclomatic": 2.0,
+      "coverage": 40.0,
+      "crap": 2.864,
+      "crate": "track-schema-yaml"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-project/src/manifest.rs",
+      "function": "ProjectManifest::load",
+      "line": 65,
+      "cyclomatic": 2.0,
+      "coverage": 62.5,
+      "crap": 2.2109375,
+      "crate": "track-project"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-cli/src/output.rs",
+      "function": "print_init",
+      "line": 6,
+      "cyclomatic": 2.0,
+      "coverage": 70.0,
+      "crap": 2.108,
+      "crate": "track-cli"
+    },
+    {
       "file": "/Users/greg/proj/track/crates/track-hub-http/src/http/protocol_version.rs",
       "function": "ensure_supported_request_version",
       "line": 8,
@@ -1306,6 +1693,15 @@
       "coverage": 72.72727272727273,
       "crap": 2.0811419984973702,
       "crate": "track-hub-http"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-project/src/discovery.rs",
+      "function": "ensure_manifest",
+      "line": 72,
+      "cyclomatic": 2.0,
+      "coverage": 80.0,
+      "crap": 2.032,
+      "crate": "track-project"
     },
     {
       "file": "/Users/greg/proj/track/crates/track-hub/src/in_memory/in_memory_hub_log.rs",
@@ -2127,6 +2523,24 @@
       "crate": "track-store-sqlite"
     },
     {
+      "file": "/Users/greg/proj/track/crates/track-cli/tests/cli_smoke.rs",
+      "function": "track_cmd",
+      "line": 9,
+      "cyclomatic": 1.0,
+      "coverage": null,
+      "crap": 2.0,
+      "crate": "track-cli"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-cli/src/main.rs",
+      "function": "run_init",
+      "line": 111,
+      "cyclomatic": 2.0,
+      "coverage": 100.0,
+      "crap": 2.0,
+      "crate": "track-cli"
+    },
+    {
       "file": "/Users/greg/proj/track/crates/track-hub/src/pull_service.rs",
       "function": "pull_page",
       "line": 10,
@@ -2296,6 +2710,15 @@
       "coverage": 75.0,
       "crap": 1.015625,
       "crate": "track-replication"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-locations/src/user_identity.rs",
+      "function": "default_actor_from_os",
+      "line": 88,
+      "cyclomatic": 1.0,
+      "coverage": 75.0,
+      "crap": 1.015625,
+      "crate": "track-locations"
     },
     {
       "file": "/Users/greg/proj/track/crates/track-sync/src/error.rs",
@@ -4402,6 +4825,177 @@
       "coverage": 100.0,
       "crap": 1.0,
       "crate": "track-materialize-yaml"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-locations/src/platform_paths.rs",
+      "function": "user_config_base",
+      "line": 8,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-locations"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-locations/src/platform_paths.rs",
+      "function": "user_state_base",
+      "line": 15,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-locations"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-locations/src/platform_paths.rs",
+      "function": "user_state_base_from",
+      "line": 19,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-locations"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-locations/src/platform_paths.rs",
+      "function": "user_cache_base",
+      "line": 26,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-locations"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-locations/src/locations.rs",
+      "function": "resolve_project_locations",
+      "line": 78,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-locations"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-schema-yaml/src/states_document.rs",
+      "function": "default_true",
+      "line": 24,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-schema-yaml"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-schema-yaml/src/validate.rs",
+      "function": "SchemaValidationReport::is_valid",
+      "line": 31,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-schema-yaml"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-schema-yaml/src/validate.rs",
+      "function": "validate_schema_bundle",
+      "line": 37,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-schema-yaml"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-schema-yaml/src/validate.rs",
+      "function": "push",
+      "line": 212,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-schema-yaml"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-project/src/discovery.rs",
+      "function": "looks_like_repo_root",
+      "line": 80,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-project"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-project/src/manifest.rs",
+      "function": "default_timezone",
+      "line": 49,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-project"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-project/src/manifest.rs",
+      "function": "ProjectManifest::validation_context",
+      "line": 75,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-project"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-project/src/template.rs",
+      "function": "render_builtin",
+      "line": 46,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-project"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-node/src/push_plan.rs",
+      "function": "resolve_workspace_uuid",
+      "line": 95,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-node"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-node/src/lib.rs",
+      "function": "bootstrap",
+      "line": 20,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-node"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-node/src/lib.rs",
+      "function": "init",
+      "line": 25,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-node"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-node/src/lib.rs",
+      "function": "schema_validate",
+      "line": 30,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-node"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-node/src/lib.rs",
+      "function": "push",
+      "line": 37,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-node"
+    },
+    {
+      "file": "/Users/greg/proj/track/crates/track-cli/src/tracing_init.rs",
+      "function": "init_tracing",
+      "line": 6,
+      "cyclomatic": 1.0,
+      "coverage": 100.0,
+      "crap": 1.0,
+      "crate": "track-cli"
     },
     {
       "file": "/Users/greg/proj/track/crates/track-hub/src/pull_service.rs",
