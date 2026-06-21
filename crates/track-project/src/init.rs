@@ -162,6 +162,8 @@ fn write_initial_state(state_dir: &Path, project_uuid: TrackUlid) -> Result<(), 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::fs;
+    use std::path::PathBuf;
     use tempfile::tempdir;
 
     #[test]
@@ -181,5 +183,74 @@ mod tests {
         assert!(outcome.project_root.join("track.yaml").exists());
         let manifest = ProjectManifest::load(&outcome.project_root).unwrap();
         assert_eq!(manifest.project.key, "KITCHEN");
+    }
+
+    #[test]
+    fn force_reinit_preserves_uuid_and_resets_schema() {
+        let dir = tempdir().unwrap();
+        let first = init_project(InitOptions {
+            key: "APP".into(),
+            name: None,
+            workspace: "personal".into(),
+            template: "default".into(),
+            cwd: dir.path().to_path_buf(),
+            project: None,
+            force: false,
+            standalone: true,
+        })
+        .unwrap();
+        fs::write(first.project_root.join("schema/types.yaml"), "types: {}\n").unwrap();
+
+        let second = init_project(InitOptions {
+            key: "APP".into(),
+            name: None,
+            workspace: "personal".into(),
+            template: "default".into(),
+            cwd: dir.path().to_path_buf(),
+            project: None,
+            force: true,
+            standalone: true,
+        })
+        .unwrap();
+
+        assert_eq!(first.project_uuid, second.project_uuid);
+        let types = fs::read_to_string(second.project_root.join("schema/types.yaml")).unwrap();
+        assert!(types.contains("Task"));
+    }
+
+    #[test]
+    fn rejects_invalid_key() {
+        let dir = tempdir().unwrap();
+        let err = init_project(InitOptions {
+            key: "bad key".into(),
+            name: None,
+            workspace: "personal".into(),
+            template: "default".into(),
+            cwd: dir.path().to_path_buf(),
+            project: None,
+            force: false,
+            standalone: true,
+        })
+        .unwrap_err();
+        assert!(matches!(err, ProjectError::InvalidKey { .. }));
+    }
+
+    #[test]
+    fn init_from_local_template_path() {
+        let dir = tempdir().unwrap();
+        let tmpl = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../templates/default");
+        let outcome = init_project(InitOptions {
+            key: "LOCAL".into(),
+            name: Some("Local Template".into()),
+            workspace: "personal".into(),
+            template: tmpl.to_string_lossy().into(),
+            cwd: dir.path().to_path_buf(),
+            project: Some(dir.path().join("proj")),
+            force: false,
+            standalone: false,
+        })
+        .unwrap();
+        assert_eq!(outcome.key, "LOCAL");
+        assert!(outcome.project_root.join("track.yaml").exists());
     }
 }

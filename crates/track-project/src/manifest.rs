@@ -80,3 +80,33 @@ impl ProjectManifest {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use std::fs;
+
+    use tempfile::tempdir;
+
+    use super::*;
+
+    #[test]
+    fn load_applies_default_timezone() {
+        let dir = tempdir().unwrap();
+        fs::write(
+            dir.path().join("track.yaml"),
+            r#"type: project
+workspace: personal
+project:
+  key: K
+  name: Test
+  project_uuid: 01JHM8X9K2Q4Z0000000000000
+defaults:
+  type: Task
+  workflow: default
+"#,
+        )
+        .unwrap();
+        let manifest = ProjectManifest::load(dir.path()).unwrap();
+        assert_eq!(manifest.project.timezone, "UTC");
+    }
+}

@@ -101,4 +101,31 @@ mod tests {
         assert_eq!(found, root);
         assert_eq!(method, DiscoveryMethod::WalkUp);
     }
+
+    #[test]
+    fn explicit_project_requires_manifest() {
+        let dir = tempdir().unwrap();
+        let missing = dir.path().join("missing");
+        fs::create_dir_all(&missing).unwrap();
+        let err = discover_project_root(dir.path(), Some(&missing)).unwrap_err();
+        assert!(matches!(err, ProjectError::NotFound));
+    }
+
+    #[test]
+    fn resolve_init_target_defaults_to_track_in_repo() {
+        let dir = tempdir().unwrap();
+        fs::write(dir.path().join("Cargo.toml"), "[package]\n").unwrap();
+        let (target, method) = resolve_init_target(dir.path(), None, false).unwrap();
+        assert_eq!(target, dir.path().join("track"));
+        assert_eq!(method, DiscoveryMethod::InitTarget);
+    }
+
+    #[test]
+    fn resolve_init_target_standalone_uses_cwd() {
+        let dir = tempdir().unwrap();
+        fs::write(dir.path().join("Cargo.toml"), "[package]\n").unwrap();
+        let (target, method) = resolve_init_target(dir.path(), None, true).unwrap();
+        assert_eq!(target, dir.path());
+        assert_eq!(method, DiscoveryMethod::InitTarget);
+    }
 }

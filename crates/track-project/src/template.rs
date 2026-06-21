@@ -14,6 +14,7 @@ const DEFAULT_TRACK_TMPL: &str = include_str!("../../../templates/default/track.
 const DEFAULT_GITIGNORE: &str = include_str!("../../../templates/default/gitignore");
 
 /// Resolved template content ready to write.
+#[derive(Debug)]
 pub struct TemplateFiles {
     /// Rendered track.yaml content.
     pub track_yaml: String,
@@ -113,4 +114,69 @@ fn load_local_template(
         schema_files,
         gitignore,
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use std::fs;
+
+    use tempfile::tempdir;
+
+    use super::*;
+
+    fn write_minimal_template(root: &Path, use_tmpl: bool) {
+        fs::create_dir_all(root.join("schema")).unwrap();
+        for name in [
+            "states.yaml",
+            "labels.yaml",
+            "workflows.yaml",
+            "types.yaml",
+            "features.yaml",
+        ] {
+            fs::write(root.join("schema").join(name), "{}\n").unwrap();
+        }
+        if use_tmpl {
+            fs::write(
+                root.join("track.yaml.tmpl"),
+                "type: project\nworkspace: {workspace}\nproject:\n  key: {key}\n",
+            )
+            .unwrap();
+        } else {
+            fs::write(root.join("track.yaml"), "type: project\n").unwrap();
+        }
+        fs::write(root.join("gitignore"), "/work/\n").unwrap();
+    }
+
+    #[test]
+    fn load_local_template_from_track_yaml_tmpl() {
+        let dir = tempdir().unwrap();
+        write_minimal_template(dir.path(), true);
+        let files =
+            load_local_template(dir.path(), "APP", "My App", "01JHM8X9K2Q4Z0", "personal").unwrap();
+        assert!(files.track_yaml.contains("key: APP"));
+        assert!(files.track_yaml.contains("workspace: personal"));
+        assert_eq!(files.schema_files.len(), 5);
+        assert_eq!(files.gitignore, "/work/\n");
+    }
+
+    #[test]
+    fn load_local_template_from_track_yaml() {
+        let dir = tempdir().unwrap();
+        write_minimal_template(dir.path(), false);
+        let files = load_local_template(dir.path(), "K", "Name", "uuid", "ws").unwrap();
+        assert!(files.track_yaml.contains("type: project"));
+    }
+
+    #[test]
+    fn load_local_template_missing_dir_errors() {
+        let err =
+            load_local_template(Path::new("/no/such/template"), "K", "N", "u", "w").unwrap_err();
+        assert!(matches!(err, ProjectError::Template(_)));
+    }
+
+    #[test]
+    fn load_template_rejects_http_url() {
+        let err = load_template("https://example.com/tmpl", "K", "N", "u", "w").unwrap_err();
+        assert!(matches!(err, ProjectError::Template(_)));
+    }
 }
